@@ -39,10 +39,10 @@ float length(const Vec3 &v) { return std::sqrtf(length_sq(v)); }
 float dot(const Vec3 &v1, const Vec3 &v2) { return v1.e[0] * v2.e[0] + v1.e[1] * v2.e[1] + v1.e[2] * v2.e[2]; }
 float dot_abs(const Vec3 &v1, const Vec3 &v2) { return std::fabs(dot(v1, v2)); }
 
+Vec3 cross(const Vec3 &v1, const Vec3 &v2) { return Vec3(v1.e[1] * v2.e[2] - v1.e[2] * v2.e[1], v1.e[2] * v2.e[0] - v1.e[0] * v2.e[2], v1.e[0] * v2.e[1] - v1.e[1] * v2.e[0]); }
+
 Vec3 abs(const Vec3 &v) { return Vec3(std::fabs(v.e[0]), std::fabs(v.e[1]), std::fabs(v.e[2])); }
 
 Vec3 lerp(const float t, const Vec3 &v1, const Vec3 &v2) {
   return Vec3(lerp(t, v1.e[0], v2.e[0]), lerp(t, v1.e[1], v2.e[1]), lerp(t, v1.e[2], v2.e[2]));
 }
-
-
