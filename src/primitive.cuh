@@ -10,3 +10,8 @@ struct Tri {
   Vec3 n_b;
   Vec3 n_c;
 }
+
+struct Slab {
+  Vec3 ll;
+  Vec3 ur;
+}
