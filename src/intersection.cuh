@@ -11,3 +11,5 @@ struct Intersection {
 }
 
 bool hit(const Ray &r, const Tri &t, Intersection *i);
+
+bool hit_test(const Ray &r, const Slab &s);

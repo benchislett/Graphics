@@ -40,3 +40,21 @@ bool hit(const Ray &r, const Tri &t, Intersection *i) {
 
   return true;
 }
+
+bool hit_test(const Ray &r, const Slab &s) {
+  float xInv = 1.f / r.d.e[0];
+  float yInv = 1.f / r.d.e[1];
+  float zInv = 1.f / r.d.e[2];
+
+  float t0 = (s.ll.e[0] - r.o.e[0]) * xInv;
+  float t1 = (s.ur.e[0] - r.o.e[0]) * xInv;
+  float t2 = (s.ll.e[1] - r.o.e[1]) * yInv;
+  float t3 = (s.ur.e[1] - r.o.e[1]) * yInv;
+  float t4 = (s.ll.e[2] - r.o.e[2]) * zInv;
+  float t5 = (s.ur.e[2] - r.o.e[2]) * zInv;
+
+  float tmin = fmax(fmax(fmin(t0, t1), fmin(t2, t3)), fmin(t4, t5));
+  float tmax = fmin(fmin(fmax(t0, t1), fmax(t2, t3)), fmax(t4, t5));
+
+  return (0 < tmax) && (tmin < tmax);
+}
