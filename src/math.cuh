@@ -1,6 +1,8 @@
 #pragma once
 
 #include <math.h>
+#include <cfloat>
+#include <cstdint>
 
 float lerp(t, a, b) { return a + t * (b - a); }
 
@@ -45,4 +47,12 @@ Vec3 abs(const Vec3 &v) { return Vec3(std::fabs(v.e[0]), std::fabs(v.e[1]), std:
 
 Vec3 lerp(const float t, const Vec3 &v1, const Vec3 &v2) {
   return Vec3(lerp(t, v1.e[0], v2.e[0]), lerp(t, v1.e[1], v2.e[1]), lerp(t, v1.e[2], v2.e[2]));
+}
+
+Vec3 max(const Vec3 &a, const Vec3 &b) {
+  return Vec3(fmax(a.e[0], b.e[0]), fmax(a.e[1], b.e[1]), fmax(a.e[2], b.e[2]));
+}
+
+Vec3 min(const Vec3 &a, const Vec3 &b) {
+  return Vec3(fmin(a.e[0], b.e[0]), fmin(a.e[1], b.e[1]), fmin(a.e[2], b.e[2]));
 }
