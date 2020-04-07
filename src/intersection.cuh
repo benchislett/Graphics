@@ -2,7 +2,7 @@
 
 #include "math.cuh"
 #include "ray.cuh"
-#include "tri.cuh"
+#include "primitive.cuh"
 
 struct Intersection {
   float t;
