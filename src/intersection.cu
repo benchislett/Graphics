@@ -41,6 +41,20 @@ bool hit(const Ray &r, const Tri &t, Intersection *i) {
   return true;
 }
 
+bool hit(const Ray &r, Tri *tris, int n, Intersection *i) {
+  Intersection tmp;
+  bool hit_any = false;
+  for (int i = 0; i < n; i++) {
+    if (hit(r, tris[i], &tmp)) {
+      if (hit_any == false || tmp.t < i->t) {
+        *i = tmp;
+      }
+      hit_any = true;
+    }
+  }
+  return hit_any;
+}
+
 bool hit_test(const Ray &r, const Slab &s) {
   float xInv = 1.f / r.d.e[0];
   float yInv = 1.f / r.d.e[1];
