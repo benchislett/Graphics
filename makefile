@@ -21,4 +21,4 @@ test: test.cpp libbenpt.a
 
 .PHONY: clean
 clean:
-	rm -f src/*.o *.o test libbenpt.a
+	rm -f src/*.o *.o test libbenpt.a *.ppm
