@@ -9,16 +9,19 @@
 Vec3 trace(const Ray &r, const Scene &scene) {
   Intersection i;
   Ray trace_ray = r;
-  Vec3 colour = scene.background;
+  Vec3 colour(1.f, 1.f, 1.f);
   int depth = 0;
   while (hit(trace_ray, scene.tris, scene.n_tris, &i)) {
     trace_ray = {i.p, i.n};
     colour *= 0.75;
     if (++depth >= MAX_DEPTH) {
-      colour = {0.f, 0.f, 0.f};
+      // colour = {0.f, 0.f, 0.f};
       break;
     }
   }
+  float t = 0.5 * (normalized(trace_ray.d).e[1] + 1);
+  colour *= Vec3(1.f-t, 1.f-t, 1.f-t) + (scene.background * t);
+
   return colour;
 }
 
