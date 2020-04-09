@@ -8,7 +8,7 @@ struct Intersection {
   float t;
   Vec3 p;
   Vec3 n;
-}
+};
 
 bool hit(const Ray &r, const Tri &t, Intersection *i);
 bool hit(const Ray &r, Tri *tris, int n, Intersection *i);

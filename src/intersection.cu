@@ -1,4 +1,7 @@
 #include "intersection.cuh"
+#include <cstdio>
+
+#define SIGN(a) (((a) > 0) ? 1 : (((a) < 0) ? -1 : 0))
 
 // Moller-Trumbore intersection
 bool hit(const Ray &r, const Tri &t, Intersection *i) {
@@ -36,16 +39,15 @@ bool hit(const Ray &r, const Tri &t, Intersection *i) {
   Vec3 normal = t.n_a * w + t.n_b * u + t.n_c * v;
 #endif
 
-  h->n = normal * (-std::sgn(dot(r.d, normal)));
-
+  i->n = normal * (-SIGN(dot(r.d, normal)));
   return true;
 }
 
 bool hit(const Ray &r, Tri *tris, int n, Intersection *i) {
   Intersection tmp;
   bool hit_any = false;
-  for (int i = 0; i < n; i++) {
-    if (hit(r, tris[i], &tmp)) {
+  for (int c = 0; c < n; c++) {
+    if (hit(r, tris[c], &tmp)) {
       if (hit_any == false || tmp.t < i->t) {
         *i = tmp;
       }
