@@ -18,3 +18,7 @@ libbenpt.a: $(OBJECTS) device.o
 
 test: test.cpp libbenpt.a
 	g++ $^ -o $@ $(CUDAFLAGS) -std=c++17 -L. -lbenpt
+
+.PHONY: clean
+clean:
+	rm -f src/*.o *.o test libbenpt.a
