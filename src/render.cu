@@ -1,6 +1,8 @@
 #include "render.cuh"
 #include "intersection.cuh"
+
 #include <random>
+#include <functional>
 
 #define MAX_DEPTH 5
 
