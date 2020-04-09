@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <vector>
 
+
 void load_tris_obj(const std::string &fname, Scene *scene) {
   float x,y,z;
   uint32_t a,b,c,d,e,f;
@@ -15,18 +16,18 @@ void load_tris_obj(const std::string &fname, Scene *scene) {
 
   for (std::string line; std::getline(input, line); ) {
     if (line[0] == 'v' && line[1] == ' ') {
-      sscanf(line, "v %f %f %f", &x, &y, &z);
+      sscanf(line.c_str(), "v %f %f %f", &x, &y, &z);
       verts.emplace_back(x, y, z);
     } else if (line[0] == 'v' && line[1] == 'n') {
-      sscanf(line, "vn %f %f %f", &x, &y, &z);
+      sscanf(line.c_str(), "vn %f %f %f", &x, &y, &z);
       normals.emplace_back(x, y, z);
     } else if (line[0] == 'f') {
       if (line.find("//") == std::string::npos) {
-        sscanf(line, "f %u/%*u/%u %u/%*u/%u %u/%*u/%u", &a, &b, &c, &d, &e, &f);
+        sscanf(line.c_str(), "f %u/%*u/%u %u/%*u/%u %u/%*u/%u", &a, &b, &c, &d, &e, &f);
       } else {
-        sscanf(line, "f %u//%u %u//%u %u//%u", &a, &b, &c, &d, &e, &f);
+        sscanf(line.c_str(), "f %u//%u %u//%u %u//%u", &a, &b, &c, &d, &e, &f);
       }
-      tris.emplace_back(Tri(vectors[a], vectors[c], vectors[e], normals[b], normals[d], normals[f]));
+      tris.emplace_back(Tri(verts[a], verts[c], verts[e], normals[b], normals[d], normals[f]));
     }
   }
   Tri *tri_arr = (Tri *)malloc(tris.size() * sizeof(Tri));
@@ -46,10 +47,10 @@ void write_tris_ppm(const std::string &fname, const Image &im) {
   int r, g, b;
   for (int j = im.height - 1; j >= 0; j--) {
     for (int i = 0; i < im.width; i++) {
-      rgb = im.film[j * width + i];
-      r = (int)(255.999 * std::sqrtf(rgb.e[0]));
-      g = (int)(255.999 * std::sqrtf(rgb.e[1]));
-      b = (int)(255.999 * std::sqrtf(rgb.e[2]));
+      rgb = im.film[j * im.width + i];
+      r = (int)(255.999 * sqrtf(rgb.e[0]));
+      g = (int)(255.999 * sqrtf(rgb.e[1]));
+      b = (int)(255.999 * sqrtf(rgb.e[2]));
       output << r << ' ' << g << ' ' << b << '\n';
     }
   }
