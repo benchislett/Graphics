@@ -1,21 +1,17 @@
 #pragma once
 
-#include "math.h"
+#include "math.cuh"
 
 struct Slab {
   Vec3 ll;
   Vec3 ur;
 
-  Slab() {
-    ll = { FLT_MAX, FLT_MAX, FLT_MAX };
-    ur = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
-  }
+  Slab();
 
-  void expand(const Slab &s) {
-    ll = min(ll, s.ll);
-    ur = max(ur, s.ur);
-  }
-}
+  Slab(const Vec3 &v1, const Vec3 &v2) : ll(v1), ur(v2) {}
+
+  void expand(const Slab &s);
+};
 
 Slab bounding_slab(const Slab &s1, const Slab &s2);
 Slab bounding_slab(const Vec3 &a, const Vec3 &b, const Vec3 &c);
@@ -32,4 +28,4 @@ struct Tri {
   Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c);
   Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n);
   Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n_a, const Vec3 &n_b, const Vec3 &n_c);
-}
+};
