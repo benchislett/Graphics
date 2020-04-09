@@ -12,7 +12,7 @@ bool hit(const Ray &r, const Tri &t, Intersection *i) {
 
   float det = dot(edge0, h);
 
-  if (fabsf(det) < 0.0001f) return false;
+  if (fabsf(det) < FLT_MIN) return false;
 
   float detInv = 1.0f / det;
   Vec3 s = r.o - t.a;
@@ -27,7 +27,7 @@ bool hit(const Ray &r, const Tri &t, Intersection *i) {
 
   float time = detInv * dot(edge1, q);
 
-  if (time < 0.0001f) return false;
+  if (time < 0.01f) return false;
 
   i->p = r.at(time);
   i->t = time;
