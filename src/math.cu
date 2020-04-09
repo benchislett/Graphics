@@ -21,6 +21,9 @@ bool Vec3::operator!=(const Vec3 &v) const { return e[0] != v.e[0] || e[1] != v.
 Vec3 Vec3::operator*(const float f) const { return Vec3(e[0] * f, e[1] * f, e[2] * f); }
 Vec3 &Vec3::operator*=(const float f) { e[0] *= f; e[1] *= f; e[2] *= f; return *this; }
 
+Vec3 Vec3::operator*(const Vec3 &v) const { return Vec3(e[0] * v.e[0], e[1] * v.e[1], e[2] * v.e[2]); }
+Vec3 &Vec3::operator*=(const Vec3 &v) { e[0] *= v.e[0]; e[1] *= v.e[1]; e[2] *= v.e[2]; return *this; }
+
 Vec3 Vec3::operator/(const float f) const { return (*this) * (1.f / f); }
 Vec3 &Vec3::operator/=(const float f) { return (*this) *= (1.f / f); }
 
@@ -39,7 +42,11 @@ float length(const Vec3 &v) { return sqrtf(length_sq(v)); }
 float dot(const Vec3 &v1, const Vec3 &v2) { return v1.e[0] * v2.e[0] + v1.e[1] * v2.e[1] + v1.e[2] * v2.e[2]; }
 float dot_abs(const Vec3 &v1, const Vec3 &v2) { return std::fabs(dot(v1, v2)); }
 
-Vec3 cross(const Vec3 &v1, const Vec3 &v2) { return Vec3(v1.e[1] * v2.e[2] - v1.e[2] * v2.e[1], v1.e[2] * v2.e[0] - v1.e[0] * v2.e[2], v1.e[0] * v2.e[1] - v1.e[1] * v2.e[0]); }
+Vec3 cross(const Vec3 &v1, const Vec3 &v2) {
+  return Vec3(v1.e[1] * v2.e[2] - v1.e[2] * v2.e[1],
+              v1.e[2] * v2.e[0] - v1.e[0] * v2.e[2],
+              v1.e[0] * v2.e[1] - v1.e[1] * v2.e[0]);
+}
 
 Vec3 abs(const Vec3 &v) { return Vec3(std::fabs(v.e[0]), std::fabs(v.e[1]), std::fabs(v.e[2])); }
 
@@ -56,5 +63,6 @@ Vec3 min(const Vec3 &v1, const Vec3 &v2) {
 }
 
 Vec3 normalized(const Vec3 &v) {
-  return v / length(v);
+  float len = length(v);
+  return v / (len == 0.f ? 1.f : len);
 }
