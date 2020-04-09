@@ -8,7 +8,7 @@
 
 void load_tris_obj(const std::string &fname, Scene *scene) {
   float x,y,z;
-  uint32_t a,b,c,d,e,f;
+  int32_t a,b,c,d,e,f;
   std::ifstream input(fname);
   std::vector<Vec3> verts;
   std::vector<Vec3> normals;
@@ -21,13 +21,25 @@ void load_tris_obj(const std::string &fname, Scene *scene) {
     } else if (line[0] == 'v' && line[1] == 'n') {
       sscanf(line.c_str(), "vn %f %f %f", &x, &y, &z);
       normals.emplace_back(x, y, z);
-    } else if (line[0] == 'f') {
-      if (line.find("//") == std::string::npos) {
-        sscanf(line.c_str(), "f %u/%*u/%u %u/%*u/%u %u/%*u/%u", &a, &b, &c, &d, &e, &f);
+    } else if (line[0] == 'f' && line.find("/") != std::string::npos) {
+      if (line.find("//") != std::string::npos) {
+        sscanf(line.c_str(), "f %d//%d %d//%d %d//%d", &a, &b, &c, &d, &e, &f);
       } else {
-        sscanf(line.c_str(), "f %u//%u %u//%u %u//%u", &a, &b, &c, &d, &e, &f);
+        sscanf(line.c_str(), "f %d/%*d/%d %d/%*d/%d %d/%*d/%d", &a, &b, &c, &d, &e, &f);
       }
-      tris.emplace_back(Tri(verts[a], verts[c], verts[e], normals[b], normals[d], normals[f]));
+      a = (a < 0 ? verts.size() + a : a - 1);
+      b = (b < 0 ? normals.size() + b : b - 1);
+      c = (c < 0 ? verts.size() + c : c - 1);
+      d = (d < 0 ? normals.size() + d : d - 1);
+      e = (e < 0 ? verts.size() + e : e - 1);
+      f = (f < 0 ? normals.size() + f : f - 1);
+      tris.push_back(Tri(verts[a], verts[c], verts[e], normals[b], normals[d], normals[f]));
+    } else if (line[0] == 'f') {
+      sscanf(line.c_str(), "f %d %d %d", &a, &b, &c);
+      a = (a < 0 ? verts.size() + a : a - 1);
+      b = (b < 0 ? verts.size() + b : b - 1);
+      c = (c < 0 ? verts.size() + c : c - 1);
+      tris.push_back(Tri(verts[a], verts[b], verts[c]));
     }
   }
   Tri *tri_arr = (Tri *)malloc(tris.size() * sizeof(Tri));
