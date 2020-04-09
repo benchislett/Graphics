@@ -12,4 +12,4 @@ struct Camera {
   Camera(float vfov, float aspect, const Vec3 &look_from, const Vec3 &look_at, const Vec3 &view_up);
 
   Ray get_ray(float s, float t) const;
-}
+};
