@@ -4,6 +4,6 @@
 
 #include <string>
 
-void load_tris_obj(const std::string &fname, Scene *scene);
+Tri *load_tris_obj(const std::string &fname, int *n);
 
 void write_tris_ppm(const std::string &fname, const Image &im);

@@ -6,7 +6,7 @@
 #include <vector>
 
 
-void load_tris_obj(const std::string &fname, Scene *scene) {
+Tri *load_tris_obj(const std::string &fname, int *n) {
   float x,y,z;
   int32_t a,b,c,d,e,f;
   std::ifstream input(fname);
@@ -42,12 +42,14 @@ void load_tris_obj(const std::string &fname, Scene *scene) {
       tris.push_back(Tri(verts[a], verts[b], verts[c]));
     }
   }
+
   Tri *tri_arr = (Tri *)malloc(tris.size() * sizeof(Tri));
   for (int i = 0; i < tris.size(); i++) {
     tri_arr[i] = tris[i];
   }
-  scene->n_tris = tris.size();
-  scene->tris = tri_arr;
+
+  *n = tris.size();
+  return tri_arr;
 }
 
 void write_tris_ppm(const std::string &fname, const Image &im) {
