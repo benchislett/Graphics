@@ -1,12 +1,13 @@
 #include "src/render.cuh"
 #include "src/io.cuh"
 #include "src/intersection.cuh"
+#include "src/bvh.cuh"
 
 int main() {
 
-  int width = 64;
-  int height = 64;
-  int spp = 1;
+  int width = 128;
+  int height = 128;
+  int spp = 32;
 
   float vfov = 0.698132;
   float aspect = 1; // square
@@ -19,12 +20,16 @@ int main() {
 
   Vec3 background = {0.2f, 0.2f, 0.75f};
 
-  Scene s = {c, NULL, 0, background, spp};
-  load_tris_obj("data/bunny.obj", &s);
+  int n_tris;
+  Tri *tris = load_tris_obj("data/bunny.obj", &n_tris);
+
+  BVH b = build_bvh(tris, n_tris);
+
+  Scene s = {c, b, background, spp};
 
   Image im = {width, height, NULL};
   im.film = (Vec3 *)malloc(width * height * sizeof(Vec3));
-  
+
   Render(s, im);
   
   write_tris_ppm("bunny.ppm", im);
