@@ -3,13 +3,13 @@
 #include "math.cuh"
 #include "primitive.cuh"
 #include "camera.cuh"
+#include "bvh.cuh"
 
 #include <cuda_runtime.h>
 
 struct Scene {
   Camera cam;
-  Tri *tris;
-  int n_tris;
+  BVH b;
   Vec3 background;
   int spp;
 };

@@ -4,14 +4,14 @@
 #include <random>
 #include <functional>
 
-#define MAX_DEPTH 5
+#define MAX_DEPTH 1
 
 Vec3 trace(const Ray &r, const Scene &scene) {
   Intersection i;
   Ray trace_ray = r;
   Vec3 colour(1.f, 1.f, 1.f);
   int depth = 0;
-  while (hit(trace_ray, scene.tris, scene.n_tris, &i)) {
+  while (hit(trace_ray, scene.b, &i)) {
     trace_ray = {i.p, i.n};
     colour *= 0.75;
     if (++depth >= MAX_DEPTH) {
