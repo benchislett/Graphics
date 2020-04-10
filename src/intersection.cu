@@ -74,3 +74,42 @@ bool hit_test(const Ray &r, const Slab &s) {
 
   return (0 < tmax) && (tmin < tmax);
 }
+
+bool hit(const Ray &r, const BVH &b, BVHNode *current, Intersection *i) {
+  if (!hit_test(r, (*current).s)) {
+    return false;
+  }
+
+  Intersection i_l, i_r;
+  int left = (*current).left;
+  int right = (*current).right;
+  bool hit_left, hit_right;
+  if (left < 0) {
+    hit_left = hit(r, b.tris[-left], &i_l);
+  } else {
+    hit_left = hit(r, b, (b.nodes + left), &i_l);
+  }
+
+  if (right < 0) {
+    hit_right = hit(r, b.tris[-right], &i_r);
+  } else {
+    hit_right = hit(r, b, (b.nodes + right), &i_r);
+  }
+
+  if (hit_left && hit_right) {
+    if (i_l.t < i_r.t) { *i = i_l; }
+    else { *i = i_r; }
+    return true;
+  } else if (hit_left) {
+    *i = i_l;
+    return true;
+  } else if (hit_right) {
+    *i = i_r;
+    return true;
+  }
+  return false;
+}
+
+bool hit(const Ray &r, const BVH &b, Intersection *i) {
+  return hit(r, b, (b.nodes + b.n_nodes - 1), i);
+}

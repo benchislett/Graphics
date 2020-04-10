@@ -3,6 +3,7 @@
 #include "math.cuh"
 #include "ray.cuh"
 #include "primitive.cuh"
+#include "bvh.cuh"
 
 struct Intersection {
   float t;
@@ -10,7 +11,8 @@ struct Intersection {
   Vec3 n;
 };
 
+bool hit_test(const Ray &r, const Slab &s);
+
 bool hit(const Ray &r, const Tri &t, Intersection *i);
 bool hit(const Ray &r, Tri *tris, int n, Intersection *i);
-
-bool hit_test(const Ray &r, const Slab &s);
+bool hit(const Ray &r, const BVH &b, Intersection *i);
