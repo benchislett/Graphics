@@ -20,5 +20,5 @@ Camera::Camera(float vfov, float aspect, const Vec3 &look_from, const Vec3 &look
 }
 
 Ray Camera::get_ray(float s, float t) const {
-  return { pos, normalized(lower_left + (s * h) + (t * v) - pos) };
+  return Ray(pos, lower_left + (s * h) + (t * v) - pos);
 }
