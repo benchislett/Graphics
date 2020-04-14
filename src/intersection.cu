@@ -4,9 +4,9 @@
 #define SIGN(a) (((a) > 0) ? 1 : (((a) < 0) ? -1 : 0))
 
 // Moller-Trumbore intersection
-bool hit(const Ray &r, const Tri &t, Intersection *i) {
-  Vec3 edge0 = t.b - t.a;
-  Vec3 edge1 = t.c - t.a;
+bool hit(const Ray &r, Primitive &p, Intersection *i) {
+  Vec3 edge0 = p.t.b - p.t.a;
+  Vec3 edge1 = p.t.c - p.t.a;
 
   Vec3 h = cross(r.d, edge1);
 
@@ -15,7 +15,7 @@ bool hit(const Ray &r, const Tri &t, Intersection *i) {
   if (fabsf(det) < FLT_MIN) return false;
 
   float detInv = 1.0f / det;
-  Vec3 s = r.o - t.a;
+  Vec3 s = r.o - p.t.a;
   float u = detInv * dot(s, h);
 
   if (u < 0.0f || u > 1.0f) return false;
@@ -31,30 +31,16 @@ bool hit(const Ray &r, const Tri &t, Intersection *i) {
 
   i->p = r.at(time);
   i->t = time;
+  i->prim = &p;
 
-#ifdef NO_NORMAL_INTERP
-  Vec3 normal = t.n_a;
-#else
+  //Vec3 normal = p.t.n_a;
   float w = 1.f - u - v;
-  Vec3 normal = t.n_a * w + t.n_b * u + t.n_c * v;
-#endif
+  Vec3 normal = p.t.n_a * w + p.t.n_b * u + p.t.n_c * v;
+  normal = normalized(normal) * (-SIGN(dot(r.d, normal)));
 
-  i->n = normal * (-SIGN(dot(r.d, normal)));
+  i->n = normal;
+  i->s = normalized(cross(normal, edge0));
   return true;
-}
-
-bool hit(const Ray &r, Tri *tris, int n, Intersection *i) {
-  Intersection tmp;
-  bool hit_any = false;
-  for (int c = 0; c < n; c++) {
-    if (hit(r, tris[c], &tmp)) {
-      if (hit_any == false || tmp.t < i->t) {
-        *i = tmp;
-      }
-      hit_any = true;
-    }
-  }
-  return hit_any;
 }
 
 bool hit_test(const Ray &r, const Slab &s) {
@@ -85,13 +71,13 @@ bool hit(const Ray &r, const BVH &b, BVHNode *current, Intersection *i) {
   int right = (*current).right;
   bool hit_left, hit_right;
   if (left < 0) {
-    hit_left = hit(r, b.tris[-left], &i_l);
+    hit_left = hit(r, b.prims[-left], &i_l);
   } else {
     hit_left = hit(r, b, (b.nodes + left), &i_l);
   }
 
   if (right < 0) {
-    hit_right = hit(r, b.tris[-right], &i_r);
+    hit_right = hit(r, b.prims[-right], &i_r);
   } else {
     hit_right = hit(r, b, (b.nodes + right), &i_r);
   }
