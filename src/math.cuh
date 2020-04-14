@@ -4,6 +4,10 @@
 #include <cfloat>
 #include <cstdint>
 
+#define INV_PI 0.31830988618f
+#define PI_OVER_4 0.78539816339f
+#define PI_OVER_2 1.57079632679f
+
 float lerp(float t, float a, float b);
 
 struct Vec3 {
