@@ -6,13 +6,13 @@
 #include <vector>
 
 
-Tri *load_tris_obj(const std::string &fname, int *n) {
+Primitive *load_obj(const std::string &fname, int *n) {
   float x,y,z;
   int32_t a,b,c,d,e,f;
   std::ifstream input(fname);
   std::vector<Vec3> verts;
   std::vector<Vec3> normals;
-  std::vector<Tri> tris;
+  std::vector<Primitive> prims;
 
   for (std::string line; std::getline(input, line); ) {
     if (line[0] == 'v' && line[1] == ' ') {
@@ -33,26 +33,26 @@ Tri *load_tris_obj(const std::string &fname, int *n) {
       d = (d < 0 ? normals.size() + d : d - 1);
       e = (e < 0 ? verts.size() + e : e - 1);
       f = (f < 0 ? normals.size() + f : f - 1);
-      tris.push_back(Tri(verts[a], verts[c], verts[e], normals[b], normals[d], normals[f]));
+      prims.emplace_back(Tri(verts[a], verts[c], verts[e], normals[b], normals[d], normals[f]));
     } else if (line[0] == 'f') {
       sscanf(line.c_str(), "f %d %d %d", &a, &b, &c);
       a = (a < 0 ? verts.size() + a : a - 1);
       b = (b < 0 ? verts.size() + b : b - 1);
       c = (c < 0 ? verts.size() + c : c - 1);
-      tris.push_back(Tri(verts[a], verts[b], verts[c]));
+      prims.emplace_back(Tri(verts[a], verts[b], verts[c]));
     }
   }
 
-  Tri *tri_arr = (Tri *)malloc(tris.size() * sizeof(Tri));
-  for (int i = 0; i < tris.size(); i++) {
-    tri_arr[i] = tris[i];
+  Primitive *prim_arr = (Primitive *)malloc(prims.size() * sizeof(Primitive));
+  for (int i = 0; i < prims.size(); i++) {
+    prim_arr[i] = prims[i];
   }
 
-  *n = tris.size();
-  return tri_arr;
+  *n = prims.size();
+  return prim_arr;
 }
 
-void write_tris_ppm(const std::string &fname, const Image &im) {
+void write_ppm(const std::string &fname, const Image &im) {
   std::ofstream output(fname);
 
   output << "P3\n" << im.width << ' ' << im.height << "\n255\n";
@@ -62,6 +62,9 @@ void write_tris_ppm(const std::string &fname, const Image &im) {
   for (int j = im.height - 1; j >= 0; j--) {
     for (int i = 0; i < im.width; i++) {
       rgb = im.film[j * im.width + i];
+      rgb.e[0] = (std::isnan(rgb.e[0])) ? 0.f : ((rgb.e[0] > 1.f) ? 1.f : rgb.e[0]);
+      rgb.e[1] = (std::isnan(rgb.e[1])) ? 0.f : ((rgb.e[1] > 1.f) ? 1.f : rgb.e[1]);
+      rgb.e[2] = (std::isnan(rgb.e[2])) ? 0.f : ((rgb.e[2] > 1.f) ? 1.f : rgb.e[2]);
       r = (int)(255.999 * sqrtf(rgb.e[0]));
       g = (int)(255.999 * sqrtf(rgb.e[1]));
       b = (int)(255.999 * sqrtf(rgb.e[2]));

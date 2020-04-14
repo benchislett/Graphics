@@ -1,9 +1,10 @@
 #pragma once
 
+#include "primitive.cuh"
 #include "render.cuh"
 
 #include <string>
 
-Tri *load_tris_obj(const std::string &fname, int *n);
+Primitive *load_obj(const std::string &fname, int *n);
 
-void write_tris_ppm(const std::string &fname, const Image &im);
+void write_ppm(const std::string &fname, const Image &im);
