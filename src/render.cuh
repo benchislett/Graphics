@@ -1,16 +1,9 @@
 #pragma once
 
 #include "math.cuh"
-#include "primitive.cuh"
-#include "camera.cuh"
-#include "bvh.cuh"
+#include "scene.cuh"
 
-#include <cuda_runtime.h>
-
-struct Scene {
-  Camera cam;
-  BVH b;
-  Vec3 background;
+struct RenderParams {
   int spp;
 };
 
@@ -20,4 +13,4 @@ struct Image {
   Vec3 *film; // row-major
 };
 
-void Render(const Scene &scene, Image &im);
+void Render(const RenderParams &params, const Scene &scene, Image &im);
