@@ -12,7 +12,7 @@ struct BVH {
   int n_nodes;
   int n_tris;
   BVHNode *nodes;
-  Tri *tris;
+  Primitive *prims;
 };
 
-BVH build_bvh(Tri *tris, int n);
+BVH build_bvh(Primitive *prims, int n);
