@@ -5,9 +5,9 @@
 
 int main() {
 
-  int width = 128;
-  int height = 128;
-  int spp = 32;
+  int width = 32;
+  int height = 32;
+  int spp = 1024;
 
   float vfov = 0.698132;
   float aspect = 1; // square
@@ -20,19 +20,20 @@ int main() {
 
   Vec3 background = {0.2f, 0.2f, 0.75f};
 
-  int n_tris;
-  Tri *tris = load_tris_obj("data/bunny.obj", &n_tris);
+  int n_prims;
+  Primitive *prims = load_obj("data/bunny.obj", &n_prims);
 
-  BVH b = build_bvh(tris, n_tris);
+  BVH b = build_bvh(prims, n_prims);
 
-  Scene s = {c, b, background, spp};
+  RenderParams params = {spp};
+  Scene s = {c, b, background};
 
   Image im = {width, height, NULL};
   im.film = (Vec3 *)malloc(width * height * sizeof(Vec3));
 
-  Render(s, im);
+  Render(params, s, im);
   
-  write_tris_ppm("bunny.ppm", im);
+  write_ppm("bunny.ppm", im);
   
   return 0;
 }
