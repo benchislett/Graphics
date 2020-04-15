@@ -70,44 +70,6 @@ bool same_hemisphere(const Vec3 &w, const Vec3 &wp) {
   return w.e[2] * wp.e[2] > 0.f;
 }
 
-void concentricsample_disk(float *u, float *v) {
-  float x = 2.f * (*u) - 1.f;
-  float y = 2.f * (*v) - 1.f;
-
-  if (x == 0.f && y == 0.f) {
-    *u = 0.f;
-    *v = 0.f;
-    return;
-  }
-
-  float theta, r;
-  if (std::abs(x) > std::abs(y)) {
-    r = x;
-    theta = PI_OVER_4 * (y / x);
-  } else {
-    r = y;
-    theta = PI_OVER_2 - PI_OVER_4 * (x / y);
-  }
-  
-  *u = r * cosf(theta);
-  *v = r * sinf(theta);
-}
-
-Vec3 cosinesample_hemisphere(float u, float v) {
-  concentricsample_disk(&u, &v);
-
-  float z = 1.f - u * u - v * v;
-  z = z < 0.f ? 0.f : sqrtf(z);
-  return Vec3(u, v, z);
-}
-
-Vec3 BxDF::sample_f(const Vec3 &wo, Vec3 *wi, float u, float v, float *ret_pdf) const {
-  *wi = cosinesample_hemisphere(u, v);
-  if (wo.e[2] < 0.f) wi->e[2] = -wi->e[2];
-  *ret_pdf = pdf(wo, *wi);
-  return f(wo, *wi);
-}
-
 float BxDF::pdf(const Vec3 &wo, const Vec3 &wi) const {
   return same_hemisphere(wo, wi) ? abscos_theta(wi) * INV_PI : 0.f;
 }
