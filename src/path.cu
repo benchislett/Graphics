@@ -24,7 +24,7 @@ Vec3 trace(const Ray &r, const Scene &scene, int max_depth) {
     does_hit = hit(ray, scene.b, &i);
 
     if (!does_hit) {
-      float t = 0.5f * (normalized(ray.d).e[1] + 1.f);
+      float t = 0.5f * (ray.d.e[1] + 1.f);
       l += beta * (Vec3(1.f-t, 1.f-t, 1.f-t) + (scene.background * t));
     }
 
