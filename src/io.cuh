@@ -1,10 +1,10 @@
 #pragma once
 
-#include "primitive.cuh"
+#include "scene.cuh"
 #include "render.cuh"
 
 #include <string>
 
-Primitive *load_obj(const std::string &fname, int *n);
+Scene load_obj(std::string fname);
 
 void write_ppm(const std::string &fname, const Image &im);
