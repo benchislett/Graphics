@@ -6,8 +6,8 @@
 
 struct Primitive {
   Tri t;
-  BSDF bsdf;
+  BSDF *bsdf;
 
   Primitive(const Tri &t);
-  Primitive(const Tri &t, const BSDF &b) : t(t), bsdf(b) {}
+  Primitive(const Tri &t, BSDF *b) : t(t), bsdf(b) {}
 };

@@ -24,7 +24,7 @@ void Render(const RenderParams &params, const Scene &scene, Image &im) {
       for (c = 0; c < params.spp; c++) {
         u = ((float)i + rand()) / (float)im.width;
         v = ((float)j + rand()) / (float)im.height;
-        colour += trace(scene.cam.get_ray(u, v), scene, 5);
+        colour += trace(scene.cam.get_ray(u, v), scene, 50);
       }
       colour /= (float)params.spp;
       im.film[idx] = colour;

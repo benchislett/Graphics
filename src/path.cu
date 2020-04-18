@@ -23,14 +23,16 @@ Vec3 trace(const Ray &r, const Scene &scene, int max_depth) {
   for (bounces = 0;; bounces++) {
     does_hit = hit(ray, scene.b, &i);
 
-    if (!does_hit) {
-      float t = 0.5f * (ray.d.e[1] + 1.f);
-      l += beta * (Vec3(1.f-t, 1.f-t, 1.f-t) + (scene.background * t));
+    if (!does_hit || specular_bounce) {
+      // l += beta * Vec3(0.1f, 0.1, 0.75f);
     }
-
     if (!does_hit || bounces >= max_depth) break;
 
-    i.prim->bsdf.update(i.n, i.s);
+    i.prim->bsdf->update(i.n, i.s);
+    
+    if (i.prim->bsdf->is_light()) {
+      l += beta * i.prim->bsdf->emittance();
+    }
 
     // Sample illumination
     // When area lights are implemented
@@ -38,8 +40,9 @@ Vec3 trace(const Ray &r, const Scene &scene, int max_depth) {
     wo_world = -1 * ray.d;
     u = rand();
     v = rand();
-    f = i.prim->bsdf.sample_f(wo_world, &wi_world, u, v, &pdf);
+    f = i.prim->bsdf->sample_f(wo_world, &wi_world, u, v, &pdf);
     if (is_zero(f) || pdf == 0.f) break;
+
     float cos_term = dot_abs(wi_world, i.n);
     beta *= f * cos_term / pdf;
     ray = Ray(i.p, wi_world);
