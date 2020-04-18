@@ -74,6 +74,14 @@ float BxDF::pdf(const Vec3 &wo, const Vec3 &wi) const {
   return same_hemisphere(wo, wi) ? abscos_theta(wi) * INV_PI : 0.f;
 }
 
+Vec3 BxDF::emittance() const {
+  return Vec3(0.f, 0.f, 0.f);
+}
+
+Vec3 Lambertian::f(const Vec3 &wo, const Vec3 &wi) const {
+  return INV_PI * r;
+}
+
 OrenNayar::OrenNayar(const Vec3 &r, float roughness) : r(r) {
   float sigma2 = roughness * roughness;
   a = 1.f - sigma2 / (2.f * sigma2 + 0.66f);
@@ -106,6 +114,10 @@ Vec3 OrenNayar::f(const Vec3 &wo, const Vec3 &wi) const {
   return INV_PI * r * (a + b * max_cos * sinalpha * tanbeta);
 }
 
-bool OrenNayar::is_specular() const {
-  return false;
+Vec3 AreaLight::f(const Vec3 &wo, const Vec3 &wi) const {
+  return INV_PI * r;
+}
+
+Vec3 AreaLight::emittance() const {
+  return e;
 }
