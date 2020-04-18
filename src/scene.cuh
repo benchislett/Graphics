@@ -7,5 +7,6 @@
 struct Scene {
   Camera cam;
   BVH b;
-  Vec3 background;
+  BSDF *materials;
+  int n_materials;
 };
