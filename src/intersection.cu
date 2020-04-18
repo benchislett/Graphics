@@ -62,22 +62,22 @@ bool hit_test(const Ray &r, const Slab &s) {
 }
 
 bool hit(const Ray &r, const BVH &b, BVHNode *current, Intersection *i) {
-  if (!hit_test(r, (*current).s)) {
-    return false;
+  if (!hit_test(r, current->s)) {
+    //return false;
   }
 
   Intersection i_l, i_r;
-  int left = (*current).left;
-  int right = (*current).right;
+  int left = current->left;
+  int right = current->right;
   bool hit_left, hit_right;
   if (left < 0) {
-    hit_left = hit(r, b.prims[-left], &i_l);
+    hit_left = hit(r, b.prims[-(left + 1)], &i_l);
   } else {
     hit_left = hit(r, b, (b.nodes + left), &i_l);
   }
 
   if (right < 0) {
-    hit_right = hit(r, b.prims[-right], &i_r);
+    hit_right = hit(r, b.prims[-(right + 1)], &i_r);
   } else {
     hit_right = hit(r, b, (b.nodes + right), &i_r);
   }
@@ -96,6 +96,25 @@ bool hit(const Ray &r, const BVH &b, BVHNode *current, Intersection *i) {
   return false;
 }
 
+bool hit(const Ray &r, Primitive *prims, int n_prims, Intersection *i) {
+  bool hit_any = false;
+  float t_best = FLT_MAX;
+  Intersection tmp;
+
+  bool did_hit;
+  for (int c = 0; c < n_prims; c++) {
+    did_hit = hit(r, prims[c], &tmp);
+    if (did_hit) hit_any = true;
+    if (did_hit && tmp.t < t_best) {
+      t_best = tmp.t;
+      *i = tmp;
+    }
+  }
+  return hit_any;
+}
+
 bool hit(const Ray &r, const BVH &b, Intersection *i) {
-  return hit(r, b, (b.nodes + b.n_nodes - 1), i);
+  // return hit(r, b.prims, b.n_tris, i);
+  bool res = hit(r, b, b.nodes + b.n_nodes - 1, i);
+  return res;
 }

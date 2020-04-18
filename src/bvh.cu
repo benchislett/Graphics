@@ -77,16 +77,16 @@ int populate_nodes(Primitive *prims, Node *root, std::vector<BVHNode> &node_vec)
   int left, right;
   Slab l, r;
   if (root->left == NULL) {
-    left = -root->p_left;
-    l = prims[-left].t.bound;
+    left = -root->p_left - 1;
+    l = prims[-(left + 1)].t.bound;
   } else {
     left = populate_nodes(prims, root->left, node_vec);
     l = node_vec[left].s;
   }
 
   if (root->right == NULL) {
-    right = -root->p_right;
-    r = prims[-right].t.bound;
+    right = -root->p_right - 1;
+    r = prims[-(right + 1)].t.bound;
   } else {
     right = populate_nodes(prims, root->right, node_vec);
     r = node_vec[right].s;
@@ -121,8 +121,10 @@ BVH build_bvh(Primitive *prims, int n) {
 
   std::vector<BVHNode> node_vec;
   populate_nodes(prims, root, node_vec);
-  for (i = 0; i < n - 1; i++) nodes[i] = node_vec[i];
+  for (i = 0; i < n - 1; i++) {
+    nodes[i] = node_vec[i];
+    printf("Node %d: left %d, right %d\n", i, nodes[i].left, nodes[i].right);
+  }
 
   return {n - 1, n, nodes, prims};
 }
-
