@@ -18,4 +18,6 @@ struct BSDF {
   Vec3 f(const Vec3 &wo_world, const Vec3 &wi_world) const;
   Vec3 sample_f(const Vec3 &wo_world, Vec3 *wi_world, float u, float v, float *pdf) const;
   bool is_specular() const;
+  bool is_light() const;
+  Vec3 emittance() const;
 };
