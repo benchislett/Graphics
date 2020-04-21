@@ -10,6 +10,7 @@ struct Intersection {
   Vec3 p;
   Vec3 n;
   Vec3 s;
+  Vec3 incoming;
   Primitive *prim;
 };
 
