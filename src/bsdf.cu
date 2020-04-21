@@ -60,7 +60,7 @@ Vec3 BSDF::local2world(const Vec3 &v) const {
 Vec3 BSDF::f(const Vec3 &wo_world, const Vec3 &wi_world) const {
   Vec3 wo = world2local(wo_world);
   Vec3 wi = world2local(wi_world);
-  if (wo.e[2] == 0) return {0.f, 0.f, 0.f};
+  if (wo.e[2] == 0.f) return {0.f, 0.f, 0.f};
   return b->f(wo, wi);
 }
 
@@ -77,6 +77,12 @@ Vec3 BSDF::sample_f(const Vec3 &wo_world, Vec3 *wi_world, float u, float v, floa
   if (*pdf == 0.f) return {0.f, 0.f, 0.f};
 
   return sampled;
+}
+
+float BSDF::pdf(const Vec3 &wo_world, const Vec3 &wi_world) const {
+  Vec3 wo = world2local(wo_world);
+  Vec3 wi = world2local(wi_world);
+  return b->pdf(wo, wi);
 }
 
 bool BSDF::is_specular() const {
