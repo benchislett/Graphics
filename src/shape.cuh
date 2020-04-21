@@ -28,4 +28,7 @@ struct Tri {
   Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c);
   Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n);
   Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n_a, const Vec3 &n_b, const Vec3 &n_c);
+
+  float area() const;
+  Vec3 sample(float u, float v, float *pdf) const;
 };

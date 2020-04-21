@@ -33,3 +33,16 @@ Tri::Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c) : a(a), b(b), c(c), n_a(cr
 Tri::Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n) : a(a), b(b), c(c), n_a(n), n_b(n), n_c(n), bound(bounding_slab(a, b, c)) {}
 
 Tri::Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n_a, const Vec3 &n_b, const Vec3 &n_c) : a(a), b(b), c(c), n_a(n_a), n_b(n_b), n_c(n_c), bound(bounding_slab(a, b, c)) {}
+
+float Tri::area() const {
+  return 0.5 * length(cross(b - a, c - a));
+}
+
+Vec3 Tri::sample(float u, float v, float *pdf) const {
+  float u_ = sqrtf(u);
+  float v_ = u_ * (1.f - v);
+  float w_ = u_ * v;
+  u_ = 1.f - u_;
+  *pdf = 1.f / area();
+  return (a * u_) + (b * v_) + (c * w_);
+}
