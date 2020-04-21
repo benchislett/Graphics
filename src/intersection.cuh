@@ -15,7 +15,7 @@ struct Intersection {
 };
 
 bool hit_test(const Ray &r, const Slab &s);
-bool hit_first(const Ray &r, const BVH &b, Primitive *p);
+bool hit_first(const Ray &r, const BVH &b, const Primitive *p);
 
 bool hit(const Ray &r, Primitive &p, Intersection *i);
 bool hit(const Ray &r, const BVH &b, Intersection *i);

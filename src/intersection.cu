@@ -120,7 +120,7 @@ bool hit(const Ray &r, const BVH &b, Intersection *i) {
   return res;
 }
 
-bool hit_test(const Ray &r, const BVH &b, Primitive *p) {
+bool hit_first(const Ray &r, const BVH &b, const Primitive *p) {
   Intersection i;
   bool res = hit(r, b, &i);
   if (!res) return false;

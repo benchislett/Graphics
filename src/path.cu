@@ -4,14 +4,16 @@
 #include <random>
 #include <functional>
 
-Vec3 sample_li(const Intersection &i, const Primitive &prim, Vec3 *wi, float u, float v, float *pdf) {
+Vec3 sample_li(const Intersection &i, const Primitive &prim, const Scene &s, Vec3 *wi, float u, float v, float *pdf, bool *vis) {
   Vec3 p = prim.t.sample(u, v, pdf);
 
   if (*pdf == 0.f || p == i.p) {
     *pdf = 0.f;
+    *vis = false;
     return Vec3(0.f, 0.f, 0.f);
   }
   *wi = normalized(p - i.p);
+  *vis = hit_first(Ray(i.p, (*wi)), s.b, &prim);
 
   // record visibility
   return prim.bsdf->emittance();
@@ -27,7 +29,8 @@ Vec3 direct_lighting(const Intersection &i, const Primitive &light, const Scene 
   Vec3 ld = {0.f, 0.f, 0.f};
   Vec3 wi;
   float light_pdf = 0.f, scatter_pdf = 0.f;
-  Vec3 li = sample_li(i, light, &wi, u_light, v_light, &light_pdf);
+  bool visible;
+  Vec3 li = sample_li(i, light, s, &wi, u_light, v_light, &light_pdf, &visible);
 
   Vec3 f;
   float weight;
@@ -36,7 +39,7 @@ Vec3 direct_lighting(const Intersection &i, const Primitive &light, const Scene 
     scatter_pdf = i.prim->bsdf->pdf(i.incoming, wi);
 
     if (!is_zero(f)) {
-      // check visibility, possibly set Li to 0
+      if (!visible) li = {0.f, 0.f, 0.f};
 
       if (!is_zero(li)) {
         weight = power_heuristic(1.f, light_pdf, 1.f, scatter_pdf);
@@ -83,7 +86,7 @@ Vec3 trace(const Ray &r, const Scene &scene, int max_depth) {
 
     i.prim->bsdf->update(i.n, i.s);
     
-    if (i.prim->bsdf->is_light()) {
+    if (i.prim->bsdf->is_light() && bounces == 0) {
       l += beta * i.prim->bsdf->emittance();
       break;
     }
