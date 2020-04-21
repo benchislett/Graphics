@@ -5,8 +5,8 @@
 
 int main() {
 
-  int width = 128;
-  int height = 128;
+  int width = 512;
+  int height = 512;
   int spp = 2048;
 
   float vfov = 0.698132;
