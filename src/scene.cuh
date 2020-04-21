@@ -7,6 +7,8 @@
 struct Scene {
   Camera cam;
   BVH b;
+  Primitive **lights;
+  int n_lights;
   BSDF *materials;
   int n_materials;
 };

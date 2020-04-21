@@ -75,6 +75,7 @@ Scene load_obj(std::string fname) {
   std::vector<Primitive> prims;
   BSDF *bsdf;
   int idx;
+  int n_lights = 0;
 
   for (std::string line; std::getline(input, line); ) {
     line = trim(line);
@@ -90,6 +91,7 @@ Scene load_obj(std::string fname) {
       idx = std::distance(materials.begin(), materials.find(current_name));
       if (idx == materials.size()) printf("No material with name %s\n", current_name.c_str());
       bsdf = mats + idx;
+      if (bsdf->is_light()) n_lights++;
       if (line.find("/") != std::string::npos) {
         if (line.find("//") != std::string::npos) {
           sscanf(line.c_str(), "f %d//%d %d//%d %d//%d", &a, &b, &c, &d, &e, &f);
@@ -114,14 +116,17 @@ Scene load_obj(std::string fname) {
       printf("Unrecognized line %s\n", line.c_str());
     }
   }
-
   Primitive *prim_arr = (Primitive *)malloc(prims.size() * sizeof(Primitive));
+  Primitive **lights = (Primitive **)malloc(n_lights * sizeof(Primitive *));
+
+  int light = 0;
   for (int i = 0; i < prims.size(); i++) {
     prim_arr[i] = prims[i];
+    if (prim_arr[i].bsdf->is_light()) lights[light++] = prim_arr + i;
   }
 
   BVH bvh = build_bvh(prim_arr, prims.size());
-  return {cam, bvh, mats, n_mats};
+  return {cam, bvh, lights, n_lights, mats, n_mats};
 }
 
 void write_ppm(const std::string &fname, const Image &im) {
