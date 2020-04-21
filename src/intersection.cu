@@ -64,7 +64,7 @@ bool hit_test(const Ray &r, const Slab &s) {
 
 bool hit(const Ray &r, const BVH &b, BVHNode *current, Intersection *i) {
   if (!hit_test(r, current->s)) {
-    //return false;
+    return false;
   }
 
   Intersection i_l, i_r;
@@ -118,4 +118,12 @@ bool hit(const Ray &r, const BVH &b, Intersection *i) {
   // return hit(r, b.prims, b.n_tris, i);
   bool res = hit(r, b, b.nodes + b.n_nodes - 1, i);
   return res;
+}
+
+bool hit_test(const Ray &r, const BVH &b, Primitive *p) {
+  Intersection i;
+  bool res = hit(r, b, &i);
+  if (!res) return false;
+
+  return (i.prim == p);
 }
