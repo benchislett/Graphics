@@ -123,7 +123,6 @@ BVH build_bvh(Primitive *prims, int n) {
   populate_nodes(prims, root, node_vec);
   for (i = 0; i < n - 1; i++) {
     nodes[i] = node_vec[i];
-    printf("Node %d: left %d, right %d\n", i, nodes[i].left, nodes[i].right);
   }
 
   return {n - 1, n, nodes, prims};
