@@ -45,19 +45,89 @@ void load_materials(std::string &fname, std::map<std::string, BSDF> &materials) 
       Kd = {0.f, 0.f, 0.f};
       Ke = {0.f, 0.f, 0.f};
     } else if (line[0] == 'K' && line[1] == 'd') {
-      sscanf(line.c_str(), "Kd %f %f %f %*s", Kd.e, Kd.e + 1, Kd.e + 2);
+      sscanf(line.c_str(), "Kd %f %f %f", Kd.e, Kd.e + 1, Kd.e + 2);
     } else if (line[0] == 'K' && line[1] == 'e') {
-      sscanf(line.c_str(), "Ke %f %f %f %*s", Ke.e, Ke.e + 1, Ke.e + 2);
+      sscanf(line.c_str(), "Ke %f %f %f", Ke.e, Ke.e + 1, Ke.e + 2);
     }
   }
   load_material(materials, current_name, Kd, Ke);
 }
 
+void load_vertex(const std::string &line, std::vector<Vec3> &verts) {
+  float x, y, z;
+  sscanf(line.c_str(), "v %f %f %f", &x, &y, &z);
+  verts.emplace_back(x, y, z);
+}
+
+void load_normal(const std::string &line, std::vector<Vec3> &normals) {
+  float x, y, z;
+  sscanf(line.c_str(), "vn %f %f %f", &x, &y, &z);
+  normals.emplace_back(x, y, z);
+}
+
+void clean(int e[9], int n) {
+  for (int i = 0; i < 9; i++) {
+    e[i] = (e[i] < 0 ? n + e[i] : e[i] - 1);
+  }
+}
+
+void clean_alt(int e[9], int n1, int n2) {
+  for (int i = 0; i < 9; i++) {
+    e[i] = (e[i] < 0 ? ((i % 2 == 0) ? n1 : n2) + e[i] : e[i] - 1);
+  }
+}
+
+void load_face(const std::string &line, std::string &current_name, const std::vector<Vec3> &verts, const std::vector<Vec3> &normals, const std::map<std::string, BSDF> materials, BSDF *mat_arr, std::vector<Primitive> &prims) {
+  int mat_idx = std::distance(materials.begin(), materials.find(current_name));
+  if (mat_idx == materials.size()) {
+    printf("No material with name %s\n", current_name.c_str());
+    current_name = "";
+    return load_face(line, current_name, verts, normals, materials, mat_arr, prims);
+  }
+  BSDF *bsdf = mat_arr + mat_idx;
+
+  int n;
+  int e[9];
+
+  n = sscanf(line.c_str(), "f %d %d %d %d", e+0, e+1, e+2, e+3);
+  if (n >= 3) {
+    clean(e, verts.size());
+    prims.emplace_back(Tri(verts[e[0]], verts[e[1]], verts[e[2]]), bsdf);
+    if (n == 4) prims.emplace_back(Tri(verts[e[1]], verts[e[2]], verts[e[3]]), bsdf);
+    return;
+  }
+
+  n = sscanf(line.c_str(), "f %d/%*d %d/%*d %d/%*d %d/%*d", e+0, e+1, e+2, e+3);
+  if (n >= 3) {
+    clean(e, verts.size());
+    prims.emplace_back(Tri(verts[e[0]], verts[e[1]], verts[e[2]]), bsdf);
+    if (n == 4) prims.emplace_back(Tri(verts[e[1]], verts[e[2]], verts[e[3]]), bsdf);
+    return;
+  }
+
+  n = sscanf(line.c_str(), "f %d/%*d/%d %d/%*d/%d %d/%*d/%d %d/%*d/%d", e+0, e+1, e+2, e+3, e+4, e+5, e+6, e+7);
+  if (n >= 6) {
+    clean_alt(e, verts.size(), normals.size());
+    prims.emplace_back(Tri(verts[e[0]], verts[e[2]], verts[e[4]], normals[e[1]], normals[e[3]], normals[e[5]]), bsdf);
+    if (n == 8) prims.emplace_back(Tri(verts[e[2]], verts[e[4]], verts[e[6]], normals[e[3]], normals[e[5]], normals[e[7]]), bsdf);
+    return;
+  }
+
+  n = sscanf(line.c_str(), "f %d//%d %d//%d %d//%d %d//%d", e+0, e+1, e+2, e+3, e+4, e+5, e+6, e+7);
+  if (n >= 6) {
+    clean_alt(e, verts.size(), normals.size());
+    prims.emplace_back(Tri(verts[e[0]], verts[e[2]], verts[e[4]], normals[e[1]], normals[e[3]], normals[e[5]]), bsdf);
+    if (n > 6) prims.emplace_back(Tri(verts[e[2]], verts[e[4]], verts[e[6]], normals[e[3]], normals[e[5]], normals[e[7]]), bsdf);
+    return;
+  }
+
+  printf("Cannot parse line: %s\n", line.c_str());
+  exit(1);
+}
+
 Scene load_obj(std::string fname) {
   Camera cam;
 
-  float x,y,z;
-  int a,b,c,d,e,f;
   std::ifstream input(fname);
   std::map<std::string, BSDF> materials;
   materials[""] = BSDF(new Lambertian(Vec3(1.f, 1.f, 1.f)));
@@ -73,59 +143,39 @@ Scene load_obj(std::string fname) {
   std::vector<Vec3> verts;
   std::vector<Vec3> normals;
   std::vector<Primitive> prims;
-  BSDF *bsdf;
-  int idx;
-  int n_lights = 0;
 
   for (std::string line; std::getline(input, line); ) {
     line = trim(line);
-    if (line[0] == 'v' && line[1] == ' ') {
-      sscanf(line.c_str(), "v %f %f %f", &x, &y, &z);
-      verts.emplace_back(x, y, z);
+    if (line[0] == '#' || line == "" || line == "\n" || line[0] == 'g' || line[0] == 'o' || line[0] == 's') {
+      continue;
+    } else if (line[0] == 'v' && line[1] == ' ') {
+      load_vertex(line, verts);
     } else if (line[0] == 'v' && line[1] == 'n') {
-      sscanf(line.c_str(), "vn %f %f %f", &x, &y, &z);
-      normals.emplace_back(x, y, z);
+      load_normal(line, normals);
     } else if (line.find("usemtl") != std::string::npos) {
       current_name = line.substr(7);
     } else if (line[0] == 'f') {
-      idx = std::distance(materials.begin(), materials.find(current_name));
-      if (idx == materials.size()) printf("No material with name %s\n", current_name.c_str());
-      bsdf = mats + idx;
-      if (bsdf->is_light()) n_lights++;
-      if (line.find("/") != std::string::npos) {
-        if (line.find("//") != std::string::npos) {
-          sscanf(line.c_str(), "f %d//%d %d//%d %d//%d", &a, &b, &c, &d, &e, &f);
-        } else {
-          sscanf(line.c_str(), "f %d/%*d/%d %d/%*d/%d %d/%*d/%d", &a, &b, &c, &d, &e, &f);
-        }
-        a = (a < 0 ? verts.size() + a : a - 1);
-        b = (b < 0 ? normals.size() + b : b - 1);
-        c = (c < 0 ? verts.size() + c : c - 1);
-        d = (d < 0 ? normals.size() + d : d - 1);
-        e = (e < 0 ? verts.size() + e : e - 1);
-        f = (f < 0 ? normals.size() + f : f - 1);
-        prims.emplace_back(Tri(verts[a], verts[c], verts[e], normals[b], normals[d], normals[f]), bsdf);
-      } else if (line[0] == 'f') {
-        sscanf(line.c_str(), "f %d %d %d", &a, &b, &c);
-        a = (a < 0) ? verts.size() + a : a - 1;
-        b = (b < 0) ? verts.size() + b : b - 1;
-        c = (c < 0) ? verts.size() + c : c - 1;
-        prims.emplace_back(Tri(verts[a], verts[b], verts[c]), bsdf);
-      }
-    } else if (line != "" && line != "\n") {
+      load_face(line, current_name, verts, normals, materials, mats, prims);
+    } else {
       printf("Unrecognized line %s\n", line.c_str());
     }
   }
   Primitive *prim_arr = (Primitive *)malloc(prims.size() * sizeof(Primitive));
-  Primitive **lights = (Primitive **)malloc(n_lights * sizeof(Primitive *));
 
-  int light = 0;
+  int n_lights = 0;
   for (int i = 0; i < prims.size(); i++) {
     prim_arr[i] = prims[i];
-    if (prim_arr[i].bsdf->is_light()) lights[light++] = prim_arr + i;
+    if (prims[i].bsdf->is_light()) n_lights++;
   }
 
   BVH bvh = build_bvh(prim_arr, prims.size());
+
+  int light = 0;
+  Primitive **lights = (Primitive **)malloc(n_lights * sizeof(Primitive *));
+  for (int i = 0; i < prims.size(); i++) {
+    if (prim_arr[i].bsdf->is_light()) lights[light++] = prim_arr + i;
+  }
+
   return {cam, bvh, lights, n_lights, mats, n_mats};
 }
 
