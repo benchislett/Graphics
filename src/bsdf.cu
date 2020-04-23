@@ -1,46 +1,5 @@
 #include "bsdf.cuh"
 
-void concentric_sample_disk(float *u, float *v) {
-  float uu = 2.f * (*u) - 1.f;
-  float vv = 2.f * (*v) - 1.f;
-
-  if (uu == 0.f || vv == 0.f) {
-    *u = 0.f;
-    *v = 0.f;
-    return;
-  }
-
-  float r, theta;
-  if (fabs(uu) > fabs(vv)) {
-    r = uu;
-    theta = PI_OVER_4 * (vv / uu);
-  } else {
-    r = vv;
-    theta = PI_OVER_2 - PI_OVER_4 * (uu / vv);
-  }
-
-  *u = r * cosf(theta);
-  *v = r * sinf(theta);
-}
-
-Vec3 cosine_sample(float u, float v) {
-  concentric_sample_disk(&u, &v);
-
-  float z = sqrtf(fmax(0.f, 1.f - u * u - v * v));
-  return Vec3(u, v, z);
-}
-
-/*
-Vec3 cosine_sample(float u, float v) {
-  float phi = 2.f * PI * u;
-  float v_sqrt = sqrtf(v);
-  float x = cosf(phi) * v_sqrt;
-  float y = sinf(phi) * v_sqrt;
-  float z = sqrtf(1.f - v);
-  return Vec3(x, y, z);
-}
-*/
-
 void BSDF::update(const Vec3 &n_new, const Vec3 &s_new) {
   n = n_new;
   s = s_new;
@@ -68,11 +27,9 @@ Vec3 BSDF::sample_f(const Vec3 &wo_world, Vec3 *wi_world, float u, float v, floa
   Vec3 wo = world2local(wo_world);
   if (wo.e[2] == 0.f) return {0.f, 0.f, 0.f};
 
-  Vec3 wi = cosine_sample(u, v);
-  *wi_world = local2world(cosine_sample(u, v));
-
-  Vec3 sampled = b->f(wo, wi);
-  *pdf = b->pdf(wo, wi);
+  Vec3 wi;
+  Vec3 sampled = b->sample_f(wo, &wi, u, v, pdf);
+  *wi_world = local2world(wi);
 
   if (*pdf == 0.f) return {0.f, 0.f, 0.f};
 

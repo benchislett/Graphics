@@ -20,3 +20,5 @@ bool same_hemisphere(const Vec3 &w1, const Vec3 &w2);
 Vec3 reflect(const Vec3 &w, const Vec3 &n);
 bool refract(const Vec3 &w_in, const Vec3 &n, float eta, Vec3 *w_t);
 
+Vec3 cosine_sample(float u, float v);
+
