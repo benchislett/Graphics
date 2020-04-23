@@ -1,4 +1,7 @@
 #include "io.cuh"
+#include "bxdf.cuh"
+#include "fresnel.cuh"
+#include "bsdf.cuh"
 
 #include <iostream>
 #include <fstream>
@@ -20,37 +23,46 @@ std::string trim(const std::string &s) {
   return rtrim(ltrim(s));
 }
 
-void load_material(std::map<std::string, BSDF> &materials, const std::string &name, const Vec3 &Kd, const Vec3 &Ke) {
+void load_material(std::map<std::string, BSDF> &materials, const std::string &name, float Ns, const Vec3 &Kd, const Vec3 &Ks, const Vec3 &Ke) {
   if (name != "") {
-    if (Ke.e[0] == 0.f && Ke.e[1] == 0.f && Ke.e[2] == 0.f) {
+    if (!is_zero(Ke)) {
+      materials[name] = BSDF(new AreaLight(Kd, Ke));
+    } else if (is_zero(Ks) || Ns == 0.f) {
       materials[name] = BSDF(new Lambertian(Kd));
     } else {
-      materials[name] = BSDF(new AreaLight(Kd, Ke));
+      float roughness = 1.f - sqrtf(Ns) / 30.f;
+      materials[name] = BSDF(new TorranceSparrow(Kd, new Beckmann(roughness), new Fresnel(1.0f, 1.5f)));
     }
   }
 }
 
 void load_materials(std::string &fname, std::map<std::string, BSDF> &materials) {
   std::string current_name = "";
-  Vec3 Kd;
-  Vec3 Ke;
+  Vec3 Kd, Ks, Ke;
+  float Ns;
 
   std::ifstream input(fname);
   std::string line;
   for (; std::getline(input, line); ) {
     line = trim(line);
     if (line.find("newmtl") != std::string::npos) {
-      load_material(materials, current_name, Kd, Ke);
+      load_material(materials, current_name, Ns, Kd, Ks, Ke);
       current_name = line.substr(7);
       Kd = {0.f, 0.f, 0.f};
+      Ks = {0.f, 0.f, 0.f};
       Ke = {0.f, 0.f, 0.f};
+      Ns = 0.f;
     } else if (line[0] == 'K' && line[1] == 'd') {
       sscanf(line.c_str(), "Kd %f %f %f", Kd.e, Kd.e + 1, Kd.e + 2);
+    } else if (line[0] == 'K' && line[1] == 's') {
+      sscanf(line.c_str(), "Ks %f %f %f", Ks.e, Ks.e + 1, Ks.e + 2);
     } else if (line[0] == 'K' && line[1] == 'e') {
       sscanf(line.c_str(), "Ke %f %f %f", Ke.e, Ke.e + 1, Ke.e + 2);
+    } else if (line[0] == 'N' && line[1] == 's') {
+      sscanf(line.c_str(), "Ns %f", &Ns);
     }
   }
-  load_material(materials, current_name, Kd, Ke);
+  load_material(materials, current_name, Ns, Kd, Ks, Ke);
 }
 
 void load_vertex(const std::string &line, std::vector<Vec3> &verts) {
