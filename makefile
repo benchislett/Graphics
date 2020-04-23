@@ -3,7 +3,7 @@ ARFLAGS= -rcv
 NVCCFLAGS= -arch=sm_61 -gencode=arch=compute_61,code=sm_61
 CUDAFLAGS= -L/usr/local/cuda/lib64 -I/usr/local/cuda/include -lcuda -lcudart
 
-OBJECTS= ./src/bsdf.o ./src/bvh.o ./src/bxdf.o ./src/camera.o ./src/intersection.o ./src/io.o ./src/math.o ./src/microfacet.o ./src/onb_math.o ./src/path.o ./src/primitive.o ./src/ray.o ./src/render.o ./src/shape.o
+OBJECTS= ./src/bsdf.o ./src/bvh.o ./src/bxdf.o ./src/camera.o ./src/fresnel.o ./src/intersection.o ./src/io.o ./src/math.o ./src/microfacet.o ./src/onb_math.o ./src/path.o ./src/primitive.o ./src/ray.o ./src/render.o ./src/shape.o
 
 default: libbenpt.a
 
