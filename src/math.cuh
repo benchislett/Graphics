@@ -5,8 +5,10 @@
 #include <cstdint>
 #include <cstdio>
 
+#define TWO_PI 6.28318530718f
 #define PI 3.14159265359f
 #define INV_PI 0.31830988618f
+#define SQRT_INV_PI 0.56418958354f
 #define PI_OVER_4 0.78539816339f
 #define PI_OVER_2 1.57079632679f
 
