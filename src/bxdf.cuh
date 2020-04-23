@@ -1,6 +1,8 @@
 #pragma once
 
 #include "math.cuh"
+#include "microfacet.cuh"
+#include "fresnel.cuh"
 
 struct BxDF {
   virtual Vec3 f(const Vec3 &wo, const Vec3 &wi) const = 0;
@@ -38,4 +40,18 @@ struct AreaLight : BxDF {
   bool is_specular() const { return false; }
   bool is_light() const { return true; }
   Vec3 emittance() const;
+};
+
+struct TorranceSparrow : BxDF {
+  const Vec3 r;
+  const MicrofacetDistribution *dist;
+  const Fresnel *fresnel;
+
+  TorranceSparrow(const Vec3 &r, const MicrofacetDistribution *d, const Fresnel *f) : r(r), dist(d), fresnel(f) {}
+
+  Vec3 f(const Vec3 &wo, const Vec3 &wi) const;
+  Vec3 sample_f(const Vec3 &wo, Vec3 *wi, float u, float v, float *pdf) const;
+  float pdf(const Vec3 &wo, const Vec3 &wi) const;
+  bool is_specular() const { return false; }
+  bool is_light() const { return false; }
 };
