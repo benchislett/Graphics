@@ -16,9 +16,10 @@ struct MicrofacetDistribution {
 };
 
 struct Beckmann : MicrofacetDistribution {
-  const float alpha_x, alpha_y;
+  float alpha_x, alpha_y;
 
   Beckmann(float ax, float ay, bool s = true) : MicrofacetDistribution(s), alpha_x(ax), alpha_y(ay) {}
+  Beckmann(float roughness, bool s = true);
 
   float lambda(const Vec3 &w) const;
   Vec3 sample_wh(const Vec3 &wo, float u, float v) const;

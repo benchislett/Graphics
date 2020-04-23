@@ -17,6 +17,16 @@ float MicrofacetDistribution::pdf(const Vec3 &wo, const Vec3 &wh) const {
   }
 }
 
+float alpha(float roughness) {
+  float x = logf(fmax(0.001f, roughness));
+  return 1.62142f + 0.819955f * x + 0.1734f * x * x + 0.0171201f * x * x * x + 0.000640711f * x * x * x * x;
+}
+
+Beckmann::Beckmann(float roughness, bool s) : MicrofacetDistribution(s) {
+  alpha_x = alpha(roughness);
+  alpha_y = alpha_x;
+}
+
 void beckmann_sample11(float costhetai, float u, float v, float *slope_x, float *slope_y) {
   if (costhetai > 0.9999) {
     float r = sqrtf(-logf(1.f - u));
