@@ -6,6 +6,7 @@
 
 struct BxDF {
   virtual Vec3 f(const Vec3 &wo, const Vec3 &wi) const = 0;
+  virtual Vec3 sample_f(const Vec3 &wo, Vec3 *wi, float u, float v, float *pdf) const;
   virtual float pdf(const Vec3 &wi, const Vec3 &wo) const;
   virtual bool is_specular() const = 0;
   virtual bool is_light() const = 0;
@@ -48,7 +49,6 @@ struct TorranceSparrow : BxDF {
   const Fresnel *fresnel;
 
   TorranceSparrow(const Vec3 &r, const MicrofacetDistribution *d, const Fresnel *f) : r(r), dist(d), fresnel(f) {}
-
   Vec3 f(const Vec3 &wo, const Vec3 &wi) const;
   Vec3 sample_f(const Vec3 &wo, Vec3 *wi, float u, float v, float *pdf) const;
   float pdf(const Vec3 &wo, const Vec3 &wi) const;

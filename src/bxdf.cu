@@ -1,6 +1,13 @@
 #include "bxdf.cuh"
 #include "onb_math.cuh"
 
+Vec3 BxDF::sample_f(const Vec3 &wo, Vec3 *wi, float u, float v, float *pdf_) const {
+  *wi = cosine_sample(u, v);
+  if (cos_theta(wo) < 0.f) wi->e[2] *= -1;
+  *pdf_ = pdf(wo, *wi);
+  return f(wo, *wi);
+}
+
 float BxDF::pdf(const Vec3 &wo, const Vec3 &wi) const {
   return same_hemisphere(wo, wi) ? abscos_theta(wi) * INV_PI : 0.f;
 }
