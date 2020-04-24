@@ -76,7 +76,7 @@ Vec3 beckmann_sample(const Vec3 &wi, float alpha_x, float alpha_y, float u, floa
   beckmann_sample11(cos_theta(wi_s), u, v, &slope_x, &slope_y);
 
   float tmp = cos_phi(wi_s) * slope_x - sin_phi(wi_s) * slope_y;
-  slope_y = sin_phi(wi_s) * slope_x + cos_phi(wi_s) * slope_x;
+  slope_y = sin_phi(wi_s) * slope_x + cos_phi(wi_s) * slope_y;
   slope_x = tmp;
 
   slope_x *= alpha_x;
@@ -96,7 +96,7 @@ Vec3 Beckmann::sample_wh(const Vec3 &wo, float u, float v) const {
       float logsample = logf(1.f - u);
       phi = atanf(alpha_y / alpha_x * tanf(TWO_PI * v + PI_OVER_2));
     }
-    float costheta = 1.f / sqrtf(tan2theta);
+    float costheta = 1.f / sqrtf(1.f + tan2theta);
     float sintheta = sqrtf(fmax(0.f, 1.f - costheta * costheta));
     Vec3 wh = Vec3(sintheta * cosf(phi), sintheta * sinf(phi), costheta);
     if (!same_hemisphere(wo, wh)) wh *= -1.f;
