@@ -27,7 +27,7 @@ void load_material(std::map<std::string, BSDF> &materials, const std::string &na
   if (name != "") {
     if (!is_zero(Ke)) {
       materials[name] = BSDF(new AreaLight(Kd, Ke));
-    } else if (is_zero(Ks) || Ns == 0.f) {
+    } else if (is_zero(Ks)) {
       materials[name] = BSDF(new Lambertian(Kd));
     } else {
       float roughness = 1.f - sqrtf(Ns) / 30.f;
