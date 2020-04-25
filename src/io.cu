@@ -31,7 +31,7 @@ void load_material(std::map<std::string, BSDF> &materials, const std::string &na
       materials[name] = BSDF(new Lambertian(Kd));
     } else {
       float roughness = 1.f - sqrtf(Ns) / 30.f;
-      materials[name] = BSDF(new TorranceSparrow(Kd, new Beckmann(roughness), new Fresnel(1.0f, 1.5f)));
+      materials[name] = BSDF(new Lambertian(Kd), new TorranceSparrow(Ks, new Beckmann(roughness), new Fresnel(1.0f, 1.5f)));
     }
   }
 }
