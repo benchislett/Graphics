@@ -137,9 +137,7 @@ void load_face(const std::string &line, std::string &current_name, const std::ve
   exit(1);
 }
 
-Scene load_obj(std::string fname) {
-  Camera cam;
-
+void load_obj(std::string fname, Scene *scene) {
   std::ifstream input(fname);
   std::map<std::string, BSDF> materials;
   materials[""] = BSDF(new Lambertian(Vec3(1.f, 1.f, 1.f)));
@@ -188,7 +186,11 @@ Scene load_obj(std::string fname) {
     if (prim_arr[i].bsdf->is_light()) lights[light++] = prim_arr + i;
   }
 
-  return {cam, bvh, lights, n_lights, mats, n_mats};
+  scene->b = bvh;
+  scene->lights = lights;
+  scene->n_lights = n_lights;
+  scene->materials = mats;
+  scene->n_materials = n_mats;
 }
 
 void write_ppm(const std::string &fname, const Image &im) {

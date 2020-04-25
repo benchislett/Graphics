@@ -5,6 +5,6 @@
 
 #include <string>
 
-Scene load_obj(std::string fname);
+void load_obj(std::string fname, Scene *scene);
 
 void write_ppm(const std::string &fname, const Image &im);
