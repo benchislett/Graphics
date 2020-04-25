@@ -3,12 +3,13 @@
 #include "math.cuh"
 #include "bxdf.cuh"
 
+
 struct BSDF {
   Vec3 n, s, t;
-  BxDF *b;
+  BxDF *b[3];
+  int n_bxdfs = 0;
 
-  BSDF() : b(NULL) {}
-  BSDF(BxDF *b) : b(b) {}
+  BSDF(BxDF *b1 = NULL, BxDF *b2 = NULL, BxDF *b3 = NULL) : b {b1, b2, b3}, n_bxdfs(b1 == NULL ? 0 : (b2 == NULL ? 1 : (b3 == NULL ? 2 : 3))) {}
 
   void update(const Vec3 &n, const Vec3 &s);
 

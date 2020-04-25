@@ -20,36 +20,65 @@ Vec3 BSDF::f(const Vec3 &wo_world, const Vec3 &wi_world) const {
   Vec3 wo = world2local(wo_world);
   Vec3 wi = world2local(wi_world);
   if (wo.e[2] == 0.f) return {0.f, 0.f, 0.f};
-  return b->f(wo, wi);
+
+  Vec3 val(0.f, 0.f, 0.f);
+  for (int i = 0; i < n_bxdfs; i++) {
+    val += b[i]->f(wo, wi);
+  }
+  return val;
 }
 
 Vec3 BSDF::sample_f(const Vec3 &wo_world, Vec3 *wi_world, float u, float v, float *pdf) const {
   Vec3 wo = world2local(wo_world);
   if (wo.e[2] == 0.f) return {0.f, 0.f, 0.f};
 
+  int choice = (int)(u * n_bxdfs);
+  if (choice >= n_bxdfs) printf("Uh oh!\n");
+
   Vec3 wi;
-  Vec3 sampled = b->sample_f(wo, &wi, u, v, pdf);
+  Vec3 val = b[choice]->sample_f(wo, &wi, u, v, pdf);
   *wi_world = local2world(wi);
+
+  for (int i = 0; i < n_bxdfs; i++) {
+    if (i != choice) {
+      *pdf += b[i]->pdf(wo, wi);
+      val += b[i]->f(wo, wi);
+    }
+  }
 
   if (*pdf == 0.f) return {0.f, 0.f, 0.f};
 
-  return sampled;
+  return val;
 }
 
 float BSDF::pdf(const Vec3 &wo_world, const Vec3 &wi_world) const {
   Vec3 wo = world2local(wo_world);
   Vec3 wi = world2local(wi_world);
-  return b->pdf(wo, wi);
+  float pdf = 0.f;
+  for (int i = 0; i < n_bxdfs; i++) {
+    pdf += b[i]->pdf(wo, wi);
+  }
+  return pdf;
 }
 
 bool BSDF::is_specular() const {
-  return b->is_specular();
+  for (int i = 0; i < n_bxdfs; i++) {
+    if (b[i]->is_specular()) return true;
+  }
+  return false;
 }
 
 bool BSDF::is_light() const {
-  return b->is_light();
+  for (int i = 0; i < n_bxdfs; i++) {
+    if (b[i]->is_light()) return true;
+  }
+  return false;
 }
 
 Vec3 BSDF::emittance() const {
-  return b->emittance();
+  Vec3 emit(0.f, 0.f, 0.f);
+  for (int i = 0; i < n_bxdfs; i++) {
+    emit += b[i]->emittance();
+  }
+  return emit;
 }
