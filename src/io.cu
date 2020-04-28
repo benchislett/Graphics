@@ -24,15 +24,15 @@ std::string trim(const std::string &s) {
   return rtrim(ltrim(s));
 }
 
-void load_material(std::map<std::string, BSDF> &materials, const std::string &name, float Ns, const Vec3 &Kd, const Vec3 &Ks, const Vec3 &Ke) {
+void load_material(std::map<std::string, BSDF> &materials, const std::string &name, float Ns, const Vec3 &Kd, const Vec3 &Ks, const Vec3 &Ke, int tex) {
   if (name != "") {
     if (!is_zero(Ke)) {
-      materials[name] = BSDF(new AreaLight(Kd, Ke));
+      materials[name] = BSDF(new AreaLight(Kd, Ke), tex);
     } else if (is_zero(Ks)) {
-      materials[name] = BSDF(new Lambertian(Kd));
+      materials[name] = BSDF(new Lambertian(Kd), tex);
     } else {
       float roughness = 1.f - sqrtf(Ns) / 30.f;
-      materials[name] = BSDF(new Lambertian(Kd), new TorranceSparrow(Ks, new Beckmann(roughness), new Fresnel(1.0f, 1.5f)));
+      materials[name] = BSDF(new Lambertian(Kd), tex, new TorranceSparrow(Ks, new Beckmann(roughness), new Fresnel(1.0f, 1.5f)));
     }
   }
 }
@@ -41,20 +41,24 @@ void load_materials(const std::string &fname, std::map<std::string, BSDF> &mater
   std::string dir_prefix = (fname.rfind("/") == std::string::npos) ? "" : fname.substr(0, fname.rfind("/") + 1);
   std::string texture_file(200, '\0');
   std::string current_name = "";
-  Vec3 Kd, Ks, Ke;
-  float Ns;
+  Vec3 Kd(0.f, 0.f, 0.f);
+  Vec3 Ks(0.f, 0.f, 0.f);
+  Vec3 Ke(0.f, 0.f, 0.f);
+  float Ns = 0.f;
+  int current_texture = -1;
 
   std::ifstream input(fname);
   std::string line;
   for (; std::getline(input, line); ) {
     line = trim(line);
     if (line.find("newmtl") != std::string::npos) {
-      load_material(materials, current_name, Ns, Kd, Ks, Ke);
+      load_material(materials, current_name, Ns, Kd, Ks, Ke, current_texture);
       current_name = line.substr(7);
       Kd = {0.f, 0.f, 0.f};
       Ks = {0.f, 0.f, 0.f};
       Ke = {0.f, 0.f, 0.f};
       Ns = 0.f;
+      current_texture = -1;
     } else if (line[0] == 'K' && line[1] == 'd') {
       sscanf(line.c_str(), "Kd %f %f %f", Kd.e, Kd.e + 1, Kd.e + 2);
     } else if (line[0] == 'K' && line[1] == 's') {
@@ -67,9 +71,10 @@ void load_materials(const std::string &fname, std::map<std::string, BSDF> &mater
       sscanf(line.c_str(), "map_Kd %s", texture_file.c_str());
       texture_file.insert(0, dir_prefix);
       textures.emplace_back(texture_file);
+      current_texture = textures.size() - 1;
     }
   }
-  load_material(materials, current_name, Ns, Kd, Ks, Ke);
+  load_material(materials, current_name, Ns, Kd, Ks, Ke, current_texture);
 }
 
 void load_vertex(const std::string &line, std::vector<Vec3> &verts) {
