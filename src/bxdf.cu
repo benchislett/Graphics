@@ -20,7 +20,7 @@ Vec3 Lambertian::f(const Vec3 &wo, const Vec3 &wi) const {
   return INV_PI * r;
 }
 
-OrenNayar::OrenNayar(const Vec3 &r, float roughness) : r(r) {
+OrenNayar::OrenNayar(const Vec3 &r, float roughness) : BxDF(r) {
   float sigma2 = roughness * roughness;
   a = 1.f - sigma2 / (2.f * sigma2 + 0.66f);
   b = 0.45f * sigma2 / (sigma2 + 0.09f);
