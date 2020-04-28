@@ -17,3 +17,9 @@ Texture::Texture(const std::string &png_name) {
     data[i / 4] = {(float)pixels[i] / 255.f, (float)pixels[i + 1] / 255.f, (float)pixels[i + 2] / 255.f};
   }
 }
+
+Vec3 Texture::eval(float u, float v) const {
+  int i = (int)(u * width);
+  int j = (int)(v * height);
+  return data[j * width + i];
+}
