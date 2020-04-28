@@ -4,6 +4,7 @@
 #include "camera.cuh"
 #include "bvh.cuh"
 #include "random.cuh"
+#include "texture.cuh"
 
 struct Scene {
   Camera cam;
@@ -13,4 +14,6 @@ struct Scene {
   BSDF *materials;
   int n_materials;
   RNG gen;
+  Texture *textures;
+  int n_textures;
 };
