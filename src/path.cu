@@ -55,7 +55,7 @@ Vec3 direct_lighting(const Intersection &i, const Primitive &light, const Scene 
 Vec3 sample_one_light(const Intersection &i, const Scene &s, float u_scatter, float v_scatter, float u_light, float v_light, float u_choice) {
   if (s.n_lights == 0) return Vec3(0.f, 0.f, 0.f);
 
-  int light_idx = (int)(v_light * s.n_lights);
+  int light_idx = (int)(u_choice * s.n_lights);
   return direct_lighting(i, *s.lights[light_idx], s, u_scatter, v_scatter, u_light, v_light) * (float)s.n_lights;
 }
 
@@ -65,12 +65,10 @@ Vec3 trace(const Ray &r, const Scene &scene, int max_depth) {
   bool specular_bounce = false;
   Ray ray = r;
   Vec3 wo_world, wi_world;
-  float pdf, u, v;
+  float pdf;
   Vec3 f;
 
-  std::default_random_engine generator(std::random_device{}());
-  std::uniform_real_distribution<float> distribution(0.f, 1.f);
-  auto rand = std::bind(distribution, generator);
+  auto rand = [&](){return scene.gen.generate_float();};
 
   bool does_hit;
   Intersection i;
@@ -79,12 +77,13 @@ Vec3 trace(const Ray &r, const Scene &scene, int max_depth) {
     does_hit = hit(ray, scene.b, &i);
 
     if (!does_hit || specular_bounce) {
-      // l += beta * Vec3(0.1f, 0.1, 0.75f);
+      float t = 0.5f * (normalized(ray.d).e[1] + 1.f);
+      l += beta * lerp(t, Vec3(1.f, 1.f, 1.f), Vec3(0.3f, 0.3f, 0.8f));
     }
 
     if (!does_hit || bounces >= max_depth) break;
 
-    i.prim->bsdf->update(i.n, i.s);
+    i.prim->bsdf->update(i.n, i.s, scene.textures, i.u, i.v);
     
     if (i.prim->bsdf->is_light() && bounces == 0) {
       l += beta * i.prim->bsdf->emittance();
@@ -93,14 +92,13 @@ Vec3 trace(const Ray &r, const Scene &scene, int max_depth) {
 
     l += beta * sample_one_light(i, scene, rand(), rand(), rand(), rand(), rand());
 
-    // Sample illumination
-    // When area lights are implemented
-
     wo_world = i.incoming;
-    u = rand();
-    v = rand();
-    f = i.prim->bsdf->sample_f(wo_world, &wi_world, u, v, &pdf);
-    if (is_zero(f) || pdf == 0.f) break;
+
+    int n = i.prim->bsdf->n_bxdfs;
+    int choice = (n == 1) ? 0 : scene.gen.generate_int(0, n - 1);
+    choice = fmax(0, n - 1);
+    f = i.prim->bsdf->sample_f(wo_world, &wi_world, rand(), rand(), &pdf, choice);
+    if (is_zero(f) || fabsf(pdf) < 0.0001f) break;
 
     float cos_term = dot_abs(wi_world, i.n);
     beta *= f * cos_term / pdf;
