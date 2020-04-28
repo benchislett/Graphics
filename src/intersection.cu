@@ -33,6 +33,8 @@ bool hit(const Ray &r, Primitive &p, Intersection *i) {
   i->t = time;
   i->prim = &p;
   i->incoming = -1 * r.d;
+  i->u = u;
+  i->v = v;
 
   //Vec3 normal = p.t.n_a;
   float w = 1.f - u - v;

@@ -12,6 +12,8 @@ struct Intersection {
   Vec3 s;
   Vec3 incoming;
   Primitive *prim;
+  float u;
+  float v;
 };
 
 bool hit_test(const Ray &r, const Slab &s);
