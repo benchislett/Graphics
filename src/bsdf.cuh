@@ -3,7 +3,6 @@
 #include "math.cuh"
 #include "bxdf.cuh"
 
-
 struct BSDF {
   Vec3 n, s, t;
   BxDF *b[3];
@@ -17,7 +16,7 @@ struct BSDF {
   Vec3 local2world(const Vec3 &v) const;
 
   Vec3 f(const Vec3 &wo_world, const Vec3 &wi_world) const;
-  Vec3 sample_f(const Vec3 &wo_world, Vec3 *wi_world, float u, float v, float *pdf) const;
+  Vec3 sample_f(const Vec3 &wo_world, Vec3 *wi_world, float u, float v, float *pdf, int choice) const;
   float pdf(const Vec3 &wo_world, const Vec3 &wi_world) const;
   bool is_specular() const;
   bool is_light() const;

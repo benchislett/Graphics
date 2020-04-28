@@ -3,6 +3,7 @@
 #include "math.cuh"
 #include "camera.cuh"
 #include "bvh.cuh"
+#include "random.cuh"
 
 struct Scene {
   Camera cam;
@@ -11,4 +12,5 @@ struct Scene {
   int n_lights;
   BSDF *materials;
   int n_materials;
+  RNG gen;
 };

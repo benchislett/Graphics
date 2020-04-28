@@ -28,12 +28,9 @@ Vec3 BSDF::f(const Vec3 &wo_world, const Vec3 &wi_world) const {
   return val;
 }
 
-Vec3 BSDF::sample_f(const Vec3 &wo_world, Vec3 *wi_world, float u, float v, float *pdf) const {
+Vec3 BSDF::sample_f(const Vec3 &wo_world, Vec3 *wi_world, float u, float v, float *pdf, int choice) const {
   Vec3 wo = world2local(wo_world);
   if (wo.e[2] == 0.f) return {0.f, 0.f, 0.f};
-
-  int choice = (int)(u * n_bxdfs);
-  if (choice >= n_bxdfs) printf("Uh oh!\n");
 
   Vec3 wi;
   Vec3 val = b[choice]->sample_f(wo, &wi, u, v, pdf);
@@ -41,7 +38,7 @@ Vec3 BSDF::sample_f(const Vec3 &wo_world, Vec3 *wi_world, float u, float v, floa
 
   for (int i = 0; i < n_bxdfs; i++) {
     if (i != choice) {
-      *pdf += b[i]->pdf(wo, wi);
+      (*pdf) += b[i]->pdf(wo, wi);
       val += b[i]->f(wo, wi);
     }
   }

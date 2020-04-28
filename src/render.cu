@@ -17,7 +17,15 @@ void Render(const RenderParams &params, const Scene &scene, Image &im) {
   auto rand = std::bind(distribution, generator);
 
   float u, v;
+  float progress_interval = 0.1f;
+  float progress = 0.f;
+  float r;
   for (j = 0; j < im.height; j++) {
+    r = (float)j / (float)(im.height);
+    if (r >= progress) {
+      progress += progress_interval;
+      printf("Rendering %d%% complete\n", (int)(100.f * r));
+    }
     for (i = 0; i < im.width; i++) {
       idx = j * im.width + i;
       colour = {0.f, 0.f, 0.f};
