@@ -2,6 +2,7 @@
 #include "bxdf.cuh"
 #include "fresnel.cuh"
 #include "bsdf.cuh"
+#include "texture.cuh"
 
 #include <iostream>
 #include <fstream>
@@ -36,7 +37,9 @@ void load_material(std::map<std::string, BSDF> &materials, const std::string &na
   }
 }
 
-void load_materials(std::string &fname, std::map<std::string, BSDF> &materials) {
+void load_materials(const std::string &fname, std::map<std::string, BSDF> &materials, std::vector<Texture> &textures) {
+  std::string dir_prefix = (fname.rfind("/") == std::string::npos) ? "" : fname.substr(0, fname.rfind("/") + 1);
+  std::string texture_file(200, '\0');
   std::string current_name = "";
   Vec3 Kd, Ks, Ke;
   float Ns;
@@ -60,6 +63,10 @@ void load_materials(std::string &fname, std::map<std::string, BSDF> &materials) 
       sscanf(line.c_str(), "Ke %f %f %f", Ke.e, Ke.e + 1, Ke.e + 2);
     } else if (line[0] == 'N' && line[1] == 's') {
       sscanf(line.c_str(), "Ns %f", &Ns);
+    } else if (line.compare(0, 6, "map_Kd") == 0) {
+      sscanf(line.c_str(), "map_Kd %s", texture_file.c_str());
+      texture_file.insert(0, dir_prefix);
+      textures.emplace_back(texture_file);
     }
   }
   load_material(materials, current_name, Ns, Kd, Ks, Ke);
@@ -69,6 +76,12 @@ void load_vertex(const std::string &line, std::vector<Vec3> &verts) {
   float x, y, z;
   sscanf(line.c_str(), "v %f %f %f", &x, &y, &z);
   verts.emplace_back(x, y, z);
+}
+
+void load_vertex_tex(const std::string &line, std::vector<Vec3> &tex_coords) {
+  float u, v;
+  sscanf(line.c_str(), "vt %f %f", &u, &v);
+  tex_coords.emplace_back(u, v, 0.f);
 }
 
 void load_normal(const std::string &line, std::vector<Vec3> &normals) {
@@ -138,19 +151,27 @@ void load_face(const std::string &line, std::string &current_name, const std::ve
 }
 
 void load_obj(std::string fname, Scene *scene) {
-  std::ifstream input(fname);
   std::map<std::string, BSDF> materials;
   materials[""] = BSDF(new Lambertian(Vec3(1.f, 1.f, 1.f)));
+  std::vector<Texture> textures;
+
+  std::ifstream input(fname);
   fname.replace(fname.end() - 3, fname.end(), "mtl");
-  std::string current_name = "";
-  load_materials(fname, materials);
+  load_materials(fname, materials, textures);
 
   int n_mats = materials.size();
   BSDF *mats = (BSDF *)malloc(n_mats * sizeof(BSDF));
   int i = 0;
   for (auto it = materials.begin(); it != materials.end(); it++, i++) mats[i] = it->second; 
 
+  int n_textures = textures.size();
+  Texture *tex_arr = (Texture *)malloc(n_textures * sizeof(Texture));
+  for (i = 0; i < textures.size(); i++) tex_arr[i] = textures[i];
+
+  std::string current_name = "";
+
   std::vector<Vec3> verts;
+  std::vector<Vec3> texture_coords;
   std::vector<Vec3> normals;
   std::vector<Primitive> prims;
 
@@ -160,6 +181,8 @@ void load_obj(std::string fname, Scene *scene) {
       continue;
     } else if (line[0] == 'v' && line[1] == ' ') {
       load_vertex(line, verts);
+    } else if (line[0] == 'v' && line[1] == 't') {
+      load_vertex_tex(line, texture_coords);
     } else if (line[0] == 'v' && line[1] == 'n') {
       load_normal(line, normals);
     } else if (line.find("usemtl") != std::string::npos) {
@@ -170,6 +193,7 @@ void load_obj(std::string fname, Scene *scene) {
       printf("Unrecognized line %s\n", line.c_str());
     }
   }
+
   Primitive *prim_arr = (Primitive *)malloc(prims.size() * sizeof(Primitive));
 
   int n_lights = 0;
@@ -191,6 +215,8 @@ void load_obj(std::string fname, Scene *scene) {
   scene->n_lights = n_lights;
   scene->materials = mats;
   scene->n_materials = n_mats;
+  scene->textures = tex_arr;
+  scene->n_textures = n_textures;
 }
 
 void write_ppm(const std::string &fname, const Image &im) {
