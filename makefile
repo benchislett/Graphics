@@ -7,8 +7,8 @@ OBJECTS= src/bsdf.o src/bvh.o src/bxdf.o src/camera.o src/fresnel.o src/intersec
 
 default: libbenpt.a
 
-%.o: %.cu
-	nvcc -c $^ -o $@ $(NVCCFLAGS) -dc
+%.o: %.cu %.cuh
+	nvcc -c $< -o $@ $(NVCCFLAGS) -dc
 
 device.o: $(OBJECTS)
 	nvcc -dlink $^ -o $@
