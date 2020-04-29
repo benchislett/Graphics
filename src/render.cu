@@ -33,6 +33,9 @@ void Render(const RenderParams &params, const Scene &scene, Image &im) {
         u = ((float)i + rand()) / (float)im.width;
         v = ((float)j + rand()) / (float)im.height;
         colour += trace(scene.cam.get_ray(u, v), scene, 50);
+        colour.e[0] = fmax(fmin(colour.e[0], 1.f), 0.f);
+        colour.e[1] = fmax(fmin(colour.e[1], 1.f), 0.f);
+        colour.e[2] = fmax(fmin(colour.e[2], 1.f), 0.f);
       }
       colour /= (float)params.spp;
       im.film[idx] = colour;
