@@ -95,59 +95,62 @@ void load_normal(const std::string &line, std::vector<Vec3> &normals) {
   normals.emplace_back(x, y, z);
 }
 
-void clean(int e[9], int n) {
-  for (int i = 0; i < 9; i++) {
+void clean(int e[12], int n) {
+  for (int i = 0; i < 12; i++) {
     e[i] = (e[i] < 0 ? n + e[i] : e[i] - 1);
   }
 }
 
-void clean_alt(int e[9], int n1, int n2) {
-  for (int i = 0; i < 9; i++) {
+void clean_alt(int e[12], int n1, int n2) {
+  for (int i = 0; i < 12; i++) {
     e[i] = (e[i] < 0 ? ((i % 2 == 0) ? n1 : n2) + e[i] : e[i] - 1);
   }
 }
 
-void load_face(const std::string &line, std::string &current_name, const std::vector<Vec3> &verts, const std::vector<Vec3> &normals, const std::map<std::string, BSDF> materials, BSDF *mat_arr, std::vector<Primitive> &prims) {
+void clean_alt3(int e[12], int n1, int n2, int n3) {
+  for (int i = 0; i < 12; i++) {
+    e[i] = (e[i] < 0 ? ((i % 3 == 0) ? n1 : ((i % 3 == 1) ? n2 : n3)) + e[i] : e[i] - 1);
+  }
+}
+
+void load_face(const std::string &line, std::string &current_name, const std::vector<Vec3> &verts, const std::vector<Vec3> &tex_coords, const std::vector<Vec3> &normals, const std::map<std::string, BSDF> materials, BSDF *mat_arr, std::vector<Primitive> &prims) {
   int mat_idx = std::distance(materials.begin(), materials.find(current_name));
   if (mat_idx == materials.size()) {
     printf("No material with name %s\n", current_name.c_str());
     current_name = "";
-    return load_face(line, current_name, verts, normals, materials, mat_arr, prims);
+    return load_face(line, current_name, verts, tex_coords, normals, materials, mat_arr, prims);
   }
   BSDF *bsdf = mat_arr + mat_idx;
 
   int n;
-  int e[9];
+  int e[12];
 
-  n = sscanf(line.c_str(), "f %d %d %d %d", e+0, e+1, e+2, e+3);
-  if (n >= 3) {
+  n = sscanf(line.c_str(), "f %d %d %d", e+0, e+1, e+2);
+  if (n == 3) {
     clean(e, verts.size());
     prims.emplace_back(Tri(verts[e[0]], verts[e[1]], verts[e[2]]), bsdf);
-    if (n == 4) prims.emplace_back(Tri(verts[e[1]], verts[e[2]], verts[e[3]]), bsdf);
     return;
   }
 
-  n = sscanf(line.c_str(), "f %d/%*d %d/%*d %d/%*d %d/%*d", e+0, e+1, e+2, e+3);
-  if (n >= 3) {
-    clean(e, verts.size());
-    prims.emplace_back(Tri(verts[e[0]], verts[e[1]], verts[e[2]]), bsdf);
-    if (n == 4) prims.emplace_back(Tri(verts[e[1]], verts[e[2]], verts[e[3]]), bsdf);
+  n = sscanf(line.c_str(), "f %d/%d %d/%d %d/%d", e+0, e+1, e+2, e+3, e+4, e+5);
+  if (n == 6) {
+    clean_alt(e, verts.size(), tex_coords.size());
+    Vec3 n = cross(verts[e[4]] - verts[e[0]], verts[e[4]] - verts[e[2]]);
+    prims.emplace_back(Tri(verts[e[0]], verts[e[2]], verts[e[4]], n, n, n, tex_coords[e[1]], tex_coords[e[3]], tex_coords[e[5]]), bsdf);
     return;
   }
 
-  n = sscanf(line.c_str(), "f %d/%*d/%d %d/%*d/%d %d/%*d/%d %d/%*d/%d", e+0, e+1, e+2, e+3, e+4, e+5, e+6, e+7);
-  if (n >= 6) {
+  n = sscanf(line.c_str(), "f %d/%d/%d %d/%d/%d %d/%d/%d", e+0, e+1, e+2, e+3, e+4, e+5, e+6, e+7, e+8);
+  if (n == 9) {
+    clean_alt3(e, verts.size(), tex_coords.size(), normals.size());
+    prims.emplace_back(Tri(verts[e[0]], verts[e[3]], verts[e[6]], normals[e[2]], normals[e[5]], normals[e[8]], tex_coords[e[1]], tex_coords[e[4]], tex_coords[e[7]]), bsdf);
+    return;
+  }
+
+  n = sscanf(line.c_str(), "f %d//%d %d//%d %d//%d", e+0, e+1, e+2, e+3, e+4, e+5);
+  if (n == 6) {
     clean_alt(e, verts.size(), normals.size());
     prims.emplace_back(Tri(verts[e[0]], verts[e[2]], verts[e[4]], normals[e[1]], normals[e[3]], normals[e[5]]), bsdf);
-    if (n == 8) prims.emplace_back(Tri(verts[e[2]], verts[e[4]], verts[e[6]], normals[e[3]], normals[e[5]], normals[e[7]]), bsdf);
-    return;
-  }
-
-  n = sscanf(line.c_str(), "f %d//%d %d//%d %d//%d %d//%d", e+0, e+1, e+2, e+3, e+4, e+5, e+6, e+7);
-  if (n >= 6) {
-    clean_alt(e, verts.size(), normals.size());
-    prims.emplace_back(Tri(verts[e[0]], verts[e[2]], verts[e[4]], normals[e[1]], normals[e[3]], normals[e[5]]), bsdf);
-    if (n > 6) prims.emplace_back(Tri(verts[e[2]], verts[e[4]], verts[e[6]], normals[e[3]], normals[e[5]], normals[e[7]]), bsdf);
     return;
   }
 
@@ -193,7 +196,7 @@ void load_obj(std::string fname, Scene *scene) {
     } else if (line.find("usemtl") != std::string::npos) {
       current_name = line.substr(7);
     } else if (line[0] == 'f') {
-      load_face(line, current_name, verts, normals, materials, mats, prims);
+      load_face(line, current_name, verts, texture_coords, normals, materials, mats, prims);
     } else {
       printf("Unrecognized line %s\n", line.c_str());
     }

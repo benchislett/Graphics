@@ -34,6 +34,8 @@ Tri::Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n) : a(a), b(b
 
 Tri::Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n_a, const Vec3 &n_b, const Vec3 &n_c) : a(a), b(b), c(c), n_a(n_a), n_b(n_b), n_c(n_c), bound(bounding_slab(a, b, c)) {}
 
+Tri::Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n_a, const Vec3 &n_b, const Vec3 &n_c, const Vec3 &t_a, const Vec3 &t_b, const Vec3 &t_c) : a(a), b(b), c(c), n_a(n_a), n_b(n_b), n_c(n_c), t_a(t_a), t_b(t_b), t_c(t_c), bound(bounding_slab(a, b, c)) {}
+
 float Tri::area() const {
   return 0.5 * length(cross(b - a, c - a));
 }

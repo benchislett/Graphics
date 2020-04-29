@@ -23,11 +23,15 @@ struct Tri {
   Vec3 n_a;
   Vec3 n_b;
   Vec3 n_c;
+  Vec3 t_a;
+  Vec3 t_b;
+  Vec3 t_c;
   Slab bound;
 
   Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c);
   Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n);
   Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n_a, const Vec3 &n_b, const Vec3 &n_c);
+  Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n_a, const Vec3 &n_b, const Vec3 &n_c, const Vec3 &t_a, const Vec3 &t_b, const Vec3 &t_c);
 
   float area() const;
   Vec3 sample(float u, float v, float *pdf) const;
