@@ -62,11 +62,11 @@ Vec3 sample_one_light(const Intersection &i, const Scene &s, float u_scatter, fl
 Vec3 trace(const Ray &r, const Scene &scene, int max_depth) {
   Vec3 l = {0.f, 0.f, 0.f};
   Vec3 beta = {1.f, 1.f, 1.f};
-  bool specular_bounce = false;
   Ray ray = r;
   Vec3 wo_world, wi_world;
   float pdf;
   Vec3 f;
+  Vec3 uvw;
 
   auto rand = [&](){return scene.gen.generate_float();};
 
@@ -76,14 +76,15 @@ Vec3 trace(const Ray &r, const Scene &scene, int max_depth) {
   for (bounces = 0;; bounces++) {
     does_hit = hit(ray, scene.b, &i);
 
-    if (!does_hit || specular_bounce) {
-      float t = 0.5f * (normalized(ray.d).e[1] + 1.f);
-      l += beta * lerp(t, Vec3(1.f, 1.f, 1.f), Vec3(0.3f, 0.3f, 0.8f));
-    }
-
     if (!does_hit || bounces >= max_depth) break;
 
-    i.prim->bsdf->update(i.n, i.s, scene.textures, i.u, i.v);
+    if (i.prim->bsdf->n_textures > 0) {
+      uvw = {i.u, i.v, 1.f - i.u - i.v};
+      uvw = (i.prim->t.t_a * uvw.e[2]) + (i.prim->t.t_b * uvw.e[0]) + (i.prim->t.t_c * uvw.e[1]);
+      i.prim->bsdf->update(i.n, i.s, scene.textures, uvw.e[0], uvw.e[1]);
+    } else {
+      i.prim->bsdf->update(i.n, i.s, scene.textures, -1.f, -1.f);
+    }
     
     if (i.prim->bsdf->is_light() && bounces == 0) {
       l += beta * i.prim->bsdf->emittance();
