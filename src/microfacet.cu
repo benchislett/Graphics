@@ -18,7 +18,7 @@ float MicrofacetDistribution::pdf(const Vec3 &wo, const Vec3 &wh) const {
 }
 
 float alpha(float roughness) {
-  float x = logf(fmax(0.001f, roughness));
+  float x = logf(fmax(0.003f, roughness));
   return 1.62142f + 0.819955f * x + 0.1734f * x * x + 0.0171201f * x * x * x + 0.000640711f * x * x * x * x;
 }
 
