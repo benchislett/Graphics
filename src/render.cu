@@ -10,6 +10,7 @@ void Render(const RenderParams &params, const Scene &scene, Image &im) {
   int c;
   int idx;
   Vec3 colour;
+  Vec3 colour_tmp;
   
   std::default_random_engine generator;
   std::uniform_real_distribution<float> distribution(0.f, 1.f);
@@ -32,10 +33,11 @@ void Render(const RenderParams &params, const Scene &scene, Image &im) {
       for (c = 0; c < params.spp; c++) {
         u = ((float)i + rand()) / (float)im.width;
         v = ((float)j + rand()) / (float)im.height;
-        colour += trace(scene.cam.get_ray(u, v), scene, 50);
-        colour.e[0] = fmax(fmin(colour.e[0], 1.f), 0.f);
-        colour.e[1] = fmax(fmin(colour.e[1], 1.f), 0.f);
-        colour.e[2] = fmax(fmin(colour.e[2], 1.f), 0.f);
+        colour_tmp = trace(scene.cam.get_ray(u, v), scene, 50);
+        colour_tmp.e[0] = fmax(fmin(colour_tmp.e[0], 1.f), 0.f);
+        colour_tmp.e[1] = fmax(fmin(colour_tmp.e[1], 1.f), 0.f);
+        colour_tmp.e[2] = fmax(fmin(colour_tmp.e[2], 1.f), 0.f);
+        colour += colour_tmp;
       }
       colour /= (float)params.spp;
       im.film[idx] = colour;
