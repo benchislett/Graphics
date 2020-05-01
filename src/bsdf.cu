@@ -5,10 +5,11 @@ void BSDF::update(const Vec3 &n_new, const Vec3 &s_new, Texture *tex_arr, float 
   s = s_new;
   t = cross(n, s);
 
+  int i;
   if (u > 0.f && v > 0.f && u < 1.f && v < 1.f) {
-    for (int i = 0; i < n_textures; i++) {
-      if (textures[i] != -1 && b[i] != NULL && i < n_bxdfs) {
-        b[i]->r = tex_arr[textures[i]].eval(u, v);
+    if (tex_idx >= 0) {
+      for (i = 0; i < n_bxdfs; i++) {
+        b[i]->r = tex_arr[tex_idx].eval(u, v);
       }
     }
   }

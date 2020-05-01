@@ -24,15 +24,15 @@ std::string trim(const std::string &s) {
   return rtrim(ltrim(s));
 }
 
-void load_material(std::map<std::string, BSDF> &materials, const std::string &name, float Ns, const Vec3 &Kd, const Vec3 &Ks, const Vec3 &Ke, int tex) {
+void load_material(std::map<std::string, BSDF> &materials, const std::string &name, float Ns, const Vec3 &Kd, const Vec3 &Ks, const Vec3 &Ke, int tex = -1) {
   if (name != "") {
     if (!is_zero(Ke)) {
-      materials[name] = BSDF(new AreaLight(Kd, Ke), tex);
+      materials[name] = BSDF(new AreaLight(Kd, Ke), NULL, NULL, tex);
     } else if (is_zero(Ks)) {
-      materials[name] = BSDF(new Lambertian(Kd), tex);
+      materials[name] = BSDF(new Lambertian(Kd), NULL, NULL, tex);
     } else {
       float roughness = 1.f - sqrtf(Ns) / 30.f;
-      materials[name] = BSDF(new Lambertian(Kd), tex, new TorranceSparrow(Ks, new Beckmann(roughness), new Fresnel(1.0f, 1.5f)));
+      materials[name] = BSDF(new Lambertian(Kd), new TorranceSparrow(Ks, new Beckmann(roughness), new Fresnel(1.0f, 1.5f)), NULL, tex);
     }
   }
 }
