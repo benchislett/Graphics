@@ -28,11 +28,11 @@ Slab bounding_slab(const Vec3 &a, const Vec3 &b, const Vec3 &c) {
              fmax(fmax(a.e[2], b.e[2]), c.e[2]) + 0.0001f }};
 }
 
-Tri::Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c) : a(a), b(b), c(c), n_a(cross(b - a, c - a)), n_b(n_a), n_c(n_a), bound(bounding_slab(a, b, c)) {}
+Tri::Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c) : a(a), b(b), c(c), n_a(cross(b - a, c - a)), n_b(n_a), n_c(n_a), t_a(Vec3(-1.f)), t_b(Vec3(-1.f)), t_c(Vec3(-1.f)), bound(bounding_slab(a, b, c)) {}
 
-Tri::Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n) : a(a), b(b), c(c), n_a(n), n_b(n), n_c(n), bound(bounding_slab(a, b, c)) {}
+Tri::Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n) : a(a), b(b), c(c), n_a(n), n_b(n), n_c(n), t_a(Vec3(-1.f)), t_b(Vec3(-1.f)), t_c(Vec3(-1.f)), bound(bounding_slab(a, b, c)) {}
 
-Tri::Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n_a, const Vec3 &n_b, const Vec3 &n_c) : a(a), b(b), c(c), n_a(n_a), n_b(n_b), n_c(n_c), bound(bounding_slab(a, b, c)) {}
+Tri::Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n_a, const Vec3 &n_b, const Vec3 &n_c) : a(a), b(b), c(c), n_a(n_a), n_b(n_b), n_c(n_c), t_a(Vec3(-1.f)), t_b(Vec3(-1.f)), t_c(Vec3(-1.f)), bound(bounding_slab(a, b, c)) {}
 
 Tri::Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n_a, const Vec3 &n_b, const Vec3 &n_c, const Vec3 &t_a, const Vec3 &t_b, const Vec3 &t_c) : a(a), b(b), c(c), n_a(n_a), n_b(n_b), n_c(n_c), t_a(t_a), t_b(t_b), t_c(t_c), bound(bounding_slab(a, b, c)) {}
 

@@ -19,7 +19,7 @@ Texture::Texture(const std::string &png_name) {
 }
 
 Vec3 Texture::eval(float u, float v) const {
-  int i = (int)(u * width);
-  int j = (int)(v * height);
+  int i = (int)(u * (float)width);
+  int j = (int)(v * (float)height);
   return data[j * width + i];
 }
