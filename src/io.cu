@@ -27,12 +27,12 @@ std::string trim(const std::string &s) {
 void load_material(std::map<std::string, BSDF> &materials, const std::string &name, float Ns, const Vec3 &Kd, const Vec3 &Ks, const Vec3 &Ke, int tex = -1) {
   if (name != "") {
     if (!is_zero(Ke)) {
-      materials[name] = BSDF(new AreaLight(Kd, Ke), NULL, NULL, tex);
-    } else if (is_zero(Ks)) {
-      materials[name] = BSDF(new Lambertian(Kd), NULL, NULL, tex);
+      materials[name] = BSDF(new AreaLight(Kd, Ke));
+    } else if (is_zero(Ks) || Ns == 0.f) {
+      materials[name] = BSDF(new Lambertian(Kd, tex));
     } else {
       float roughness = 1.f - sqrtf(Ns) / 30.f;
-      materials[name] = BSDF(new Lambertian(Kd), new TorranceSparrow(Ks, new Beckmann(roughness), new Fresnel(1.0f, 1.5f)), NULL, tex);
+      materials[name] = BSDF(new Lambertian(Kd, tex), new TorranceSparrow(Ks, new Beckmann(roughness), new Fresnel(1.0f, 1.5f)));
     }
   }
 }
@@ -86,6 +86,10 @@ void load_vertex(const std::string &line, std::vector<Vec3> &verts) {
 void load_vertex_tex(const std::string &line, std::vector<Vec3> &tex_coords) {
   float u, v;
   sscanf(line.c_str(), "vt %f %f", &u, &v);
+  while (u < 0.f) u += 1.f;
+  while (u > 1.f) u -= 1.f;
+  while (v < 0.f) v += 1.f;
+  while (v > 1.f) v -= 1.f;
   tex_coords.emplace_back(u, v, 0.f);
 }
 
