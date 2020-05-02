@@ -96,11 +96,12 @@ int populate_nodes(Primitive *prims, Node *root, std::vector<BVHNode> &node_vec)
   return node_vec.size() - 1;
 }
 
-BVH build_bvh(Primitive *prims, int n) {
+BVH build_bvh(const Vector<Primitive> &prims) {
   int i;
+  int n = prims.size();
 
-  BVHNode *nodes = (BVHNode *)malloc((n - 1) * sizeof(BVHNode));
-  if (nodes == NULL) return {0, n, NULL, prims};
+  Vector<BVHNode> nodes(n - 1);
+  if (nodes.data == NULL) return { Vector<BVHNode>() };
 
   std::vector<std::pair<Primitive, uint32_t>> codes;
   
@@ -120,10 +121,10 @@ BVH build_bvh(Primitive *prims, int n) {
   Node *root = bvh_r(codes, 0, n - 1);
 
   std::vector<BVHNode> node_vec;
-  populate_nodes(prims, root, node_vec);
+  populate_nodes(prims.data, root, node_vec);
   for (i = 0; i < n - 1; i++) {
     nodes[i] = node_vec[i];
   }
-
-  return {n - 1, n, nodes, prims};
+ 
+  return { nodes };
 }

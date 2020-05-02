@@ -4,6 +4,7 @@
 #include "microfacet.cuh"
 #include "fresnel.cuh"
 #include "texture.cuh"
+#include "vector.cuh"
 
 struct BxDF {
   int tex_idx;
@@ -16,7 +17,7 @@ struct BxDF {
   virtual bool is_specular() const { return false; }
   virtual bool is_light() const { return false; }
   virtual Vec3 emittance() const { return Vec3(0.f); }
-  virtual void tex_update(Texture *tex_arr, float u, float v);
+  virtual void tex_update(const Vector<Texture> &tex_arr, float u, float v);
 };
 
 struct Lambertian : BxDF {
@@ -24,7 +25,7 @@ struct Lambertian : BxDF {
 
   Lambertian(const Vec3 &r, int tex = -1) : BxDF(tex), r(r) {}
   Vec3 f(const Vec3 &wo, const Vec3 &wi) const;
-  void tex_update(Texture *tex_arr, float u, float v);
+  void tex_update(const Vector<Texture> &tex_arr, float u, float v);
 };
 
 struct OrenNayar : BxDF {
@@ -33,7 +34,7 @@ struct OrenNayar : BxDF {
 
   OrenNayar(const Vec3 &r, float roughness, int tex = -1);
   Vec3 f(const Vec3 &wo, const Vec3 &wi) const;
-  void tex_update(Texture *tex_arr, float u, float v);
+  void tex_update(const Vector<Texture> &tex_arr, float u, float v);
 };
 
 struct AreaLight : BxDF {
@@ -44,7 +45,7 @@ struct AreaLight : BxDF {
   Vec3 f(const Vec3 &wo, const Vec3 &wi) const;
   bool is_light() const { return true; }
   Vec3 emittance() const;
-};
+}; 
 
 struct TorranceSparrow : BxDF {
   Vec3 r;

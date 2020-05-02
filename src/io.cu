@@ -117,14 +117,14 @@ void clean_alt3(int e[12], int n1, int n2, int n3) {
   }
 }
 
-void load_face(const std::string &line, std::string &current_name, const std::vector<Vec3> &verts, const std::vector<Vec3> &tex_coords, const std::vector<Vec3> &normals, const std::map<std::string, BSDF> materials, BSDF *mat_arr, std::vector<Primitive> &prims) {
+void load_face(const std::string &line, std::string &current_name, const std::vector<Vec3> &verts, const std::vector<Vec3> &tex_coords, const std::vector<Vec3> &normals, const std::map<std::string, BSDF> materials, Vector<BSDF> mat_arr, std::vector<Primitive> &prims) {
   int mat_idx = std::distance(materials.begin(), materials.find(current_name));
   if (mat_idx == materials.size()) {
     printf("No material with name %s\n", current_name.c_str());
     current_name = "";
     return load_face(line, current_name, verts, tex_coords, normals, materials, mat_arr, prims);
   }
-  BSDF *bsdf = mat_arr + mat_idx;
+  BSDF *bsdf = mat_arr.data + mat_idx;
 
   int n;
   int e[12];
@@ -172,12 +172,12 @@ void load_obj(std::string fname, Scene *scene) {
   load_materials(fname, materials, textures);
 
   int n_mats = materials.size();
-  BSDF *mats = (BSDF *)malloc(n_mats * sizeof(BSDF));
+  Vector<BSDF> mats(n_mats);
   int i = 0;
   for (auto it = materials.begin(); it != materials.end(); it++, i++) mats[i] = it->second; 
 
   int n_textures = textures.size();
-  Texture *tex_arr = (Texture *)malloc(n_textures * sizeof(Texture));
+  Vector<Texture> tex_arr(n_textures);
   for (i = 0; i < textures.size(); i++) tex_arr[i] = textures[i];
 
   std::string current_name = "";
@@ -206,7 +206,7 @@ void load_obj(std::string fname, Scene *scene) {
     }
   }
 
-  Primitive *prim_arr = (Primitive *)malloc(prims.size() * sizeof(Primitive));
+  Vector<Primitive> prim_arr(prims.size());
 
   int n_lights = 0;
   for (int i = 0; i < prims.size(); i++) {
@@ -214,21 +214,19 @@ void load_obj(std::string fname, Scene *scene) {
     if (prims[i].bsdf->is_light()) n_lights++;
   }
 
-  BVH bvh = build_bvh(prim_arr, prims.size());
+  BVH bvh = build_bvh(prim_arr);
 
   int light = 0;
-  Primitive **lights = (Primitive **)malloc(n_lights * sizeof(Primitive *));
+  Vector<int> lights(n_lights);
   for (int i = 0; i < prims.size(); i++) {
-    if (prim_arr[i].bsdf->is_light()) lights[light++] = prim_arr + i;
+    if (prim_arr[i].bsdf->is_light()) lights[light++] = i;
   }
 
   scene->b = bvh;
+  scene->prims = prim_arr;
   scene->lights = lights;
-  scene->n_lights = n_lights;
   scene->materials = mats;
-  scene->n_materials = n_mats;
   scene->textures = tex_arr;
-  scene->n_textures = n_textures;
 }
 
 void write_ppm(const std::string &fname, const Image &im) {

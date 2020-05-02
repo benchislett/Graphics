@@ -64,7 +64,7 @@ bool hit_test(const Ray &r, const Slab &s) {
   return (0 < tmax) && (tmin < tmax);
 }
 
-bool hit(const Ray &r, const BVH &b, BVHNode *current, Intersection *i) {
+bool hit(const Ray &r, const Scene &s, BVHNode *current, Intersection *i) {
   if (!hit_test(r, current->s)) {
     return false;
   }
@@ -74,15 +74,15 @@ bool hit(const Ray &r, const BVH &b, BVHNode *current, Intersection *i) {
   int right = current->right;
   bool hit_left, hit_right;
   if (left < 0) {
-    hit_left = hit(r, b.prims[-(left + 1)], &i_l);
+    hit_left = hit(r, s.prims[-(left + 1)], &i_l);
   } else {
-    hit_left = hit(r, b, (b.nodes + left), &i_l);
+    hit_left = hit(r, s, (s.b.nodes.data + left), &i_l);
   }
 
   if (right < 0) {
-    hit_right = hit(r, b.prims[-(right + 1)], &i_r);
+    hit_right = hit(r, s.prims[-(right + 1)], &i_r);
   } else {
-    hit_right = hit(r, b, (b.nodes + right), &i_r);
+    hit_right = hit(r, s, (s.b.nodes.data + right), &i_r);
   }
 
   if (hit_left && hit_right) {
@@ -99,13 +99,13 @@ bool hit(const Ray &r, const BVH &b, BVHNode *current, Intersection *i) {
   return false;
 }
 
-bool hit(const Ray &r, Primitive *prims, int n_prims, Intersection *i) {
+bool hit(const Ray &r, const Vector<Primitive> &prims, Intersection *i) {
   bool hit_any = false;
   float t_best = FLT_MAX;
   Intersection tmp;
 
   bool did_hit;
-  for (int c = 0; c < n_prims; c++) {
+  for (int c = 0; c < prims.size(); c++) {
     did_hit = hit(r, prims[c], &tmp);
     if (did_hit) hit_any = true;
     if (did_hit && tmp.t < t_best) {
@@ -116,16 +116,15 @@ bool hit(const Ray &r, Primitive *prims, int n_prims, Intersection *i) {
   return hit_any;
 }
 
-bool hit(const Ray &r, const BVH &b, Intersection *i) {
-  // return hit(r, b.prims, b.n_tris, i);
-  bool res = hit(r, b, b.nodes + b.n_nodes - 1, i);
+bool hit(const Ray &r, const Scene &s, Intersection *i) {
+  bool res = hit(r, s, s.b.nodes.data + s.b.nodes.size() - 1, i);
   return res;
 }
 
-bool hit_first(const Ray &r, const BVH &b, const Primitive *p) {
+bool hit_first(const Ray &r, const Scene &s, const Primitive *p) {
   Intersection i;
-  bool res = hit(r, b, &i);
+  bool res = hit(r, s, &i);
   if (!res) return false;
 
   return (i.prim == p);
-}
+} 

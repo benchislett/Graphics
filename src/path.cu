@@ -13,7 +13,7 @@ Vec3 sample_li(const Intersection &i, const Primitive &prim, const Scene &s, Vec
     return Vec3(0.f, 0.f, 0.f);
   }
   *wi = normalized(p - i.p);
-  *vis = hit_first(Ray(i.p, (*wi)), s.b, &prim);
+  *vis = hit_first(Ray(i.p, (*wi)), s, &prim);
 
   // record visibility
   return prim.bsdf->emittance();
@@ -53,10 +53,10 @@ Vec3 direct_lighting(const Intersection &i, const Primitive &light, const Scene 
 }
 
 Vec3 sample_one_light(const Intersection &i, const Scene &s, float u_scatter, float v_scatter, float u_light, float v_light, float u_choice) {
-  if (s.n_lights == 0) return Vec3(0.f, 0.f, 0.f);
+  if (s.lights.size() == 0) return Vec3(0.f);
 
-  int light_idx = (int)(u_choice * s.n_lights);
-  return direct_lighting(i, *s.lights[light_idx], s, u_scatter, v_scatter, u_light, v_light) * (float)s.n_lights;
+  int light_idx = (int)(u_choice * s.lights.size());
+  return direct_lighting(i, s.prims[s.lights[light_idx]], s, u_scatter, v_scatter, u_light, v_light) * (float)s.lights.size();
 }
 
 Vec3 trace(const Ray &r, const Scene &scene, int max_depth) {
@@ -74,7 +74,7 @@ Vec3 trace(const Ray &r, const Scene &scene, int max_depth) {
   Intersection i;
   int bounces;
   for (bounces = 0;; bounces++) {
-    does_hit = hit(ray, scene.b, &i);
+    does_hit = hit(ray, scene, &i);
 
     if (!does_hit || bounces >= max_depth) {
       l = beta * Vec3(1.f, 1.f, 1.f);

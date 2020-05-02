@@ -12,18 +12,18 @@ float BxDF::pdf(const Vec3 &wo, const Vec3 &wi) const {
   return same_hemisphere(wo, wi) ? abscos_theta(wi) * INV_PI : 0.f;
 }
 
-void BxDF::tex_update(Texture *tex_arr, float u, float v) {}
+void BxDF::tex_update(const Vector<Texture> &tex_arr, float u, float v) {}
 
 Vec3 Lambertian::f(const Vec3 &wo, const Vec3 &wi) const {
   return INV_PI * r;
 }
 
-void Lambertian::tex_update(Texture *tex_arr, float u, float v) {
+void Lambertian::tex_update(const Vector<Texture> &tex_arr, float u, float v) {
   if (tex_idx < 0) return;
   r = tex_arr[tex_idx].eval(u, v);
 }
 
-void OrenNayar::tex_update(Texture *tex_arr, float u, float v) {
+void OrenNayar::tex_update(const Vector<Texture> &tex_arr, float u, float v) {
   if (tex_idx < 0) return;
   r = tex_arr[tex_idx].eval(u, v);
 }

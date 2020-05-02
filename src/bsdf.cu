@@ -1,6 +1,6 @@
 #include "bsdf.cuh"
 
-void BSDF::update(const Vec3 &n_new, const Vec3 &s_new, Texture *tex_arr, float u, float v) {
+void BSDF::update(const Vec3 &n_new, const Vec3 &s_new, const Vector<Texture> &tex_arr, float u, float v) {
   n = n_new;
   s = s_new;
   t = cross(n, s);

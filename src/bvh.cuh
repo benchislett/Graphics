@@ -1,6 +1,7 @@
 #pragma once
 
 #include "primitive.cuh"
+#include "vector.cuh"
 
 struct BVHNode {
   Slab s;
@@ -9,10 +10,7 @@ struct BVHNode {
 };
 
 struct BVH {
-  int n_nodes;
-  int n_tris;
-  BVHNode *nodes;
-  Primitive *prims;
+  Vector<BVHNode> nodes;
 };
 
-BVH build_bvh(Primitive *prims, int n);
+BVH build_bvh(const Vector<Primitive> &prims);

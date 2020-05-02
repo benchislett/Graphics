@@ -4,7 +4,8 @@
 #include "ray.cuh"
 #include "primitive.cuh"
 #include "bvh.cuh"
-
+#include "scene.cuh"
+ 
 struct Intersection {
   float t;
   Vec3 p;
@@ -17,7 +18,7 @@ struct Intersection {
 };
 
 bool hit_test(const Ray &r, const Slab &s);
-bool hit_first(const Ray &r, const BVH &b, const Primitive *p);
+bool hit_first(const Ray &r, const Scene &s, const Primitive *p);
 
 bool hit(const Ray &r, Primitive &p, Intersection *i);
-bool hit(const Ray &r, const BVH &b, Intersection *i);
+bool hit(const Ray &r, const Scene &s, Intersection *i);
