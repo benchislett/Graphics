@@ -12,15 +12,23 @@ float BxDF::pdf(const Vec3 &wo, const Vec3 &wi) const {
   return same_hemisphere(wo, wi) ? abscos_theta(wi) * INV_PI : 0.f;
 }
 
-Vec3 BxDF::emittance() const {
-  return Vec3(0.f, 0.f, 0.f);
-}
+void BxDF::tex_update(Texture *tex_arr, float u, float v) {}
 
 Vec3 Lambertian::f(const Vec3 &wo, const Vec3 &wi) const {
   return INV_PI * r;
 }
 
-OrenNayar::OrenNayar(const Vec3 &r, float roughness) : BxDF(r) {
+void Lambertian::tex_update(Texture *tex_arr, float u, float v) {
+  if (tex_idx < 0) return;
+  r = tex_arr[tex_idx].eval(u, v);
+}
+
+void OrenNayar::tex_update(Texture *tex_arr, float u, float v) {
+  if (tex_idx < 0) return;
+  r = tex_arr[tex_idx].eval(u, v);
+}
+
+OrenNayar::OrenNayar(const Vec3 &r, float roughness, int tex) : BxDF(tex), r(r) {
   float sigma2 = roughness * roughness;
   a = 1.f - sigma2 / (2.f * sigma2 + 0.66f);
   b = 0.45f * sigma2 / (sigma2 + 0.09f);

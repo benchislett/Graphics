@@ -2,15 +2,13 @@
 
 #include "math.cuh"
 #include "bxdf.cuh"
-#include "texture.cuh"
 
 struct BSDF {
   Vec3 n, s, t;
   BxDF *b[3];
   int n_bxdfs = 0;
-  int tex_idx = -1;
 
-  BSDF(BxDF *b1 = NULL, BxDF *b2 = NULL, BxDF *b3 = NULL, int tex = -1) : b {b1, b2, b3}, n_bxdfs(b1 == NULL ? 0 : (b2 == NULL ? 1 : (b3 == NULL ? 2 : 3))), tex_idx(tex) {}
+  BSDF(BxDF *b1 = NULL, BxDF *b2 = NULL, BxDF *b3 = NULL) : b {b1, b2, b3}, n_bxdfs(b1 == NULL ? 0 : (b2 == NULL ? 1 : (b3 == NULL ? 2 : 3))) {}
 
   void update(const Vec3 &n, const Vec3 &s, Texture *tex_arr, float u = -1.f, float v = -1.f);
 
