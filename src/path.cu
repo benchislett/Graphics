@@ -16,7 +16,7 @@ Vec3 sample_li(const Intersection &i, const Primitive &prim, const Scene &s, Vec
   *vis = hit_first(Ray(i.p, (*wi)), s, &prim);
 
   // record visibility
-  return prim.bsdf->emittance();
+  return s.materials[prim.bsdf].emittance();
 }
 
 float power_heuristic(float nf, float f_pdf, float ng, float g_pdf) {
@@ -35,8 +35,8 @@ Vec3 direct_lighting(const Intersection &i, const Primitive &light, const Scene 
   Vec3 f;
   float weight;
   if (light_pdf != 0.f && !is_zero(li)) {
-    f = i.prim->bsdf->f(i.incoming, wi) * dot_abs(wi, i.n);
-    scatter_pdf = i.prim->bsdf->pdf(i.incoming, wi);
+    f = s.materials[i.prim->bsdf].f(i.incoming, wi) * dot_abs(wi, i.n);
+    scatter_pdf = s.materials[i.prim->bsdf].pdf(i.incoming, wi);
 
     if (!is_zero(f)) {
       if (!visible) li = {0.f, 0.f, 0.f};
@@ -81,23 +81,25 @@ Vec3 trace(const Ray &r, const Scene &scene, int max_depth) {
       break;
     }
 
+    BSDF &mat = scene.materials[i.prim->bsdf];
+
     uvw = {i.u, i.v, 1.f - i.u - i.v};
     uvw = (i.prim->t.t_a * uvw.e[2]) + (i.prim->t.t_b * uvw.e[0]) + (i.prim->t.t_c * uvw.e[1]);
-    i.prim->bsdf->update(i.n, i.s, scene.textures, uvw.e[0], uvw.e[1]);
+    mat.update(i.n, i.s, scene.textures, uvw.e[0], uvw.e[1]);
     
-    if (i.prim->bsdf->is_light() && bounces == 0) {
-      l += beta * i.prim->bsdf->emittance();
+    if (mat.is_light() && bounces == 0) {
+      l += beta * mat.emittance();
       break;
     }
 
     l += beta * sample_one_light(i, scene, rand(), rand(), rand(), rand(), rand());
 
     wo_world = i.incoming;
-
-    int n = i.prim->bsdf->n_bxdfs;
+    int n = mat.n_bxdfs;
     int choice = (n == 1) ? 0 : scene.gen.generate_int(0, n - 1);
     choice = fmax(0, n - 1);
-    f = i.prim->bsdf->sample_f(wo_world, &wi_world, rand(), rand(), &pdf, choice);
+    f = mat.sample_f(wo_world, &wi_world, rand(), rand(), &pdf, choice);
+
     if (is_zero(f) || fabsf(pdf) < 0.0001f) break;
 
     float cos_term = dot_abs(wi_world, i.n);
