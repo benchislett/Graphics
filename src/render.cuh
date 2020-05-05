@@ -8,9 +8,11 @@ struct RenderParams {
 };
 
 struct Image {
-  int width;
-  int height;
-  Vec3 *film; // row-major
+  const int width;
+  const int height;
+  Vector<Vec3> film; // row-major
+  
+  Image(int width, int height) : width(width), height(height), film { width * height } {}
 };
 
-void Render(const RenderParams &params, const Scene &scene, Image &im);
+void Render(const RenderParams &params, Scene &scene, Image &im);
