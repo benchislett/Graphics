@@ -17,7 +17,7 @@ struct RNG {
 struct LocalDeviceRNG {
   curandState *local_state;
 
-  LocalDeviceRNG(curandState *s) : local_state(s) {}
+  __device__ LocalDeviceRNG(curandState *s) : local_state(s) {}
 
   __device__ float generate() const;
   __device__ int generate_int(int low, int high) const;
@@ -27,6 +27,7 @@ struct LocalDeviceRNG {
 struct DeviceRNG {
   curandState *state;
 
+  DeviceRNG() : state(NULL) {}
   DeviceRNG(int n_threads);
 
   __device__ LocalDeviceRNG local(int tid) {

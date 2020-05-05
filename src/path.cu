@@ -1,8 +1,6 @@
 #include "path.cuh"
 #include "intersection.cuh"
-
-#include <random>
-#include <functional>
+#include "random.cuh"
 
 __device__ Vec3 sample_li(const Intersection &i, const Primitive &prim, const Scene &s, Vec3 *wi, float u, float v, float *pdf, bool *vis) {
   Vec3 p = prim.t.sample(u, v, pdf);
@@ -59,7 +57,7 @@ __device__ Vec3 sample_one_light(const Intersection &i, const Scene &s, float u_
   return direct_lighting(i, s.prims[s.lights[light_idx]], s, u_scatter, v_scatter, u_light, v_light) * (float)s.lights.size();
 }
 
-__device__ Vec3 trace(const Ray &r, const Scene &scene, int max_depth) {
+__device__ Vec3 trace(const Ray &r, const Scene &scene, LocalDeviceRNG &gen, int max_depth) {
   Vec3 l = {0.f, 0.f, 0.f};
   Vec3 beta = {1.f, 1.f, 1.f};
   Ray ray = r;
@@ -68,8 +66,6 @@ __device__ Vec3 trace(const Ray &r, const Scene &scene, int max_depth) {
   Vec3 f;
   Vec3 uvw;
 
-  auto rand = [&](){return scene.gen.generate_float();};
-
   bool does_hit;
   Intersection i;
   int bounces;
@@ -77,7 +73,7 @@ __device__ Vec3 trace(const Ray &r, const Scene &scene, int max_depth) {
     does_hit = hit(ray, scene, &i);
 
     if (!does_hit || bounces >= max_depth) {
-      l = beta * Vec3(1.f, 1.f, 1.f);
+      // l = beta * Vec3(1.f, 1.f, 1.f);
       break;
     }
 
@@ -92,13 +88,12 @@ __device__ Vec3 trace(const Ray &r, const Scene &scene, int max_depth) {
       break;
     }
 
-    l += beta * sample_one_light(i, scene, rand(), rand(), rand(), rand(), rand());
+    l += beta * sample_one_light(i, scene, gen.generate(), gen.generate(), gen.generate(), gen.generate(), gen.generate());
 
     wo_world = i.incoming;
     int n = mat.n_bxdfs;
-    int choice = (n == 1) ? 0 : scene.gen.generate_int(0, n - 1);
-    choice = fmax(0, n - 1);
-    f = mat.sample_f(wo_world, &wi_world, rand(), rand(), &pdf, choice);
+    int choice = (n == 1) ? 0 : gen.generate_int(0, n - 1);
+    f = mat.sample_f(wo_world, &wi_world, gen.generate(), gen.generate(), &pdf, choice);
 
     if (is_zero(f) || fabsf(pdf) < 0.0001f) break;
 

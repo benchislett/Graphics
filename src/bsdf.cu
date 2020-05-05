@@ -63,7 +63,7 @@ __device__ float BSDF::pdf(const Vec3 &wo_world, const Vec3 &wi_world) {
   return pdf;
 }
 
-__device__ bool BSDF::is_light() {
+__host__ __device__ bool BSDF::is_light() {
   for (int i = 0; i < n_bxdfs; i++) {
     if (b[i].is_light()){
       return true;

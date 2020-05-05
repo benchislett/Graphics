@@ -116,7 +116,8 @@ __device__ bool hit(const Ray &r, const Vector<Primitive> &prims, Intersection *
 }
 
 __device__ bool hit(const Ray &r, const Scene &s, Intersection *i) {
-  bool res = hit(r, s, s.b.nodes.data + s.b.nodes.size() - 1, i);
+  bool res = hit(r, s.prims, i);
+  //bool res = hit(r, s, s.b.nodes.data + s.b.nodes.size() - 1, i);
   return res;
 }
 

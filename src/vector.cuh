@@ -12,8 +12,8 @@ struct Vector {
   Vector(int n) : n(n), is_host(true) { data = (T *)calloc(n, sizeof(T)); }
   Vector(T *data, int n) : data(data), n(n), is_host(true) {}
 
-  T& operator[](int i) const { return data[i]; }
-  int size() const { return n; }
+  __host__ __device__ T& operator[](int i) const { return data[i]; }
+  __host__ __device__ int size() const { return n; }
 
   void to_device() {
     if (!is_host) return;

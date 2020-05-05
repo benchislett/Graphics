@@ -7,24 +7,12 @@
 #include "texture.cuh"
 #include "vector.cuh"
 
-struct BxDF {
+struct Lambertian {
   int tex_idx;
-
-  BxDF(int tex_idx) : tex_idx(tex_idx) {}
-
-  virtual Vec3 f(const Vec3 &wo, const Vec3 &wi) const = 0;
-  virtual Vec3 sample_f(const Vec3 &wo, Vec3 *wi, float u, float v, float *pdf) const = 0;
-  virtual float pdf(const Vec3 &wo, const Vec3 &wi) const = 0;
-  virtual bool is_light() const = 0;
-  virtual Vec3 emittance() const = 0;
-  virtual void tex_update(const Vector<Texture> &tex_arr, float u, float v) = 0;
-};
-
-struct Lambertian : BxDF {
   Vec3 r;
 
-  Lambertian() : BxDF(-1), r(Vec3(1.f)) {}
-  Lambertian(const Vec3 &r, int tex = -1) : BxDF(tex), r(r) {}
+  Lambertian() : tex_idx(-1), r(Vec3(1.f)) {}
+  Lambertian(const Vec3 &r, int tex = -1) : tex_idx(tex), r(r) {}
 
   __device__ Vec3 f(const Vec3 &wo, const Vec3 &wi) const;
   __device__ Vec3 sample_f(const Vec3 &wo, Vec3 *wi, float u, float v, float *pdf) const;
@@ -34,7 +22,8 @@ struct Lambertian : BxDF {
   __device__ void tex_update(const Vector<Texture> &tex_arr, float u, float v);
 };
 
-struct OrenNayar : BxDF {
+struct OrenNayar {
+  int tex_idx;
   float a, b;
   Vec3 r;
 
@@ -49,12 +38,12 @@ struct OrenNayar : BxDF {
   __device__ void tex_update(const Vector<Texture> &tex_arr, float u, float v);
 };
 
-struct AreaLight : BxDF {
+struct AreaLight {
   Vec3 e;
   Vec3 r;
 
-  AreaLight() : BxDF(-1), r(Vec3(1.f)), e(Vec3(10.f)) {}
-  AreaLight(const Vec3 &r, const Vec3 &e) : BxDF(-1), r(r), e(e) {}
+  AreaLight() : r(Vec3(1.f)), e(Vec3(10.f)) {}
+  AreaLight(const Vec3 &r, const Vec3 &e) : r(r), e(e) {}
 
   __device__ Vec3 f(const Vec3 &wo, const Vec3 &wi) const;
   __device__ Vec3 sample_f(const Vec3 &wo, Vec3 *wi, float u, float v, float *pdf) const;
@@ -64,13 +53,13 @@ struct AreaLight : BxDF {
   __device__ void tex_update(const Vector<Texture> &tex_arr, float u, float v) {}
 }; 
 
-struct TorranceSparrow : BxDF {
+struct TorranceSparrow {
   Vec3 r;
-  const BeckmannDistribution dist;
-  const Fresnel fresnel;
+  BeckmannDistribution dist;
+  Fresnel fresnel;
 
-  TorranceSparrow() : BxDF(-1), r(Vec3(1.f)), dist(NULL), fresnel(NULL) {}
-  TorranceSparrow(const Vec3 &r, const MicrofacetDistribution *d, const Fresnel *f) : BxDF(-1), r(r), dist(d), fresnel(f) {}
+  TorranceSparrow() : r(Vec3(1.f)), dist { 0.f }, fresnel { 1.f, 1.5 } {}
+  TorranceSparrow(const Vec3 &r, const BeckmannDistribution d, const Fresnel f) : r(r), dist(d), fresnel(f) {}
 
   __device__ Vec3 f(const Vec3 &wo, const Vec3 &wi) const;
   __device__ Vec3 sample_f(const Vec3 &wo, Vec3 *wi, float u, float v, float *pdf) const;

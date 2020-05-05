@@ -22,7 +22,7 @@ __device__ void Lambertian::tex_update(const Vector<Texture> &tex_arr, float u, 
   r = tex_arr[tex_idx].eval(u, v);
 }
 
-__device__ OrenNayar::OrenNayar(const Vec3 &r, float roughness, int tex) : BxDF(tex), r(r) {
+OrenNayar::OrenNayar(const Vec3 &r, float roughness, int tex) : tex_idx(tex), r(r) {
   float sigma2 = roughness * roughness;
   a = 1.f - sigma2 / (2.f * sigma2 + 0.66f);
   b = 0.45f * sigma2 / (sigma2 + 0.09f);

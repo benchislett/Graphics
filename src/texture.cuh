@@ -7,7 +7,7 @@
 #include <string>
 
 struct Texture {
-  Vector<texture> data; // row-major
+  Vector<Vec3> data; // row-major
   uint32_t width;
   uint32_t height;
 
