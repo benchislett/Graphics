@@ -66,7 +66,7 @@ struct AreaLight : BxDF {
 
 struct TorranceSparrow : BxDF {
   Vec3 r;
-  const MicrofacetDistribution *dist;
+  const BeckmannDistribution dist;
   const Fresnel *fresnel;
 
   TorranceSparrow() : BxDF(-1), r(Vec3(1.f)), dist(NULL), fresnel(NULL) {}

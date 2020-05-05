@@ -101,18 +101,18 @@ __device__ Vec3 TorranceSparrow::f(const Vec3 &wo, const Vec3 &wi) const {
   wh = normalized(wh);
 
   Vec3 f = fresnel->evaluate(dot(wi, cos_theta(wh) < 0.f ? (-1 * wh) : wh));
-  return r * dist->d(wh) * dist->g(wo, wi) * f / (4.f * costhetai * costhetao);
+  return r * dist.d(wh) * dist.g(wo, wi) * f / (4.f * costhetai * costhetao);
 }
 
 __device__ Vec3 TorranceSparrow::sample_f(const Vec3 &wo, Vec3 *wi, float u, float v, float *pdf) const {
   if (cos_theta(wo) == 0.f) return Vec3(0.f, 0.f, 0.f);
-  Vec3 wh = dist->sample_wh(wo, u, v);
+  Vec3 wh = dist.sample_wh(wo, u, v);
   if (dot(wo, wh) < 0.f) return Vec3(0.f, 0.f, 0.f);
 
   *wi = reflect(wo, wh);
   if (!same_hemisphere(wo, *wi)) return Vec3(0.f, 0.f, 0.f);
 
-  *pdf = dist->pdf(wo, wh) / (4.f * dot(wo, wh));
+  *pdf = dist.pdf(wo, wh) / (4.f * dot(wo, wh));
   TorranceSparrow t = *((TorranceSparrow *)this);
   return t.f(wo, *wi);
 }
@@ -120,7 +120,7 @@ __device__ Vec3 TorranceSparrow::sample_f(const Vec3 &wo, Vec3 *wi, float u, flo
 __device__ float TorranceSparrow::pdf(const Vec3 &wo, const Vec3 &wi) const {
   if (!same_hemisphere(wo, wi)) return 0.f;
   Vec3 wh = normalized(wo + wi);
-  return dist->pdf(wo, wh) / (4.f * dot(wo, wh));
+  return dist.pdf(wo, wh) / (4.f * dot(wo, wh));
 }
 
 __device__ Vec3 BxDFVariant::f(const Vec3 &wo, const Vec3 &wi) const {
