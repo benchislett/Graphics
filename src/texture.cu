@@ -7,12 +7,11 @@ Texture::Texture(const std::string &png_name) {
   unsigned error = lodepng::decode(pixels, width, height, png_name.c_str());
 
   if (error) {
-    fprintf(stderr, "Error loading texture from %s\n", png_name.c_str());
-    data = NULL;
+    printf("Error loading texture from %s\n", png_name.c_str());
     return;
   }
 
-  data = (Vec3 *)malloc(width * height * sizeof(Vec3));
+  data = Vector<Vec3>(width * height);
   for (int i = 0; i < pixels.size(); i += 4) {
     data[i / 4] = {(float)pixels[i] / 255.f, (float)pixels[i + 1] / 255.f, (float)pixels[i + 2] / 255.f};
   }
