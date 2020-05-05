@@ -100,7 +100,7 @@ __device__ Vec3 TorranceSparrow::f(const Vec3 &wo, const Vec3 &wi) const {
 
   wh = normalized(wh);
 
-  Vec3 f = fresnel->evaluate(dot(wi, cos_theta(wh) < 0.f ? (-1 * wh) : wh));
+  Vec3 f = fresnel.evaluate(dot(wi, cos_theta(wh) < 0.f ? (-1 * wh) : wh));
   return r * dist.d(wh) * dist.g(wo, wi) * f / (4.f * costhetai * costhetao);
 }
 

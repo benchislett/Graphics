@@ -33,7 +33,7 @@ void load_material(std::map<std::string, int> &material_map, std::vector<BSDF> &
       material_vec.emplace_back(BxDFVariant(Lambertian(Kd, tex)));
     } else {
       float roughness = 1.f - sqrtf(Ns) / 30.f;
-      material_vec.emplace_back(BxDFVariant(Lambertian(Kd, tex)), BxDFVariant(TorranceSparrow(Ks, BeckmannDistribution(roughness), new Fresnel(1.f, 1.5f))));
+      material_vec.emplace_back(BxDFVariant(Lambertian(Kd, tex)), BxDFVariant(TorranceSparrow(Ks, BeckmannDistribution(roughness), Fresnel(1.f, 1.5f))));
     }
   }
 }
