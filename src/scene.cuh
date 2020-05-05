@@ -14,5 +14,5 @@ struct Scene {
   Vector<int> lights;
   Vector<BSDF> materials;
   Vector<Texture> textures;
-  RNG gen;
+  DeviceRNG gen;
 };

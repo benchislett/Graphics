@@ -96,7 +96,7 @@ int populate_nodes(Primitive *prims, Node *root, std::vector<BVHNode> &node_vec)
   return node_vec.size() - 1;
 }
 
-BVH build_bvh(const Vector<Primitive> &prims) {
+__host__ BVH build_bvh(const Vector<Primitive> &prims) {
   int i;
   int n = prims.size();
 

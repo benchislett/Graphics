@@ -19,6 +19,6 @@ Camera::Camera(float vfov, float aspect, const Vec3 &look_from, const Vec3 &look
   v = 2 * half_height * v_;
 }
 
-Ray Camera::get_ray(float s, float t) const {
+__device__ Ray Camera::get_ray(float s, float t) const {
   return Ray(pos, lower_left + (s * h) + (t * v) - pos);
 }

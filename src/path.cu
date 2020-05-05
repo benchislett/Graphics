@@ -4,7 +4,7 @@
 #include <random>
 #include <functional>
 
-Vec3 sample_li(const Intersection &i, const Primitive &prim, const Scene &s, Vec3 *wi, float u, float v, float *pdf, bool *vis) {
+__device__ Vec3 sample_li(const Intersection &i, const Primitive &prim, const Scene &s, Vec3 *wi, float u, float v, float *pdf, bool *vis) {
   Vec3 p = prim.t.sample(u, v, pdf);
 
   if (*pdf == 0.f || p == i.p) {
@@ -19,13 +19,13 @@ Vec3 sample_li(const Intersection &i, const Primitive &prim, const Scene &s, Vec
   return s.materials[prim.bsdf].emittance();
 }
 
-float power_heuristic(float nf, float f_pdf, float ng, float g_pdf) {
+__device__ float power_heuristic(float nf, float f_pdf, float ng, float g_pdf) {
   float f = nf * f_pdf;
   float g = ng * g_pdf;
   return (f * f) / (f * f + g * g);
 }
 
-Vec3 direct_lighting(const Intersection &i, const Primitive &light, const Scene &s, float u_scatter, float v_scatter, float u_light, float v_light) {
+__device__ Vec3 direct_lighting(const Intersection &i, const Primitive &light, const Scene &s, float u_scatter, float v_scatter, float u_light, float v_light) {
   Vec3 ld = {0.f, 0.f, 0.f};
   Vec3 wi;
   float light_pdf = 0.f, scatter_pdf = 0.f;
@@ -52,14 +52,14 @@ Vec3 direct_lighting(const Intersection &i, const Primitive &light, const Scene 
   return ld;
 }
 
-Vec3 sample_one_light(const Intersection &i, const Scene &s, float u_scatter, float v_scatter, float u_light, float v_light, float u_choice) {
+__device__ Vec3 sample_one_light(const Intersection &i, const Scene &s, float u_scatter, float v_scatter, float u_light, float v_light, float u_choice) {
   if (s.lights.size() == 0) return Vec3(0.f);
 
   int light_idx = (int)(u_choice * s.lights.size());
   return direct_lighting(i, s.prims[s.lights[light_idx]], s, u_scatter, v_scatter, u_light, v_light) * (float)s.lights.size();
 }
 
-Vec3 trace(const Ray &r, const Scene &scene, int max_depth) {
+__device__ Vec3 trace(const Ray &r, const Scene &scene, int max_depth) {
   Vec3 l = {0.f, 0.f, 0.f};
   Vec3 beta = {1.f, 1.f, 1.f};
   Ray ray = r;

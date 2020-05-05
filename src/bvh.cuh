@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cuda.cuh"
 #include "primitive.cuh"
 #include "vector.cuh"
 
@@ -16,4 +17,4 @@ struct BVH {
   void to_device() { nodes.to_device(); }
 };
 
-BVH build_bvh(const Vector<Primitive> &prims);
+__host__ BVH build_bvh(const Vector<Primitive> &prims);

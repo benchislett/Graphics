@@ -18,7 +18,7 @@ Texture::Texture(const std::string &png_name) {
   }
 }
 
-Vec3 Texture::eval(float u, float v) const {
+__device__ Vec3 Texture::eval(float u, float v) const {
   u = fmin(0.999999f, fmax(0.f, u));
   v = fmin(0.999999f, fmax(0.f, 1.f - v));
   int i = (int)(u * (float)width);

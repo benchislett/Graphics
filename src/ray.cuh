@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math.cuh"
+#include "cuda.cuh"
 
 struct Ray {
   Vec3 o;
@@ -8,5 +9,5 @@ struct Ray {
 
   Ray(const Vec3 &o, const Vec3 &d) : o(o), d(normalized(d)) {}
 
-  Vec3 at(float t) const;
+  __device__ Vec3 at(float t) const;
 };

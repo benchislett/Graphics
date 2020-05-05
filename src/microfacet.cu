@@ -1,33 +1,17 @@
 #include "microfacet.cuh"
 #include "onb_math.cuh"
 
-float MicrofacetDistribution::g1(const Vec3 &w) const {
-  return 1.f / (1.f + lambda(w));
-}
-
-float MicrofacetDistribution::g(const Vec3 &wo, const Vec3 &wi) const {
-  return 1.f / (1.f + lambda(wo) + lambda(wi));
-}
-
-float MicrofacetDistribution::pdf(const Vec3 &wo, const Vec3 &wh) const {
-  if (sample_visible_area) {
-    return d(wh) * g1(wo) * dot_abs(wo, wh) / abscos_theta(wo);
-  } else {
-    return d(wh) * abscos_theta(wh);
-  }
-}
-
 float alpha(float roughness) {
   float x = logf(fmax(0.003f, roughness));
   return 1.62142f + 0.819955f * x + 0.1734f * x * x + 0.0171201f * x * x * x + 0.000640711f * x * x * x * x;
 }
 
-Beckmann::Beckmann(float roughness, bool s) : MicrofacetDistribution(s) {
+BeckmannDistribution::BeckmannDistribution(float roughness) {
   alpha_x = alpha(roughness);
   alpha_y = alpha_x;
 }
 
-void beckmann_sample11(float costhetai, float u, float v, float *slope_x, float *slope_y) {
+__device__ void beckmann_sample11(float costhetai, float u, float v, float *slope_x, float *slope_y) {
   if (costhetai > 0.9999) {
     float r = sqrtf(-logf(1.f - u));
     float sinphi = sinf(TWO_PI * v);
@@ -69,7 +53,7 @@ void beckmann_sample11(float costhetai, float u, float v, float *slope_x, float 
   *slope_y = erfinvf(2.f * fmax(v, 0.000001f) - 1.f);
 }
 
-Vec3 beckmann_sample(const Vec3 &wi, float alpha_x, float alpha_y, float u, float v) {
+__device__ Vec3 beckmann_sample(const Vec3 &wi, float alpha_x, float alpha_y, float u, float v) {
   Vec3 wi_s = normalized(Vec3(alpha_x * wi.e[0], alpha_y * wi.e[1], wi.e[2]));
 
   float slope_x, slope_y;
@@ -85,42 +69,55 @@ Vec3 beckmann_sample(const Vec3 &wi, float alpha_x, float alpha_y, float u, floa
   return normalized(Vec3(-slope_x, -slope_y, 1.f));
 }
 
-Vec3 Beckmann::sample_wh(const Vec3 &wo, float u, float v) const {
-  if (!sample_visible_area) {
-    float tan2theta, phi;
-    if (alpha_x == alpha_y) {
-      float logsample = logf(1.f - u);
-      tan2theta = -alpha_x * alpha_x * logsample;
-      phi = v * TWO_PI;
-    } else {
-      float logsample = logf(1.f - u);
-      phi = atanf(alpha_y / alpha_x * tanf(TWO_PI * v + PI_OVER_2));
-    }
-    float costheta = 1.f / sqrtf(1.f + tan2theta);
-    float sintheta = sqrtf(fmax(0.f, 1.f - costheta * costheta));
-    Vec3 wh = Vec3(sintheta * cosf(phi), sintheta * sinf(phi), costheta);
-    if (!same_hemisphere(wo, wh)) wh *= -1.f;
-    return wh;
+__device__ Vec3 BeckmannDistribution::sample_wh(const Vec3 &wo, float u, float v) const {
+  /* Don't sample visible area
+  float tan2theta, phi;
+  if (alpha_x == alpha_y) {
+    float logsample = logf(1.f - u);
+    tan2theta = -alpha_x * alpha_x * logsample;
+    phi = v * TWO_PI;
   } else {
-    bool flip = wo.e[2] < 0.f;
-    Vec3 wh = beckmann_sample(flip ? (-1 * wo) : wo, alpha_x, alpha_y, u, v);
-    if (flip) wh *= -1;
-    return wh;
+    float logsample = logf(1.f - u);
+    phi = atanf(alpha_y / alpha_x * tanf(TWO_PI * v + PI_OVER_2));
   }
+  float costheta = 1.f / sqrtf(1.f + tan2theta);
+  float sintheta = sqrtf(fmax(0.f, 1.f - costheta * costheta));
+  Vec3 wh = Vec3(sintheta * cosf(phi), sintheta * sinf(phi), costheta);
+  if (!same_hemisphere(wo, wh)) wh *= -1.f;
+  return wh;
+  */
+
+  bool flip = wo.e[2] < 0.f;
+  Vec3 wh = beckmann_sample(flip ? (-1 * wo) : wo, alpha_x, alpha_y, u, v);
+  if (flip) wh *= -1;
+  return wh;
 }
 
-float Beckmann::d(const Vec3 &wh) const {
+__device__ float BeckmannDistribution::d(const Vec3 &wh) const {
   float tan2theta = tan2_theta(wh);
   if (isinf(tan2theta)) return 0.f;
   float cos4theta = cos2_theta(wh) * cos2_theta(wh);
   return expf(-tan2theta * (cos2_phi(wh) / (alpha_x * alpha_x) + sin2_phi(wh) / (alpha_y * alpha_y))) / (PI * alpha_x * alpha_x * cos4theta);
 }
 
-float Beckmann::lambda(const Vec3 &w) const {
+__device__ float BeckmannDistribution::lambda(const Vec3 &w) const {
   float abstantheta = fabs(tan_theta(w));
   if (isinf(abstantheta)) return 0.f;
   float alpha = sqrtf(cos2_phi(w) * alpha_x * alpha_x + sin2_phi(w) * alpha_y * alpha_y);
   float a = 1.f / (alpha * abstantheta);
   if (a >= 1.6f) return 0.f;
   return (1.f - 1.259f * a + 0.396f * a * a) / (3.535f * a + 2.181f * a * a);
+}
+
+__device__ float BeckmannDistribution::g1(const Vec3 &w) const {
+  return 1.f / (1.f + lambda(w));
+}
+
+__device__ float BeckmannDistribution::g(const Vec3 &wo, const Vec3 &wi) const {
+  return 1.f / (1.f + lambda(wo) + lambda(wi));
+}
+
+__device__ float BeckmannDistribution::pdf(const Vec3 &wo, const Vec3 &wh) const {
+  return d(wh) * g1(wo) * dot_abs(wo, wh) / abscos_theta(wo);
+  // return d(wh) * abscos_theta(wh); // don't sample visible area
 }

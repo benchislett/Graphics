@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math.cuh"
+#include "cuda.cuh"
 
 #include <string>
 
@@ -12,5 +13,5 @@ struct Texture {
   Texture() : data(NULL), width(0), height(0) {}
   Texture(const std::string &png_name);
 
-  Vec3 eval(float u, float v) const;
+  __device__ Vec3 eval(float u, float v) const;
 };
