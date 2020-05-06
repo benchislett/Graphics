@@ -35,5 +35,5 @@ struct Tri {
   Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n_a, const Vec3 &n_b, const Vec3 &n_c, const Vec3 &t_a, const Vec3 &t_b, const Vec3 &t_c);
 
   __host__ __device__ float area() const;
-  __device__ Vec3 sample(float u, float v, float *pdf) const;
+  __device__ void sample(float u, float v, float *pdf, Vec3 *p, Vec3 *n) const;
 };

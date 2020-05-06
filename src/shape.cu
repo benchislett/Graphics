@@ -40,11 +40,14 @@ __host__ __device__ float Tri::area() const {
   return 0.5 * length(cross(b - a, c - a));
 }
 
-__device__ Vec3 Tri::sample(float u, float v, float *pdf) const {
+__device__ void Tri::sample(float u, float v, float *pdf, Vec3 *p, Vec3 *n) const {
   float u_ = sqrtf(u);
   float v_ = u_ * (1.f - v);
   float w_ = u_ * v;
   u_ = 1.f - u_;
+
+  *p = (a * u_) + (b * v_) + (c * w_);
+  *n = normalized((n_a * u_) + (n_b * v_) + (n_c * w_));
+
   *pdf = 1.f / area();
-  return (a * u_) + (b * v_) + (c * w_);
 }
