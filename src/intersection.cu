@@ -63,6 +63,7 @@ __device__ inline bool hit_test(const Ray &r, const Slab &s) {
   return (0 < tmax) && (tmin < tmax);
 }
 
+/*
 __device__ bool hit(const Ray &r, const Scene &s, BVHNode *current, Intersection *i) {
   if (!hit_test(r, current->s)) {
     return false;
@@ -97,6 +98,61 @@ __device__ bool hit(const Ray &r, const Scene &s, BVHNode *current, Intersection
   }
   return false;
 }
+*/
+
+__device__ bool hit(const Ray &r, const Scene &s, BVHNode *current, Intersection *i) {
+  // Iterative traversal with thread-local stack
+  int stack[64];
+  stack[0] = -1;
+  int *stack_current = &stack[1];
+
+  int left, right;
+  bool traverse_left, traverse_right;
+  bool hit_any = false;
+  Intersection i_tmp;
+  do {
+    left = current->left;
+    right = current->right;
+
+    if (left < 0) {
+      if (hit(r, s.prims[-1 - left], &i_tmp)) {
+        if (!hit_any || i_tmp.t < i->t) {
+          *i = i_tmp;
+          hit_any = true;
+        }
+      }
+      traverse_left = false;
+    } else {
+      traverse_left = hit_test(r, s.b.nodes[left].s);
+    }
+
+    if (right < 0) {
+      if (hit(r, s.prims[-1 - right], &i_tmp)) {
+        if (!hit_any || i_tmp.t < i->t) {
+          *i = i_tmp;
+          hit_any = true;
+        }
+      }
+      traverse_right = false;
+    } else {
+      traverse_right = hit_test(r, s.b.nodes[right].s);
+    }
+
+    if (traverse_left && traverse_right) {
+      *stack_current++ = right;
+      current = s.b.nodes.data + left;
+    } else if (traverse_left) {
+      current = s.b.nodes.data + left;
+    } else if (traverse_right) {
+      current = s.b.nodes.data + right;
+    } else {
+      left = *--stack_current;
+      current = (left == -1) ? NULL : s.b.nodes.data + left;
+    }
+  } while (current != NULL);
+
+  return hit_any;
+}
 
 __device__ bool hit(const Ray &r, const Vector<Primitive> &prims, Intersection *i) {
   bool hit_any = false;
@@ -127,4 +183,4 @@ __device__ bool hit_first(const Ray &r, const Scene &s, const Primitive *p) {
   if (!res) return false;
 
   return (i.prim == p);
-} 
+}
