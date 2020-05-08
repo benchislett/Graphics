@@ -7,7 +7,7 @@ struct BeckmannDistribution {
   float alpha_x, alpha_y;
 
   // Always samples visible area
-  BeckmannDistribution(float ax, float ay) : alpha_x(ax), alpha_y(ay) {}
+  __host__ __device__ BeckmannDistribution(float ax, float ay) : alpha_x(ax), alpha_y(ay) {}
   BeckmannDistribution(float roughness);
 
   __device__ float lambda(const Vec3 &w) const;

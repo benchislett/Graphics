@@ -123,6 +123,27 @@ __device__ float TorranceSparrow::pdf(const Vec3 &wo, const Vec3 &wi) const {
   return dist.pdf(wo, wh) / (4.f * dot(wo, wh));
 }
 
+__host__ __device__ BxDFVariant::BxDFVariant(const BxDFVariant &b) {
+  which = b.which;
+  switch (which) {
+    case 1 : lambert = b.lambert;
+    case 2 : oren = b.oren;
+    case 3 : light = b.light;
+    case 4 : microfacet = b.microfacet;
+  }
+}
+
+__host__ __device__ BxDFVariant& BxDFVariant::operator=(const BxDFVariant &b) {
+  which = b.which;
+  switch (which) {
+    case 1 : lambert = b.lambert;
+    case 2 : oren = b.oren;
+    case 3 : light = b.light;
+    case 4 : microfacet = b.microfacet;
+  }
+  return *this;
+}
+
 __device__ Vec3 BxDFVariant::f(const Vec3 &wo, const Vec3 &wi) const {
   switch (which) {
     case 1 : return lambert.f(wo, wi);
@@ -130,7 +151,7 @@ __device__ Vec3 BxDFVariant::f(const Vec3 &wo, const Vec3 &wi) const {
     case 3 : return light.f(wo, wi);
     case 4 : return microfacet.f(wo, wi);
   }
-  printf("Invalid selector!\n");
+  printf("Invalid selector %d!\n", which);
   return Vec3(1.f);
 }
 
@@ -141,7 +162,7 @@ __device__ Vec3 BxDFVariant::sample_f(const Vec3 &wo, Vec3 *wi, float u, float v
     case 3 : return light.sample_f(wo, wi, u, v, pdf);
     case 4 : return microfacet.sample_f(wo, wi, u, v, pdf);
   }
-  printf("Invalid selector!\n");
+  printf("Invalid selector %d!\n", which);
   *pdf = 0.f;
   return Vec3(1.f);
 }
@@ -153,7 +174,7 @@ __device__ float BxDFVariant::pdf(const Vec3 &wo, const Vec3 &wi) const {
     case 3 : return light.pdf(wo, wi);
     case 4 : return microfacet.pdf(wo, wi);
   }
-  printf("Invalid selector!\n");
+  printf("Invalid selector %d!\n", which);
   return 0.f;
 }
 
@@ -164,7 +185,7 @@ __host__ __device__ bool BxDFVariant::is_light() const {
     case 3 : return light.is_light();
     case 4 : return microfacet.is_light();
   }
-  printf("Invalid selector!\n");
+  printf("Invalid selector %d!\n", which);
   return false;
 }
 
@@ -175,7 +196,7 @@ __device__ Vec3 BxDFVariant::emittance() const {
     case 3 : return light.emittance();
     case 4 : return microfacet.emittance();
   }
-  printf("Invalid selector!\n");
+  printf("Invalid selector %d!\n", which);
   return Vec3(0.f);
 }
 
@@ -186,5 +207,5 @@ __device__ void BxDFVariant::tex_update(const Vector<Texture> &tex_arr, float u,
     case 3 : return light.tex_update(tex_arr, u, v);
     case 4 : return microfacet.tex_update(tex_arr, u, v);
   }
-  printf("Invalid selector!\n");
+  printf("Invalid selector %d!\n", which);
 }

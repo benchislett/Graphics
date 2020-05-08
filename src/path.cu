@@ -2,10 +2,10 @@
 #include "intersection.cuh"
 #include "random.cuh"
 
-__device__ Vec3 sample_li(const Intersection &i, const Primitive &prim, const Scene &s, Vec3 *wi, float u, float v, float *pdf, bool *vis) {
+__device__ Vec3 sample_li(const Intersection &i, const Primitive &light, const Scene &s, Vec3 *wi, float u, float v, float *pdf, bool *vis) {
   Vec3 light_p;
   Vec3 light_n;
-  prim.t.sample(u, v, pdf, &light_p, &light_n);
+  light.t.sample(u, v, pdf, &light_p, &light_n);
 
   if (*pdf == 0.f || light_p == i.p) {
     *pdf = 0.f;
@@ -14,10 +14,10 @@ __device__ Vec3 sample_li(const Intersection &i, const Primitive &prim, const Sc
   }
   *wi = normalized(light_p - i.p);
   *pdf *= length_sq(light_p - i.p) / dot_abs(*wi, light_n);
-  *vis = hit_first(Ray(i.p, (*wi)), s, &prim);
+  *vis = hit_first(Ray(i.p, (*wi)), s, light);
 
   // record visibility
-  return s.materials[prim.bsdf].emittance();
+  return light.bsdf.emittance();
 }
 
 __device__ float power_heuristic(float nf, float f_pdf, float ng, float g_pdf) {
@@ -32,16 +32,14 @@ __device__ Vec3 direct_lighting(const Intersection &i, const Primitive &light, c
   float light_pdf = 0.f, scatter_pdf = 0.f;
   bool visible;
 
-  BSDF& mat = s.materials[i.prim->bsdf];
-
   Vec3 f;
   float weight;
 
   // Sample light
   Vec3 li = sample_li(i, light, s, &wi, u_light, v_light, &light_pdf, &visible);
   if (light_pdf != 0.f && !is_zero(li)) {
-    f = mat.f(i.incoming, wi) * dot_abs(wi, i.n);
-    scatter_pdf = mat.pdf(i.incoming, wi);
+    f = i.prim.bsdf.f(i.incoming, wi) * dot_abs(wi, i.n);
+    scatter_pdf = i.prim.bsdf.pdf(i.incoming, wi);
 
     if (!is_zero(f)) {
       if (!visible) li = {0.f, 0.f, 0.f};
@@ -92,25 +90,24 @@ __device__ Vec3 trace(const Ray &r, const Scene &scene, LocalDeviceRNG &gen, int
       break;
     }
 
-    BSDF &mat = scene.materials[i.prim->bsdf];
-
-    uvw = {i.u, i.v, 1.f - i.u - i.v};
-    uvw = (i.prim->t.t_a * uvw.e[2]) + (i.prim->t.t_b * uvw.e[0]) + (i.prim->t.t_c * uvw.e[1]);
-    mat.update(i.n, i.s, scene.textures, uvw.e[0], uvw.e[1]);
+    int n = i.prim.bsdf.n_bxdfs;
     
-    if (mat.is_light() && bounces == 0) {
-      l += beta * mat.emittance();
+    uvw = {i.u, i.v, 1.f - i.u - i.v};
+    uvw = (i.prim.t.t_a * uvw.e[2]) + (i.prim.t.t_b * uvw.e[0]) + (i.prim.t.t_c * uvw.e[1]);
+    i.prim.bsdf.update(i.n, i.s, scene.textures, uvw.e[0], uvw.e[1]);
+
+    if (i.prim.bsdf.is_light() && bounces == 0) {
+      l += beta * i.prim.bsdf.emittance();
       break;
     }
 
-    int n = mat.n_bxdfs;
     int light_choice = gen.generate_int(0, scene.lights.size() - 1);
     int bxdf_choice = (n == 1) ? 0 : gen.generate_int(0, n - 1);
     l += beta * sample_one_light(i, scene, gen.generate(), gen.generate(), gen.generate(), gen.generate(), light_choice, bxdf_choice);
 
     wo_world = i.incoming;
     int choice = (n == 1) ? 0 : gen.generate_int(0, n - 1);
-    f = mat.sample_f(wo_world, &wi_world, gen.generate(), gen.generate(), &pdf, choice);
+    f = i.prim.bsdf.sample_f(wo_world, &wi_world, gen.generate(), gen.generate(), &pdf, choice);
 
     if (is_zero(f) || fabsf(pdf) < 0.0001f) break;
 

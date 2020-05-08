@@ -20,7 +20,7 @@ __device__ Vec3 BSDF::local2world(const Vec3 &v) const {
               s.e[2] * v.e[0] + t.e[2] * v.e[1] + n.e[2] * v.e[2]);
 }
 
-__device__ Vec3 BSDF::f(const Vec3 &wo_world, const Vec3 &wi_world) {
+__device__ Vec3 BSDF::f(const Vec3 &wo_world, const Vec3 &wi_world) const {
   Vec3 wo = world2local(wo_world);
   Vec3 wi = world2local(wi_world);
   if (wo.e[2] == 0.f) return {0.f, 0.f, 0.f};
@@ -32,7 +32,7 @@ __device__ Vec3 BSDF::f(const Vec3 &wo_world, const Vec3 &wi_world) {
   return val;
 }
 
-__device__ Vec3 BSDF::sample_f(const Vec3 &wo_world, Vec3 *wi_world, float u, float v, float *pdf, int choice) {
+__device__ Vec3 BSDF::sample_f(const Vec3 &wo_world, Vec3 *wi_world, float u, float v, float *pdf, int choice) const {
   Vec3 wo = world2local(wo_world);
   if (wo.e[2] == 0.f) return {0.f, 0.f, 0.f};
 
@@ -53,7 +53,7 @@ __device__ Vec3 BSDF::sample_f(const Vec3 &wo_world, Vec3 *wi_world, float u, fl
   return val;
 }
 
-__device__ float BSDF::pdf(const Vec3 &wo_world, const Vec3 &wi_world) {
+__device__ float BSDF::pdf(const Vec3 &wo_world, const Vec3 &wi_world) const {
   Vec3 wo = world2local(wo_world);
   Vec3 wi = world2local(wi_world);
   float pdf = 0.f;
@@ -63,7 +63,7 @@ __device__ float BSDF::pdf(const Vec3 &wo_world, const Vec3 &wi_world) {
   return pdf;
 }
 
-__host__ __device__ bool BSDF::is_light() {
+__host__ __device__ bool BSDF::is_light() const {
   for (int i = 0; i < n_bxdfs; i++) {
     if (b[i].is_light()){
       return true;
@@ -72,7 +72,7 @@ __host__ __device__ bool BSDF::is_light() {
   return false;
 }
 
-__device__ Vec3 BSDF::emittance() {
+__device__ Vec3 BSDF::emittance() const {
   Vec3 emit(0.f, 0.f, 0.f);
   for (int i = 0; i < n_bxdfs; i++) {
     emit += b[i].emittance();

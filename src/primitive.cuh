@@ -6,7 +6,8 @@
 
 struct Primitive {
   Tri t;
-  int bsdf;
+  BSDF bsdf;
 
-  Primitive(const Tri &t, int bsdf = 0) : t(t), bsdf(bsdf) {}
+  __host__ __device__ Primitive() {}
+  Primitive(const Tri &t, const BSDF &b) : t(t), bsdf(b) {}
 };

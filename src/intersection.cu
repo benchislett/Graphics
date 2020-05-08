@@ -3,7 +3,7 @@
 #define SIGN(a) (((a) > 0) ? 1 : (((a) < 0) ? -1 : 0))
 
 // Moller-Trumbore intersection
-__device__ bool hit(const Ray &r, Primitive &p, Intersection *i) {
+__device__ bool hit(const Ray &r, Primitive p, Intersection *i) {
   Vec3 edge0 = p.t.b - p.t.a;
   Vec3 edge1 = p.t.c - p.t.a;
 
@@ -30,7 +30,7 @@ __device__ bool hit(const Ray &r, Primitive &p, Intersection *i) {
 
   i->p = r.at(time);
   i->t = time;
-  i->prim = &p;
+  i->prim = p;
   i->incoming = -1 * r.d;
   i->u = u;
   i->v = v;
@@ -172,15 +172,15 @@ __device__ bool hit(const Ray &r, const Vector<Primitive> &prims, Intersection *
 }
 
 __device__ bool hit(const Ray &r, const Scene &s, Intersection *i) {
-  bool res = hit(r, s.prims, i);
-  //bool res = hit(r, s, s.b.nodes.data + s.b.nodes.size() - 1, i);
+  //bool res = hit(r, s.prims, i);
+  bool res = hit(r, s, s.b.nodes.data + s.b.nodes.size() - 1, i);
   return res;
 }
 
-__device__ bool hit_first(const Ray &r, const Scene &s, const Primitive *p) {
+__device__ bool hit_first(const Ray &r, const Scene &s, const Primitive &p) {
   Intersection i;
   bool res = hit(r, s, &i);
   if (!res) return false;
 
-  return (i.prim == p);
+  return (i.prim.t.a == p.t.a) && (i.prim.t.b == p.t.b) && (i.prim.t.c == p.t.c);
 }

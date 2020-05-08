@@ -24,21 +24,20 @@ std::string trim(const std::string &s) {
   return rtrim(ltrim(s));
 }
 
-void load_material(std::map<std::string, int> &material_map, std::vector<BSDF> &material_vec, const std::string &name, float Ns, const Vec3 &Kd, const Vec3 &Ks, const Vec3 &Ke, int tex = -1) {
+void load_material(std::map<std::string, BSDF> &material_map, const std::string &name, float Ns, const Vec3 &Kd, const Vec3 &Ks, const Vec3 &Ke, int tex = -1) {
   if (name != "") {
-    material_map[name] = material_vec.size();
     if (!is_zero(Ke)) {
-      material_vec.emplace_back(BxDFVariant(AreaLight(Kd, Ke)));
+      material_map[name] = BSDF(BxDFVariant(AreaLight(Kd, Ke)));
     } else if (is_zero(Ks) || Ns == 0.f) {
-      material_vec.emplace_back(BxDFVariant(Lambertian(Kd, tex)));
+      material_map[name] = BSDF(BxDFVariant(Lambertian(Kd, tex)));
     } else {
       float roughness = 1.f - sqrtf(Ns) / 30.f;
-      material_vec.emplace_back(BxDFVariant(Lambertian(Kd, tex)), BxDFVariant(TorranceSparrow(Ks, BeckmannDistribution(roughness), Fresnel(1.f, 1.5f))));
+      material_map[name] = BSDF(BxDFVariant(Lambertian(Kd, tex)), BxDFVariant(TorranceSparrow(Ks, BeckmannDistribution(roughness), Fresnel(1.f, 1.5))));
     }
   }
 }
 
-void load_materials(const std::string &fname, std::map<std::string, int> &material_map, std::vector<BSDF> &material_vec, std::vector<Texture> &textures) {
+void load_materials(const std::string &fname, std::map<std::string, BSDF> &material_map, std::vector<Texture> &textures) {
   std::string dir_prefix = (fname.rfind("/") == std::string::npos) ? "" : fname.substr(0, fname.rfind("/") + 1);
   std::string texture_file(200, '\0');
   std::string current_name = "";
@@ -53,7 +52,7 @@ void load_materials(const std::string &fname, std::map<std::string, int> &materi
   for (; std::getline(input, line); ) {
     line = trim(line);
     if (line.find("newmtl") != std::string::npos) {
-      load_material(material_map, material_vec, current_name, Ns, Kd, Ks, Ke, current_texture);
+      load_material(material_map, current_name, Ns, Kd, Ks, Ke, current_texture);
       current_name = line.substr(7);
       Kd = {0.f, 0.f, 0.f};
       Ks = {0.f, 0.f, 0.f};
@@ -75,7 +74,7 @@ void load_materials(const std::string &fname, std::map<std::string, int> &materi
       current_texture = textures.size() - 1;
     }
   }
-  load_material(material_map, material_vec, current_name, Ns, Kd, Ks, Ke, current_texture);
+  load_material(material_map, current_name, Ns, Kd, Ks, Ke, current_texture);
 }
 
 void load_vertex(const std::string &line, std::vector<Vec3> &verts) {
@@ -118,16 +117,15 @@ void clean_alt3(int e[12], int n1, int n2, int n3) {
   }
 }
 
-void load_face(const std::string &line, std::string &current_name, const std::vector<Vec3> &verts, const std::vector<Vec3> &tex_coords, const std::vector<Vec3> &normals, const std::map<std::string, int> material_map, std::vector<Primitive> &prims) {
+void load_face(const std::string &line, std::string &current_name, const std::vector<Vec3> &verts, const std::vector<Vec3> &tex_coords, const std::vector<Vec3> &normals, std::map<std::string, BSDF> &material_map, std::vector<Primitive> &prims) {
 
   auto it = material_map.find(current_name);
-  int mat_idx;
+  BSDF b = material_map[""];
   if (it == material_map.end()) {
     printf("No material with name %s\n", current_name.c_str());
     current_name = "";
-    mat_idx = 0;
   } else {
-    mat_idx = it->second;
+    b = it->second;
   }
 
   int n;
@@ -136,7 +134,7 @@ void load_face(const std::string &line, std::string &current_name, const std::ve
   n = sscanf(line.c_str(), "f %d %d %d", e+0, e+1, e+2);
   if (n == 3) {
     clean(e, verts.size());
-    prims.emplace_back(Tri(verts[e[0]], verts[e[1]], verts[e[2]]), mat_idx);
+    prims.emplace_back(Tri(verts[e[0]], verts[e[1]], verts[e[2]]), b);
     return;
   }
 
@@ -144,21 +142,21 @@ void load_face(const std::string &line, std::string &current_name, const std::ve
   if (n == 6) {
     clean_alt(e, verts.size(), tex_coords.size());
     Vec3 n = cross(verts[e[4]] - verts[e[0]], verts[e[4]] - verts[e[2]]);
-    prims.emplace_back(Tri(verts[e[0]], verts[e[2]], verts[e[4]], n, n, n, tex_coords[e[1]], tex_coords[e[3]], tex_coords[e[5]]), mat_idx);
+    prims.emplace_back(Tri(verts[e[0]], verts[e[2]], verts[e[4]], n, n, n, tex_coords[e[1]], tex_coords[e[3]], tex_coords[e[5]]), b);
     return;
   }
 
   n = sscanf(line.c_str(), "f %d/%d/%d %d/%d/%d %d/%d/%d", e+0, e+1, e+2, e+3, e+4, e+5, e+6, e+7, e+8);
   if (n == 9) {
     clean_alt3(e, verts.size(), tex_coords.size(), normals.size());
-    prims.emplace_back(Tri(verts[e[0]], verts[e[3]], verts[e[6]], normals[e[2]], normals[e[5]], normals[e[8]], tex_coords[e[1]], tex_coords[e[4]], tex_coords[e[7]]), mat_idx);
+    prims.emplace_back(Tri(verts[e[0]], verts[e[3]], verts[e[6]], normals[e[2]], normals[e[5]], normals[e[8]], tex_coords[e[1]], tex_coords[e[4]], tex_coords[e[7]]), b);
     return;
   }
 
   n = sscanf(line.c_str(), "f %d//%d %d//%d %d//%d", e+0, e+1, e+2, e+3, e+4, e+5);
   if (n == 6) {
     clean_alt(e, verts.size(), normals.size());
-    prims.emplace_back(Tri(verts[e[0]], verts[e[2]], verts[e[4]], normals[e[1]], normals[e[3]], normals[e[5]]), mat_idx);
+    prims.emplace_back(Tri(verts[e[0]], verts[e[2]], verts[e[4]], normals[e[1]], normals[e[3]], normals[e[5]]), b);
     return;
   }
 
@@ -167,21 +165,15 @@ void load_face(const std::string &line, std::string &current_name, const std::ve
 }
 
 void load_obj(std::string fname, Scene *scene) {
-  std::map<std::string, int> material_map;
-  std::vector<BSDF> material_vec;
-  material_map[""] = 0;
-  material_vec.emplace_back(BxDFVariant(Lambertian(Vec3(1.f))));
+  std::map<std::string, BSDF> material_map;
+  material_map[""] = BSDF(BxDFVariant(Lambertian(Vec3(1.f))));
   std::vector<Texture> textures;
 
   std::ifstream input(fname);
   fname.replace(fname.end() - 3, fname.end(), "mtl");
-  load_materials(fname, material_map, material_vec, textures);
+  load_materials(fname, material_map, textures);
 
-  int n_mats = material_vec.size();
-  Vector<BSDF> mats(n_mats);
-  int i = 0;
-  for (i = 0; i < n_mats; i++) mats[i] = material_vec[i];
-
+  int i;
   int n_textures = textures.size();
   Vector<Texture> tex_arr(n_textures);
   for (i = 0; i < textures.size(); i++) tex_arr[i] = textures[i];
@@ -215,23 +207,22 @@ void load_obj(std::string fname, Scene *scene) {
   Vector<Primitive> prim_arr(prims.size());
 
   int n_lights = 0;
-  for (int i = 0; i < prims.size(); i++) {
+  for (i = 0; i < prims.size(); i++) {
     prim_arr[i] = prims[i];
-    if (material_vec[prims[i].bsdf].is_light()) n_lights++;
+    if (prims[i].bsdf.is_light()) n_lights++;
   }
 
   BVH bvh = build_bvh(prim_arr);
 
   int light = 0;
   Vector<int> lights(n_lights);
-  for (int i = 0; i < prims.size(); i++) {
-    if (material_vec[prim_arr[i].bsdf].is_light()) lights[light++] = i;
+  for (i = 0; i < prims.size(); i++) {
+    if (prim_arr[i].bsdf.is_light()) lights[light++] = i;
   }
 
   scene->b = bvh;
   scene->prims = prim_arr;
   scene->lights = lights;
-  scene->materials = mats;
   scene->textures = tex_arr;
 }
 

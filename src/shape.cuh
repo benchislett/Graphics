@@ -7,8 +7,7 @@ struct Slab {
   Vec3 ll;
   Vec3 ur;
 
-  Slab();
-
+  __host__ __device__ Slab();
   Slab(const Vec3 &v1, const Vec3 &v2) : ll(v1), ur(v2) {}
 
   __host__ __device__ void expand(const Slab &s);
@@ -29,6 +28,7 @@ struct Tri {
   Vec3 t_c;
   Slab bound;
 
+  __host__ __device__ Tri() {}
   Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c);
   Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n);
   Tri(const Vec3 &a, const Vec3 &b, const Vec3 &c, const Vec3 &n_a, const Vec3 &n_b, const Vec3 &n_c);
