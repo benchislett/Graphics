@@ -1,6 +1,5 @@
 #include "io.cuh"
 #include "bxdf.cuh"
-#include "fresnel.cuh"
 #include "bsdf.cuh"
 #include "texture.cuh"
 
@@ -24,15 +23,19 @@ std::string trim(const std::string &s) {
   return rtrim(ltrim(s));
 }
 
-void load_material(std::map<std::string, BSDF> &material_map, const std::string &name, float Ns, const Vec3 &Kd, const Vec3 &Ks, const Vec3 &Ke, int tex = -1) {
+void load_material(std::map<std::string, BSDF> &material_map, const std::string &name, float Ns, float Ni, float Tf, const Vec3 &Kd, const Vec3 &Ks, const Vec3 &Ke, int tex = -1) {
   if (name != "") {
-    if (!is_zero(Ke)) {
+    if (!is_zero(Ke)) { // Light
       material_map[name] = BSDF(BxDFVariant(AreaLight(Kd, Ke)));
-    } else if (is_zero(Ks) || Ns == 0.f) {
+    } else if (Tf != 0.f) { // Glass
+      material_map[name] = BSDF(BxDFVariant(Specular(Ks, Tf, 1.f, Ni)));
+    } else if (is_zero(Ks) || Ns == 0.f) { // Diffuse
       material_map[name] = BSDF(BxDFVariant(Lambertian(Kd, tex)));
-    } else {
+    } else if (Ns >= 800.f) { // Mirror
+      material_map[name] = BSDF(BxDFVariant(SpecularReflection(Ks, 1.f, Ni)));
+    } else { // Glossy
       float roughness = 1.f - sqrtf(Ns) / 30.f;
-      material_map[name] = BSDF(BxDFVariant(Lambertian(Kd, tex)), BxDFVariant(TorranceSparrow(Ks, BeckmannDistribution(roughness), Fresnel(1.f, 1.5))));
+      material_map[name] = BSDF(BxDFVariant(Lambertian(Kd, tex)), BxDFVariant(TorranceSparrow(Ks, BeckmannDistribution(roughness), 1.f, Ni)));
     }
   }
 }
@@ -45,6 +48,8 @@ void load_materials(const std::string &fname, std::map<std::string, BSDF> &mater
   Vec3 Ks(0.f, 0.f, 0.f);
   Vec3 Ke(0.f, 0.f, 0.f);
   float Ns = 0.f;
+  float Ni = 1.5f;
+  float Tf = 0.f;
   int current_texture = -1;
 
   std::ifstream input(fname);
@@ -52,12 +57,14 @@ void load_materials(const std::string &fname, std::map<std::string, BSDF> &mater
   for (; std::getline(input, line); ) {
     line = trim(line);
     if (line.find("newmtl") != std::string::npos) {
-      load_material(material_map, current_name, Ns, Kd, Ks, Ke, current_texture);
+      load_material(material_map, current_name, Ns, Ni, Tf, Kd, Ks, Ke, current_texture);
       current_name = line.substr(7);
       Kd = {0.f, 0.f, 0.f};
       Ks = {0.f, 0.f, 0.f};
       Ke = {0.f, 0.f, 0.f};
       Ns = 0.f;
+      Ni = 1.5f;
+      Tf = 0.f;
       current_texture = -1;
     } else if (line[0] == 'K' && line[1] == 'd') {
       sscanf(line.c_str(), "Kd %f %f %f", Kd.e, Kd.e + 1, Kd.e + 2);
@@ -67,6 +74,10 @@ void load_materials(const std::string &fname, std::map<std::string, BSDF> &mater
       sscanf(line.c_str(), "Ke %f %f %f", Ke.e, Ke.e + 1, Ke.e + 2);
     } else if (line[0] == 'N' && line[1] == 's') {
       sscanf(line.c_str(), "Ns %f", &Ns);
+    } else if (line[0] == 'N' && line[1] == 'i') {
+      sscanf(line.c_str(), "Ni %f", &Ni);
+    } else if (line[0] == 'T' && line[1] == 'f') {
+      sscanf(line.c_str(), "Tf %f", &Tf);
     } else if (line.compare(0, 6, "map_Kd") == 0) {
       sscanf(line.c_str(), "map_Kd %s", texture_file.c_str());
       texture_file.insert(0, dir_prefix);
@@ -74,7 +85,7 @@ void load_materials(const std::string &fname, std::map<std::string, BSDF> &mater
       current_texture = textures.size() - 1;
     }
   }
-  load_material(material_map, current_name, Ns, Kd, Ks, Ke, current_texture);
+  load_material(material_map, current_name, Ns, Ni, Tf, Kd, Ks, Ke, current_texture);
 }
 
 void load_vertex(const std::string &line, std::vector<Vec3> &verts) {

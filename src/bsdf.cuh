@@ -23,7 +23,7 @@ struct BSDF {
   __device__ Vec3 local2world(const Vec3 &v) const;
 
   __device__ Vec3 f(const Vec3 &wo_world, const Vec3 &wi_world) const;
-  __device__ Vec3 sample_f(const Vec3 &wo_world, Vec3 *wi_world, float u, float v, float *pdf, int choice) const;
+  __device__ Vec3 sample_f(const Vec3 &wo_world, Vec3 *wi_world, float u, float v, int face, float *pdf, int choice) const;
   __device__ float pdf(const Vec3 &wo_world, const Vec3 &wi_world) const;
   __host__ __device__ bool is_light() const;
   __device__ Vec3 emittance() const;

@@ -32,12 +32,12 @@ __device__ Vec3 BSDF::f(const Vec3 &wo_world, const Vec3 &wi_world) const {
   return val;
 }
 
-__device__ Vec3 BSDF::sample_f(const Vec3 &wo_world, Vec3 *wi_world, float u, float v, float *pdf, int choice) const {
+__device__ Vec3 BSDF::sample_f(const Vec3 &wo_world, Vec3 *wi_world, float u, float v, int face, float *pdf, int choice) const {
   Vec3 wo = world2local(wo_world);
   if (wo.e[2] == 0.f) return {0.f, 0.f, 0.f};
 
   Vec3 wi;
-  Vec3 val = b[choice].sample_f(wo, &wi, u, v, pdf);
+  Vec3 val = b[choice].sample_f(wo, &wi, u, v, face, pdf);
 
   *wi_world = local2world(wi);
 

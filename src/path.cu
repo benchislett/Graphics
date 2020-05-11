@@ -51,16 +51,6 @@ __device__ Vec3 direct_lighting(const Intersection &i, const Primitive &light, c
     }
   }
 
-  // Sample BSDF
-  /*
-  f = mat.sample_f(i.incoming, &wi, u_scatter, v_scatter, &scatter_pdf, bxdf_choice);
-  f *= dot_abs(wi, i.n);
-  if (!is_zero(f) && scatter_pdf != 0.f) {
-    weight = power_heuristic(1.f, scatter_pdf, 1.f, light_pdf);
-    bool did_hit = hit_first(Ray(i.p, wi), s, &light);
-    if (did_hit) ld += f * li * weight / scatter_pdf;
-  }*/
-
   return ld;
 }
 
@@ -107,7 +97,7 @@ __device__ Vec3 trace(const Ray &r, const Scene &scene, LocalDeviceRNG &gen, int
 
     wo_world = i.incoming;
     int choice = (n == 1) ? 0 : gen.generate_int(0, n - 1);
-    f = i.prim.bsdf.sample_f(wo_world, &wi_world, gen.generate(), gen.generate(), &pdf, choice);
+    f = i.prim.bsdf.sample_f(wo_world, &wi_world, gen.generate(), gen.generate(), i.face, &pdf, choice);
 
     if (is_zero(f) || fabsf(pdf) < 0.0001f) break;
 

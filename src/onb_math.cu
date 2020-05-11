@@ -56,13 +56,12 @@ __device__ Vec3 reflect(const Vec3 &w, const Vec3 &n) {
 
 __device__ bool refract(const Vec3 &w_in, const Vec3 &n, float eta, Vec3 *w_t) {
   float costheta_in = dot(n, w_in);
-  float sin2theta_in = 1.f - costheta_in * costheta_in;
-  sin2theta_in = sin2theta_in < 0.f ? 0.f : sin2theta_in;
+  float sin2theta_in = fmax(0.f, 1.f - costheta_in * costheta_in);
   float sin2theta_t = eta * eta * sin2theta_in;
 
-  if (sin2theta_t >= 1) return false;
+  if (sin2theta_t >= 1.f) return false;
   float costheta_t = sqrtf(1.f - sin2theta_t);
-  *w_t = -eta * w_in + (eta * costheta_in - costheta_t) * n;
+  *w_t = (-eta * w_in) + (eta * costheta_in - costheta_t) * n;
   return true;
 }
 
