@@ -1,12 +1,12 @@
 #include "microfacet.cuh"
 #include "onb_math.cuh"
 
-float alpha(float roughness) {
+__host__ __device__ float alpha(float roughness) {
   float x = logf(fmax(0.003f, roughness));
   return 1.62142f + 0.819955f * x + 0.1734f * x * x + 0.0171201f * x * x * x + 0.000640711f * x * x * x * x;
 }
 
-BeckmannDistribution::BeckmannDistribution(float roughness) {
+__host__ __device__ BeckmannDistribution::BeckmannDistribution(float roughness) {
   alpha_x = alpha(roughness);
   alpha_y = alpha_x;
 }
