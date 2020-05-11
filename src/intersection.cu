@@ -38,8 +38,10 @@ __device__ bool hit(const Ray &r, Primitive p, Intersection *i) {
   //Vec3 normal = p.t.n_a;
   float w = 1.f - u - v;
   Vec3 normal = p.t.n_a * w + p.t.n_b * u + p.t.n_c * v;
-  normal = normalized(normal) * (-SIGN(dot(r.d, normal)));
-
+  int front_face = -SIGN(dot(r.d, normal));
+  normal = normalized(normal) * front_face;
+  
+  i->face = front_face;
   i->n = normal;
   i->s = normalized(cross(normal, edge0));
   return true;

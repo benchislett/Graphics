@@ -16,6 +16,7 @@ struct Intersection {
   Primitive prim;
   float u;
   float v;
+  int face;
 };
 
 __device__ inline bool hit_test(const Ray &r, const Slab &s);
