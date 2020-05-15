@@ -3,6 +3,10 @@
 #include "path.cuh"
 #include "random.cuh"
 
+#include <ctime>
+#include <chrono>
+#include <ratio>
+
 __global__ void render_kernel(RenderParams params, Scene scene, Image im) {
   int xid = blockDim.x * blockIdx.x + threadIdx.x;
   int yid = blockDim.y * blockIdx.y + threadIdx.y;
@@ -41,17 +45,19 @@ __host__ void render(const RenderParams &params, Scene &scene, Image &im) {
   int ny = im.height;
 
   if (scene.gen.state == NULL) scene.gen = DeviceRNG(nx * ny);
-  else printf("Scene DeviceRNG already initialized!\n");
 
   dim3 threads(16, 16);
   dim3 blocks(nx / threads.x + 1, ny / threads.y + 1);
 
-  printf("rendering...\n");
+  printf("Rendering...\n");
+  auto t1 = std::chrono::high_resolution_clock::now();
   render_kernel<<<blocks, threads>>>(params, scene, im);
-  // render_kernel<<<1, 1>>>(params, scene, im);
   cudaCheckError();
   cudaDeviceSynchronize();
-  printf("done\n");
+
+  auto t2 = std::chrono::high_resolution_clock::now();
+  auto seconds = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+  printf("Finished in %f seconds\n", seconds);
 
   scene.to_host();
   im.to_host();
