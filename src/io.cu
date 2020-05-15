@@ -25,13 +25,15 @@ std::string trim(const std::string &s) {
 
 void load_material(std::map<std::string, BSDF> &material_map, const std::string &name, float Ns, float Ni, float Tf, const Vec3 &Kd, const Vec3 &Ks, const Vec3 &Ke, int tex = -1) {
   if (name != "") {
+    if (Ni == 1.f) Ni = 1.5f;
+
     if (!is_zero(Ke)) { // Light
       material_map[name] = BSDF(BxDFVariant(AreaLight(Kd, Ke)));
     } else if (Tf != 0.f) { // Glass
       material_map[name] = BSDF(BxDFVariant(Specular(Ks, Tf, 1.f, Ni)));
     } else if (is_zero(Ks) || Ns == 0.f) { // Diffuse
       material_map[name] = BSDF(BxDFVariant(Lambertian(Kd, tex)));
-    } else if (Ns >= 800.f) { // Mirror
+    } else if (Ns >= 900.f) { // Mirror
       material_map[name] = BSDF(BxDFVariant(SpecularReflection(Ks, 1.f, Ni)));
     } else { // Glossy
       float roughness = 1.f - sqrtf(Ns) / 30.f;
