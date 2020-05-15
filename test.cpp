@@ -36,16 +36,25 @@ Optional arguments:\n\
       else if (strcmp(argv[i], "-h") == 0) { printf(help_message); return 0; }
       else if (which) {
         switch(which) {
-          case 1 : obj_infile = argv[i];
-          case 2 : width = atoi(argv[i]);
-          case 3 : height = atoi(argv[i]);
-          case 4 : spp = atoi(argv[i]);
+          case 1:
+            obj_infile = argv[i];
+            break;
+          case 2:
+            width = atoi(argv[i]);
+            break;
+          case 3:
+            height = atoi(argv[i]);
+            break;
+          case 4:
+            spp = atoi(argv[i]);
+            break;
         }
         which = 0;
       }
     }
   }
 
+  printf("Loading file %s.\n", obj_infile.c_str());
   printf("Rendering with width %d, height %d, spp %d\n", width, height, spp);
 
   float vfov = 0.79f;
