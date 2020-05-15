@@ -51,6 +51,23 @@ __device__ Vec3 direct_lighting(const Intersection &i, const Primitive &light, c
     }
   }
 
+  // Sample BSDF
+  /*
+  f = i.prim.bsdf.sample_f(i.incoming, &wi, u_scatter, v_scatter, i.face, &scatter_pdf, bxdf_choice);
+  f *= dot_abs(wi, i.n);
+  if (scatter_pdf != 0.f && !is_zero(f)) {
+    Ray r(i.p, wi);
+    Intersection i_light;
+    bool res = hit(r, s, &i_light);
+    if (res && light == i_light.prim) {
+      light_pdf = length_sq(i.p - i_light.p) / (dot_abs(i_light.n, wi) * light.t.area());
+      if (light_pdf == 0.f) return ld;
+      li = light.bsdf.emittance();
+      weight = power_heuristic(1.f, scatter_pdf, 1.f, light_pdf);
+      ld += f * li * weight / scatter_pdf;
+    }
+  }*/
+
   return ld;
 }
 
@@ -69,27 +86,26 @@ __device__ Vec3 trace(const Ray &r, const Scene &scene, LocalDeviceRNG &gen, int
   Vec3 f;
   Vec3 uvw;
 
+  bool specular_bounce = false;
   bool does_hit;
   Intersection i;
   int bounces;
   for (bounces = 0;; bounces++) {
     does_hit = hit(ray, scene, &i);
 
-    if (!does_hit || bounces >= max_depth) {
-      // l = beta * Vec3(1.f, 1.f, 1.f);
-      break;
+    if (bounces == 0 || specular_bounce) {
+      if (does_hit) l += beta * i.prim.bsdf.emittance();
+      if (length_sq(i.prim.bsdf.emittance()) > 0.f && bounces == 0) break;
     }
+
+    if (!does_hit || bounces >= max_depth) break;
 
     int n = i.prim.bsdf.n_bxdfs;
     
     uvw = {i.u, i.v, 1.f - i.u - i.v};
     uvw = (i.prim.t.t_a * uvw.e[2]) + (i.prim.t.t_b * uvw.e[0]) + (i.prim.t.t_c * uvw.e[1]);
     i.prim.bsdf.update(i.n, i.s, scene.textures, uvw.e[0], uvw.e[1]);
-
-    if (i.prim.bsdf.is_light() && bounces == 0) {
-      l += beta * i.prim.bsdf.emittance();
-      break;
-    }
+    specular_bounce = i.prim.bsdf.is_specular();
 
     int light_choice = gen.generate_int(0, scene.lights.size() - 1);
     int bxdf_choice = (n == 1) ? 0 : gen.generate_int(0, n - 1);
