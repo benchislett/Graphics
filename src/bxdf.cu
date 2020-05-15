@@ -96,6 +96,17 @@ __device__ float schlick(float costhetai, float eta1, float eta2) {
   return r0 + (1.f - r0) * (costhetai * costhetai) * (costhetai * costhetai) * costhetai;
 }
 
+__device__ float fr(float costhetai, float etai, float etat) {
+  float sinthetai = sqrtf(fmax(0.f, 1.f - costhetai * costhetai));
+  float sinthetat = etai / etat * sinthetai;
+  if (sinthetat >= 1) return 1.f;
+  float costhetat = sqrtf(fmax(0.f, 1.f - sinthetat * sinthetat));
+  float r_parallel = ((etat * costhetai) - (etai * costhetat)) / ((etat * costhetai) + (etai * costhetat));
+  float r_perp = ((etai * costhetai) - (etat * costhetat)) / ((etai * costhetai) + (etat * costhetat));
+  return ((r_parallel * r_parallel) + (r_perp * r_perp)) / 2.f;
+}
+
+
 __device__ Vec3 TorranceSparrow::f(const Vec3 &wo, const Vec3 &wi) const {
   float costhetao = abscos_theta(wo);
   float costhetai = abscos_theta(wi);
@@ -105,7 +116,7 @@ __device__ Vec3 TorranceSparrow::f(const Vec3 &wo, const Vec3 &wi) const {
 
   wh = normalized(wh);
 
-  Vec3 ft = schlick(dot(wi, cos_theta(wh) < 0.f ? (-1 * wh) : wh), eta1, eta2);
+  Vec3 ft = 1.f;//fr(1.f - dot(wi, cos_theta(wh) < 0.f ? (-1 * wh) : wh), eta2, eta1);
   return r * dist.d(wh) * dist.g(wo, wi) * ft / (4.f * costhetai * costhetao);
 }
 
@@ -125,16 +136,6 @@ __device__ float TorranceSparrow::pdf(const Vec3 &wo, const Vec3 &wi) const {
   if (!same_hemisphere(wo, wi)) return 0.f;
   Vec3 wh = normalized(wo + wi);
   return dist.pdf(wo, wh) / (4.f * dot(wo, wh));
-}
-
-__device__ float fr(float costhetai, float etai, float etat) {
-  float sinthetai = sqrtf(fmax(0.f, 1.f - costhetai * costhetai));
-  float sinthetat = etai / etat * sinthetai;
-  if (sinthetat >= 1) return 1.f;
-  float costhetat = sqrtf(fmax(0.f, 1.f - sinthetat * sinthetat));
-  float r_parallel = ((etat * costhetai) - (etai * costhetat)) / ((etat * costhetai) + (etai * costhetat));
-  float r_perp = ((etai * costhetai) - (etat * costhetat)) / ((etai * costhetai) + (etat * costhetat));
-  return ((r_parallel * r_parallel) + (r_perp * r_perp)) / 2.f;
 }
 
 __device__ Vec3 SpecularReflection::sample_f(const Vec3 &wo, Vec3 *wi, float u, float v, int face, float *pdf) const {
