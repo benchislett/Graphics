@@ -124,6 +124,7 @@ struct BxDFVariant {
   __device__ Vec3 sample_f(const Vec3 &wo, Vec3 *wi, float u, float v, int face, float *pdf) const;
   __device__ float pdf(const Vec3 &wo, const Vec3 &wi) const;
   __host__ __device__ bool is_light() const;
+  __host__ __device__ bool is_specular() const { return which == 5 || which == 6; }
   __device__ Vec3 emittance() const;
   __device__ void tex_update(const Vector<Texture> &tex_arr, float u, float v);
 };

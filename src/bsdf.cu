@@ -65,9 +65,14 @@ __device__ float BSDF::pdf(const Vec3 &wo_world, const Vec3 &wi_world) const {
 
 __host__ __device__ bool BSDF::is_light() const {
   for (int i = 0; i < n_bxdfs; i++) {
-    if (b[i].is_light()){
-      return true;
-    }
+    if (b[i].is_light()) return true;
+  }
+  return false;
+}
+
+__host__ __device__ bool BSDF::is_specular() const {
+  for (int i = 0; i < n_bxdfs; i++) {
+    if (b[i].is_specular()) return true;
   }
   return false;
 }

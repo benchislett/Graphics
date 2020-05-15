@@ -169,24 +169,24 @@ __device__ Vec3 Specular::sample_f(const Vec3 &wo, Vec3 *wi, float u, float v, i
 __host__ __device__ BxDFVariant::BxDFVariant(const BxDFVariant &b) {
   which = b.which;
   switch (which) {
-    case 1 : lambert = b.lambert;
-    case 2 : oren = b.oren;
-    case 3 : light = b.light;
-    case 4 : microfacet = b.microfacet;
-    case 5 : reflect = b.reflect;
-    case 6 : specular = b.specular;
+    case 1 : lambert = b.lambert; break;
+    case 2 : oren = b.oren; break;
+    case 3 : light = b.light; break;
+    case 4 : microfacet = b.microfacet; break;
+    case 5 : reflect = b.reflect; break;
+    case 6 : specular = b.specular; break;
   }
 }
 
 __host__ __device__ BxDFVariant& BxDFVariant::operator=(const BxDFVariant &b) {
   which = b.which;
   switch (which) {
-    case 1 : lambert = b.lambert;
-    case 2 : oren = b.oren;
-    case 3 : light = b.light;
-    case 4 : microfacet = b.microfacet;
-    case 5 : reflect = b.reflect;
-    case 6 : specular = b.specular;
+    case 1 : lambert = b.lambert; break;
+    case 2 : oren = b.oren; break;
+    case 3 : light = b.light; break;
+    case 4 : microfacet = b.microfacet; break;
+    case 5 : reflect = b.reflect; break;
+    case 6 : specular = b.specular; break;
   }
   return *this;
 }
