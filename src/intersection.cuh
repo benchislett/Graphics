@@ -22,5 +22,5 @@ struct Intersection {
 __device__ inline bool hit_test(const Ray &r, const Slab &s);
 __device__ bool hit_first(const Ray &r, const Scene &s, const Primitive &p);
 
-__device__ bool hit(const Ray &r, Primitive p, Intersection *i);
+__device__ bool hit(const Ray &r, const Primitive &p, Intersection *i);
 __device__ bool hit(const Ray &r, const Scene &s, Intersection *i);

@@ -3,6 +3,7 @@
 #include "random.cuh"
 
 __device__ Vec3 sample_li(const Intersection &i, const Primitive &light, const Scene &s, Vec3 *wi, float u, float v, float *pdf, bool *vis) {
+
   Vec3 light_p;
   Vec3 light_n;
   light.t.sample(u, v, pdf, &light_p, &light_n);
@@ -14,7 +15,7 @@ __device__ Vec3 sample_li(const Intersection &i, const Primitive &light, const S
   }
   *wi = normalized(light_p - i.p);
   *pdf *= length_sq(light_p - i.p) / dot_abs(*wi, light_n);
-  *vis = hit_first(Ray(i.p, (*wi)), s, light);
+  *vis = (dot(*wi, i.n) > 0.f) && hit_first(Ray(i.p, (*wi)), s, light);
 
   // record visibility
   return light.bsdf.emittance();
@@ -42,9 +43,7 @@ __device__ Vec3 direct_lighting(const Intersection &i, const Primitive &light, c
     scatter_pdf = i.prim.bsdf.pdf(i.incoming, wi);
 
     if (!is_zero(f)) {
-      if (!visible) li = {0.f, 0.f, 0.f};
-
-      if (!is_zero(li)) {
+      if (visible) {
         weight = power_heuristic(1.f, light_pdf, 1.f, scatter_pdf);
         ld += f * li * weight / light_pdf;
       }
@@ -101,7 +100,7 @@ __device__ Vec3 trace(const Ray &r, const Scene &scene, LocalDeviceRNG &gen, int
     if (!does_hit || bounces >= max_depth) break;
 
     int n = i.prim.bsdf.n_bxdfs;
-    
+
     uvw = {i.u, i.v, 1.f - i.u - i.v};
     uvw = (i.prim.t.t_a * uvw.e[2]) + (i.prim.t.t_b * uvw.e[0]) + (i.prim.t.t_c * uvw.e[1]);
     i.prim.bsdf.update(i.n, i.s, scene.textures, uvw.e[0], uvw.e[1]);
