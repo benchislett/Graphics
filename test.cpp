@@ -24,7 +24,7 @@ Optional arguments:\n\
   -x N\t\tSpecify width in pixels\n\
   -y N\t\tSpecify height in pixels\n", argv[0]);
 
-  std::string obj_infile = "data/cornell.obj";
+  std::string obj_infile = "data/fireplace_room.obj";
   std::string ppm_outfile = "output.ppm";
   if (argc > 1) {
     int which = 0;
@@ -58,12 +58,12 @@ Optional arguments:\n\
   printf("Rendering with width %d, height %d, spp %d\n", width, height, spp);
 
   float vfov = 0.79f;
-  float aspect = 1.f;
+  float aspect = (float)width / (float)height;
 
-  //Vec3 look_from(5.03f, 0.91f, -2.20f);
-  //Vec3 look_at(-0.21f, 0.83f, -0.34f);
-  Vec3 look_from(0.f, 1.f, 3.5f);
-  Vec3 look_at(0.f, 1.f, -1.f);
+  Vec3 look_from(5.03f, 0.91f, -2.20f);
+  Vec3 look_at(-0.21f, 0.83f, -0.34f);
+  //Vec3 look_from(0.f, 1.0f, 3.5f);
+  //Vec3 look_at(0.f, 1.0f, -1.f);
 
   Vec3 view_up(0.f, 1.f, 0.f);
 
