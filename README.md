@@ -2,14 +2,6 @@
 
 CUDA-Accelerated Path Tracer supporting arbitrary BSDFs and multiple importance sampling.
 
-## Output
-
-![Cornell box with Stanford Dragon](https://raw.githubusercontent.com//benchislett/Graphics/output/output/cornell-dragon.png)
-
-![Different Cornell box with spheres](https://raw.githubusercontent.com/benchislett/Graphics/output/output/cornell-spheres.png)
-
-![Fireplace room render](https://raw.githubusercontent.com/benchislett/Graphics/output/output/room.png)
-
 ## Usage
 
 Default make will build the c++ rendering library for custom use.
@@ -24,3 +16,11 @@ which can be configured at runtime through the commandline with the following fl
 -x N	  Specify width in pixels
 -y N	  Specify height in pixels
 ```
+
+## Output
+
+![Cornell box with Stanford Dragon](https://raw.githubusercontent.com//benchislett/Graphics/output/output/cornell-dragon.png)
+
+![Different Cornell box with spheres](https://raw.githubusercontent.com/benchislett/Graphics/output/output/cornell-spheres.png)
+
+![Fireplace room render](https://raw.githubusercontent.com/benchislett/Graphics/output/output/room.png)
