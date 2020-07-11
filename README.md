@@ -4,11 +4,11 @@ CUDA-Accelerated Path Tracer supporting arbitrary BSDFs and multiple importance 
 
 ## Output
 
-![Cornell box with Stanford Dragon](/benchislett/Graphics/tree/output/output/cornell-dragon.png)
+![Cornell box with Stanford Dragon](https://raw.githubusercontent.com//benchislett/Graphics/output/output/cornell-dragon.png)
 
-![Different Cornell box with spheres](/benchislett/Graphics/tree/output/output/cornell-spheres.png)
+![Different Cornell box with spheres](https://raw.githubusercontent.com/benchislett/Graphics/output/output/cornell-spheres.png)
 
-![Fireplace room render](/benchislett/Graphics/tree/output/output/room.png)
+![Fireplace room render](https://raw.githubusercontent.com/benchislett/Graphics/output/output/room.png)
 
 ## Usage
 
