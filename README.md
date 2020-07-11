@@ -19,8 +19,8 @@ which can be configured at runtime through the commandline with the following fl
 
 ```
 -f FILE	  Specify input wavefront obj file
--h		    Print this help message.
--s N		  Specify number of samples per pixel
--x N		  Specify width in pixels
--y N		  Specify height in pixels
+-h	  Print this help message.
+-s N	  Specify number of samples per pixel
+-x N	  Specify width in pixels
+-y N	  Specify height in pixels
 ```
