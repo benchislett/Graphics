@@ -2,10 +2,10 @@ ARFLAGS= -rcv
 
 CUDA=/usr/local/cuda
 NVCC=$(CUDA)/bin/nvcc
-NVCCFLAGS= -std=c++11 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_60,code=sm_60 -gencode arch=compute_61,code=sm_61 -gencode arch=compute_70,code=sm_70
+NVCCFLAGS= -std=c++11 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_60,code=sm_60 -gencode arch=compute_61,code=sm_61 -gencode arch=compute_70,code=sm_70 --use_fast_math
 CUDAFLAGS= -L$(CUDA)/lib64 -I$(CUDA)/include -lcuda -lcudart
 
-OBJECTS= src/bsdf.o src/bvh.o src/bxdf.o src/camera.o src/intersection.o src/io.o src/math.o src/microfacet.o src/onb_math.o src/path.o src/random.o src/ray.o src/render.o src/shape.o src/texture.o src/lodepng/lodepng.o
+OBJECTS= src/math.o
 
 default: libbenpt.a
 
