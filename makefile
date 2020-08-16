@@ -5,7 +5,7 @@ NVCC=$(CUDA)/bin/nvcc
 NVCCFLAGS= -std=c++11 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_60,code=sm_60 -gencode arch=compute_61,code=sm_61 -gencode arch=compute_70,code=sm_70 --use_fast_math
 CUDAFLAGS= -L$(CUDA)/lib64 -I$(CUDA)/include -lcuda -lcudart
 
-OBJECTS= src/math.o
+OBJECTS= src/bvh.o src/camera.o src/io.o src/primitive.o src/trace.o
 
 default: libbenpt.a
 
