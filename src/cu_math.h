@@ -10,7 +10,7 @@
 #ifndef __CUDACC__
 #include <cmath>
 
-float rsqrtf(float s) {
+IHD float rsqrtf(float s) {
   return 1.f / sqrtf(s);
 }
 
