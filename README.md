@@ -18,4 +18,6 @@ Some other planned changes:
 
 ### Progress
 
-None. Just cleaned up. Check again in a few weeks.
+- CMake set up and working with CUDA (compiling with clang++).
+- CUDA float3 math helpers are working on host and device.
+- Geometry folder contains ray-triangle and ray-aabb hit tests, both working.
