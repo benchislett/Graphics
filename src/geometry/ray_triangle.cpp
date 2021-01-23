@@ -1,8 +1,8 @@
 #include "geometry.h"
 
-constexpr float hit_time_cutoff = 0.01f;
+constexpr float minHitTime = 0.01f;
 
-IHD TriangleHitRecord hit_mt(const Ray& ray, const Triangle& tri) {
+HD TriangleHitRecord hit_mt(const Ray& ray, const Triangle& tri) {
   TriangleHitRecord record;
   record.hit = false;
 
@@ -33,7 +33,7 @@ IHD TriangleHitRecord hit_mt(const Ray& ray, const Triangle& tri) {
 
   float time = determinantInv * dot(edge1, q);
 
-  if (time < hit_time_cutoff) {
+  if (time < minHitTime) {
     return record;
   }
 

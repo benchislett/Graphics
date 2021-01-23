@@ -1,3 +1,5 @@
+#pragma once
+
 #include "cu_math.h"
 
 struct Ray {
@@ -33,9 +35,9 @@ struct TriangleHitRecord {
   bool hit;
 };
 
-IHD TriangleHitRecord hit_mt(const Ray& ray, const Triangle& tri);
+HD TriangleHitRecord hit_mt(const Ray& ray, const Triangle& tri);
 IHD TriangleHitRecord hit(const Ray& ray, const Triangle& tri) {
   return hit_mt(ray, tri);
 }
 
-IHD HitRecord hit(const Ray& ray, const AABB& bbox);
+HD HitRecord hit(const Ray& ray, const AABB& bbox);
