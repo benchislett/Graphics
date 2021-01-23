@@ -18,5 +18,14 @@ int main() {
   std::cout << rec.hit << '\n';
   std::cout << rec.time << '\n';
 
+  AABB b;
+  b.lo = make_float3(5.f, -2.f, -2.f);
+  b.hi = make_float3(5.f, 2.f, 2.f);
+
+  HitRecord recBox = hit(r, b);
+
+  std::cout << recBox.hit << '\n';
+  std::cout << recBox.time << '\n';
+
   return 0;
 }
