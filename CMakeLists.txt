@@ -14,10 +14,10 @@ set(CMAKE_CXX_FLAGS    "-Wall -std=c++20")
 set(MAIN_SOURCE src/main.cpp)
 set(LIB_SOURCES src/geometry/ray_triangle.cpp src/geometry/ray_aabb.cpp)
 
-add_library(geometry SHARED ${LIB_SOURCES})
+add_library(benpt STATIC ${LIB_SOURCES})
 
-add_executable(graphics ${MAIN_SOURCE})
-target_link_libraries(graphics PUBLIC geometry)
+add_executable(main ${MAIN_SOURCE})
+target_link_libraries(main PUBLIC benpt)
 
 
 
