@@ -11,6 +11,7 @@ test
 data/
 *.ppm
 output/
+main
 
 # CMake
 CMakeLists.txt.user
