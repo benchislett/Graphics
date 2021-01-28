@@ -6,13 +6,15 @@ find_package(CUDA REQUIRED)
 
 include_directories("${CUDA_INCLUDE_DIRS}")
 include_directories("src/")
+include_directories("src/scene/")
 include_directories("src/geometry/")
+include_directories("src/integrator/")
 
 set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
 set(CMAKE_CXX_FLAGS    "-Wall -std=c++20 -Ofast -flto")
 
 set(MAIN_SOURCE src/main.cpp)
-set(LIB_SOURCES src/geometry/ray_triangle.cpp src/geometry/ray_aabb.cpp)
+set(LIB_SOURCES src/geometry/ray_triangle.cpp src/geometry/ray_aabb.cpp src/scene/from_obj.cpp src/integrator/path_trace.cpp)
 
 add_library(benpt STATIC ${LIB_SOURCES})
 
