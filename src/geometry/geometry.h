@@ -19,6 +19,10 @@ struct TriangleNormal {
   float3 n2;
 };
 
+struct TriangleEmissivity {
+  float3 intensity;
+};
+
 struct AABB {
   float3 lo;
   float3 hi;
