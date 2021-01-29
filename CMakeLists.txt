@@ -7,6 +7,7 @@ find_package(CUDA REQUIRED)
 include_directories("${CUDA_INCLUDE_DIRS}")
 include_directories("src/")
 include_directories("src/scene/")
+include_directories("src/camera/")
 include_directories("src/geometry/")
 include_directories("src/integrator/")
 
@@ -14,7 +15,11 @@ set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
 set(CMAKE_CXX_FLAGS    "-Wall -std=c++20 -Ofast -flto")
 
 set(MAIN_SOURCE src/main.cpp)
-set(LIB_SOURCES src/geometry/ray_triangle.cpp src/geometry/ray_aabb.cpp src/scene/from_obj.cpp src/integrator/path_trace.cpp)
+set(LIB_GEOMETRY_SOURCES src/geometry/ray_triangle.cpp src/geometry/ray_aabb.cpp src/geometry/traverse.cpp)
+set(LIB_CAMERA_SOURCES src/camera/init.cpp src/camera/sample.cpp)
+set(LIB_SCENE_SOURCES src/scene/from_obj.cpp src/scene/to_ppm.cpp)
+set(LIB_INTEGRATOR_SOURCES src/integrator/path_trace.cpp)
+set(LIB_SOURCES ${LIB_GEOMETRY_SOURCES} ${LIB_CAMERA_SOURCES} ${LIB_SCENE_SOURCES} ${LIB_INTEGRATOR_SOURCES})
 
 add_library(benpt STATIC ${LIB_SOURCES})
 
