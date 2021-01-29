@@ -1,6 +1,7 @@
 #include "scene.h"
 
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <utility>
 #include <vector>
@@ -14,6 +15,11 @@ Scene from_obj(const std::string& filename) {
 
   std::ifstream file;
   file.open(filename, std::ios::in);
+
+  if (!file) {
+    std::cout << "Error opening file " << filename << '\n';
+    exit(0);
+  }
 
   std::string token;
   for (std::string line; std::getline(file, line);) {
