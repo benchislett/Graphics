@@ -2,7 +2,7 @@
 
 constexpr float minHitTime = 0.01f;
 
-HD TriangleHitRecord hit_mt(const Ray& ray, const Triangle& tri) {
+HD TriangleHitRecord hit_mt(const Ray ray, const Triangle tri) {
   TriangleHitRecord record;
   record.hit = false;
 

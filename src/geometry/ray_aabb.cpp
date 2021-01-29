@@ -1,6 +1,6 @@
 #include "geometry.h"
 
-HD HitRecord hit(const Ray& ray, const AABB& bbox) {
+HD HitRecord hit(const Ray ray, const AABB bbox) {
   HitRecord record;
 
   float3 invDir = 1.f / ray.direction;
