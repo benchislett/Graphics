@@ -10,6 +10,8 @@ struct Image {
   float3* data; // [0,1]
 };
 
+void to_ppm(const Image image, const std::string& filename);
+
 struct Scene {
   int n_triangles;
 
