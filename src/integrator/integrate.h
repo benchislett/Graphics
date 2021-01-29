@@ -1,3 +1,4 @@
+#include "camera.h"
 #include "scene.h"
 
-Image render(const Scene scene, int x, int y, int spp);
+Image render(const Camera camera, const Scene scene, int x, int y, int spp);
