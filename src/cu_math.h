@@ -48,13 +48,6 @@ IHD float fmaxf(float3 a) {
 
 // Float3 -> Void //
 
-IHD void normalize(float3& v) {
-  float invLen = rsqrtf(dot(v, v));
-  v.x *= invLen;
-  v.y *= invLen;
-  v.z *= invLen;
-}
-
 IHD void operator+=(float3& a, float3 b) {
   a.x += b.x;
   a.y += b.y;
@@ -73,15 +66,27 @@ IHD void operator*=(float3& a, float3 b) {
   a.z *= b.z;
 }
 
+IHD void operator*=(float3& a, float b) {
+  a.x *= b;
+  a.y *= b;
+  a.z *= b;
+}
+
 IHD void operator/=(float3& a, float3 b) {
   a.x /= b.x;
   a.y /= b.y;
   a.z /= b.z;
 }
 
+IHD void normalize(float3& v) {
+  float invLen = rsqrtf(dot(v, v));
+  v *= invLen;
+}
+
+
 // Float3 -> Float3 //
 
-IHD float3 operator-(float3& a) {
+IHD float3 operator-(float3 a) {
   return make_float3(-a.x, -a.y, -a.z);
 }
 
@@ -131,6 +136,11 @@ IHD float3 operator/(float3 a, float b) {
 
 IHD float3 operator/(float b, float3 a) {
   return make_float3(b / a.x, b / a.y, b / a.z);
+}
+
+IHD float3 normalized(float3 a) {
+  float invLen = rsqrtf(dot(a, a));
+  return a * invLen;
 }
 
 IHD float3 fminf(float3 a, float3 b) {
