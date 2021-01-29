@@ -39,9 +39,11 @@ struct TriangleHitRecord {
   bool hit;
 };
 
-HD TriangleHitRecord hit_mt(const Ray& ray, const Triangle& tri);
-IHD TriangleHitRecord hit(const Ray& ray, const Triangle& tri) {
+HD TriangleHitRecord hit_mt(const Ray ray, const Triangle tri);
+IHD TriangleHitRecord hit(const Ray ray, const Triangle tri) {
   return hit_mt(ray, tri);
 }
 
-HD HitRecord hit(const Ray& ray, const AABB& bbox);
+HD TriangleHitRecord first_hit(const Ray ray, const Triangle* triangles, int n_triangles);
+
+HD HitRecord hit(const Ray ray, const AABB bbox);
