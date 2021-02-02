@@ -3,7 +3,9 @@
 #include <cstdio>
 
 unsigned char rescale(float x) {
-  return x * 255.9999f;
+  // printf("%f\n", x);
+  x = fminf(fmaxf(0.f, x), 1.f);
+  return (unsigned char) (x * 255.f);
 }
 
 void to_ppm(const Image image, const std::string& filename) {
