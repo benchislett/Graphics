@@ -1,4 +1,5 @@
 #include "camera.h"
+#include "log.h"
 
 const float3 view_up = make_float3(0.f, 1.f, 0.f);
 
@@ -6,7 +7,7 @@ Camera make_camera(float3 position, float3 target, float fov, float aspect) {
   float half_height = tanf(fov / 2.f);
   float half_width  = half_height * aspect;
 
-  float3 w = normalized(target - position);
+  float3 w = normalized(position - target);
   float3 u = normalized(cross(view_up, w));
   float3 v = cross(w, u);
 
@@ -14,6 +15,11 @@ Camera make_camera(float3 position, float3 target, float fov, float aspect) {
   float3 vertical   = 2.f * half_height * v;
 
   float3 project_lower_left = position - (half_width * u) - (half_height * v) - w;
+
+  DEBUG_PRINT("Initializing camera with position (%f, %f, %f), ll projection vector (%f, %f, %f), horizontal (%f, %f, "
+              "%f), vertical (%f, %f, %f)\n",
+              position.x, position.y, position.z, project_lower_left.x, project_lower_left.y, project_lower_left.z,
+              horizontal.x, horizontal.y, horizontal.z, vertical.x, vertical.y, vertical.z);
 
   return (Camera){position, horizontal, vertical, project_lower_left};
 }
