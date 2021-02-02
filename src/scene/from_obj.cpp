@@ -1,3 +1,4 @@
+#include "log.h"
 #include "scene.h"
 
 #include <fstream>
@@ -7,11 +8,11 @@
 #include <vector>
 
 Scene from_obj(const std::string& filename) {
-  std::vector<float3> vertices;
-  std::vector<float3> normals;
-  std::vector<Triangle> triangles;
-  std::vector<TriangleNormal> triangle_normals;
-  std::vector<TriangleEmissivity> triangle_emissivities;
+  static std::vector<float3> vertices;
+  static std::vector<float3> normals;
+  static std::vector<Triangle> triangles;
+  static std::vector<TriangleNormal> triangle_normals;
+  static std::vector<TriangleEmissivity> triangle_emissivities;
 
   std::ifstream file;
   file.open(filename, std::ios::in);
@@ -53,9 +54,7 @@ Scene from_obj(const std::string& filename) {
   scene.normals      = triangle_normals.data();
   scene.emissivities = triangle_emissivities.data();
 
-  // Move the vectors so they don't expire
-  std::move(triangles);
-  std::move(triangle_normals);
-  std::move(triangle_emissivities);
+  DEBUG_PRINT("Loaded scene with %d triangles\n", scene.n_triangles);
+
   return scene;
 }
