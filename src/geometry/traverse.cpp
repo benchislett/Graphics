@@ -1,6 +1,8 @@
 #include "geometry.h"
+#include "log.h"
 
 #include <climits>
+#include <cstdio>
 
 HD TriangleHitRecord first_hit(const Ray ray, const Triangle* triangles, int n_triangles) {
   TriangleHitRecord closest_hit = (TriangleHitRecord){FLT_MAX, 0.f, 0.f, false};

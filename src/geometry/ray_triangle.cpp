@@ -7,7 +7,7 @@ HD TriangleHitRecord hit_mt(const Ray ray, const Triangle tri) {
   record.hit = false;
 
   float3 edge0 = tri.v1 - tri.v0;
-  float3 edge1 = tri.v2 - tri.v1;
+  float3 edge1 = tri.v2 - tri.v0;
 
   float3 h          = cross(ray.direction, edge1);
   float determinant = dot(edge0, h);
