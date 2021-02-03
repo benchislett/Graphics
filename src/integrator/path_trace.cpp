@@ -1,9 +1,11 @@
 #include "integrate.h"
 
+#include <iostream>
+
 float3 trace(const Ray ray, const Scene scene) {
   TriangleHitRecord record = first_hit(ray, scene.triangles, scene.n_triangles);
   if (record.hit) {
-    return make_float3(0.5f);
+    return make_float3(record.u, record.v, 1.f - record.u - record.v);
   } else {
     return make_float3(0.f);
   }
@@ -24,7 +26,7 @@ Image render(const Camera camera, const Scene scene, int x, int y, int spp) {
         Ray ray = get_ray(camera, u, v);
         val += trace(ray, scene);
       }
-      image.data[i] = val / (float) spp;
+      image.data[i * y + j] = val / (float) spp;
     }
   }
 

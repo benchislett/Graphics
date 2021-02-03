@@ -1,4 +1,3 @@
-#include "log.h"
 #include "scene.h"
 
 #include <fstream>
@@ -53,8 +52,6 @@ Scene from_obj(const std::string& filename) {
   scene.triangles    = triangles.data();
   scene.normals      = triangle_normals.data();
   scene.emissivities = triangle_emissivities.data();
-
-  DEBUG_PRINT("Loaded scene with %d triangles\n", scene.n_triangles);
 
   return scene;
 }

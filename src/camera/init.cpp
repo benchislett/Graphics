@@ -16,10 +16,5 @@ Camera make_camera(float3 position, float3 target, float fov, float aspect) {
 
   float3 project_lower_left = position - (half_width * u) - (half_height * v) - w;
 
-  DEBUG_PRINT("Initializing camera with position (%f, %f, %f), ll projection vector (%f, %f, %f), horizontal (%f, %f, "
-              "%f), vertical (%f, %f, %f)\n",
-              position.x, position.y, position.z, project_lower_left.x, project_lower_left.y, project_lower_left.z,
-              horizontal.x, horizontal.y, horizontal.z, vertical.x, vertical.y, vertical.z);
-
   return (Camera){position, horizontal, vertical, project_lower_left};
 }

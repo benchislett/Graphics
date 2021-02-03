@@ -1,5 +1,4 @@
 #include "geometry.h"
-#include "log.h"
 
 #include <climits>
 #include <cstdio>
