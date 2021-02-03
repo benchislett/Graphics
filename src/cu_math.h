@@ -139,8 +139,8 @@ IHD float3 operator/(float b, float3 a) {
 }
 
 IHD float3 normalized(float3 a) {
-  float invLen = rsqrtf(dot(a, a));
-  return a * invLen;
+  normalize(a);
+  return a;
 }
 
 IHD float3 fminf(float3 a, float3 b) {
