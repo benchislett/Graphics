@@ -1,5 +1,4 @@
 #include "camera.h"
-#include "log.h"
 
 const float3 view_up = make_float3(0.f, 1.f, 0.f);
 
