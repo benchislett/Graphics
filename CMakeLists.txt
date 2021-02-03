@@ -2,9 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 
 project(benpt LANGUAGES CUDA CXX)
 
-find_package(CUDA REQUIRED)
+find_package(CUDAToolkit)
 
-include_directories("${CUDA_INCLUDE_DIRS}")
 include_directories("src/")
 include_directories("src/scene/")
 include_directories("src/camera/")
@@ -24,6 +23,7 @@ set(LIB_INTEGRATOR_SOURCES src/integrator/path_trace.cpp)
 set(LIB_SOURCES ${LIB_GEOMETRY_SOURCES} ${LIB_CAMERA_SOURCES} ${LIB_SCENE_SOURCES} ${LIB_INTEGRATOR_SOURCES})
 
 add_library(benpt STATIC ${LIB_SOURCES})
+target_link_libraries(benpt PUBLIC CUDA::cudart)
 
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL)
