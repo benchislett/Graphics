@@ -4,6 +4,8 @@ project(benpt LANGUAGES CUDA CXX)
 
 find_package(CUDA REQUIRED)
 
+find_package(GTest)
+
 include_directories("${CUDA_INCLUDE_DIRS}")
 include_directories("src/")
 include_directories("src/scene/")
@@ -15,6 +17,8 @@ set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
 set(CMAKE_CXX_FLAGS    "-Wall -std=c++20 -Ofast -flto")
 
 set(MAIN_SOURCE src/main.cpp)
+set(TEST_SOURCES src/test/geometry/ray_triangle.cpp)
+
 set(LIB_GEOMETRY_SOURCES src/geometry/ray_triangle.cpp src/geometry/ray_aabb.cpp src/geometry/traverse.cpp)
 set(LIB_CAMERA_SOURCES src/camera/init.cpp src/camera/sample.cpp)
 set(LIB_SCENE_SOURCES src/scene/from_obj.cpp src/scene/to_ppm.cpp)
@@ -24,5 +28,11 @@ set(LIB_SOURCES ${LIB_GEOMETRY_SOURCES} ${LIB_CAMERA_SOURCES} ${LIB_SCENE_SOURCE
 add_library(benpt STATIC ${LIB_SOURCES})
 
 add_executable(main ${MAIN_SOURCE})
-target_link_libraries(main PUBLIC benpt)
+target_link_libraries(main PRIVATE benpt)
+
+if (${GTEST_FOUND})
+  add_executable(test ${TEST_SOURCES})
+  target_link_libraries(test PRIVATE benpt)
+  target_link_libraries(test PRIVATE GTest::GTest GTest::Main)
+endif()
 
