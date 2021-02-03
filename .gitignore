@@ -7,9 +7,9 @@
 
 *.a
 *.o
-test
 data/
 *.ppm
+build/
 output/
 main
 
