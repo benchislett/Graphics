@@ -78,6 +78,12 @@ IHD void operator/=(float3& a, float3 b) {
   a.z /= b.z;
 }
 
+IHD void operator/=(float3& a, float b) {
+  a.x /= b;
+  a.y /= b;
+  a.z /= b;
+}
+
 IHD void normalize(float3& v) {
   float invLen = rsqrtf(dot(v, v));
   v *= invLen;

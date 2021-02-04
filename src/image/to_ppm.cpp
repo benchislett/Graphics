@@ -1,12 +1,6 @@
-#include "scene.h"
+#include "image.h"
 
 #include <cstdio>
-
-unsigned char rescale(float x) {
-  // printf("%f\n", x);
-  x = fminf(fmaxf(0.f, x), 1.f);
-  return (unsigned char) (x * 255.f);
-}
 
 void to_ppm(const Image image, const std::string& filename) {
   FILE* file = fopen(filename.c_str(), "wb");
@@ -20,9 +14,9 @@ void to_ppm(const Image image, const std::string& filename) {
   int size = image.x * image.y;
   for (int i = 0; i < size; i++) {
     unsigned char rgb[3];
-    rgb[0] = rescale(image.data[i].x);
-    rgb[1] = rescale(image.data[i].y);
-    rgb[2] = rescale(image.data[i].z);
+    rgb[0] = image.data[i].x;
+    rgb[1] = image.data[i].y;
+    rgb[2] = image.data[i].z;
     fwrite(rgb, 1, 3, file);
   }
 

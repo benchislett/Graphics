@@ -4,104 +4,76 @@
 #include "integrate.h"
 #include "scene.h"
 
-// clang-format off
-#include <GL/glew.h>
-#include <GL/freeglut.h>
-#include <cuda_gl_interop.h>
-#include <cuda_runtime.h>
+#include <SFML/Graphics.hpp>
+#include <cassert>
 #include <iostream>
 #include <string>
-// clang-format on
 
 constexpr int width    = 256;
 constexpr int height   = 256;
 constexpr float aspect = (float) width / (float) height;
 
-// constexpr const std::string model_file = "data/test.obj";
-
+Scene scene;
 float3 position       = make_float3(0.f);
 float3 look_direction = make_float3(1.f, 0.f, 0.f);
 
-GLuint pixel_buffer_obj = 0;
-GLuint texture_object   = 0;
-struct cudaGraphicsResource* cuda_buffer_resource;
-
-void init_gl(int* argc, char** argv) {
-  glutInit(argc, argv);
-  glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
-  glutInitWindowSize(256, 256);
-  glutCreateWindow("Test render window");
-  glewInit();
-}
-
-void init_buffer() {
-  glGenBuffers(1, &pixel_buffer_obj);
-  glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pixel_buffer_obj);
-  glBufferData(GL_PIXEL_UNPACK_BUFFER, 4 * width * height * sizeof(GLubyte), 0, GL_STREAM_DRAW);
-  glGenTextures(1, &texture_object);
-  glBindTexture(GL_TEXTURE_2D, texture_object);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  cudaGraphicsGLRegisterBuffer(&cuda_buffer_resource, pixel_buffer_obj, cudaGraphicsMapFlagsWriteDiscard);
-}
-
-void draw_texture() {
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-  glEnable(GL_TEXTURE_2D);
-  glBegin(GL_QUADS);
-
-  glTexCoord2f(0.0f, 0.0f);
-  glVertex2f(0, 0);
-
-  glTexCoord2f(0.0f, 1.0f);
-  glVertex2f(0, height);
-
-  glTexCoord2f(1.0f, 0.0f);
-  glVertex2f(width, 0);
-
-  glTexCoord2f(1.0f, 1.0f);
-  glVertex2f(width, height);
-
-  glEnd();
-  glDisable(GL_TEXTURE_2D);
-}
-
-void draw() {
-  uchar4* d_out;
-  cudaGraphicsMapResources(1, &cuda_buffer_resource, 0);
-  cudaGraphicsResourceGetMappedPointer((void**) &d_out, NULL, cuda_buffer_resource);
-
-  // DO STUFF WITH D_OUT;
-
-  cudaGraphicsUnmapResources(1, &cuda_buffer_resource, 0);
-}
-
-void display() {
-  draw();
-  draw_texture();
-  glutSwapBuffers();
-}
-
-void exit_gl() {
-  if (pixel_buffer_obj) {
-    cudaGraphicsUnregisterResource(cuda_buffer_resource);
-    glDeleteBuffers(1, &pixel_buffer_obj);
-    glDeleteTextures(1, &texture_object);
-  }
+void rotate_xz(float theta) {
+  float x          = look_direction.x;
+  float z          = look_direction.z;
+  look_direction.x = x * cosf(theta) - z * sinf(theta);
+  look_direction.z = z * cosf(theta) - x * sinf(theta);
 }
 
 int main(int argc, char** argv) {
-  /*Scene scene   = from_obj(model_file);
-  Camera camera = make_camera(position, look_direction - position, 1.57f, aspect);
+  scene = from_obj("data/test.obj");
 
-  Image image = render(camera, scene, 256, 256, 10);
-  to_ppm(image, "output.ppm");*/
+  sf::RenderWindow window(sf::VideoMode(width, height), "Demo Window");
 
-  init_gl(&argc, argv);
-  gluOrtho2D(0, width, height, 0);
-  glutDisplayFunc(display);
-  init_buffer();
-  glutMainLoop();
-  atexit(exit_gl);
+  while (window.isOpen()) {
+    sf::Event event;
+    while (window.pollEvent(event)) {
+      if (event.type == sf::Event::KeyPressed) {
+        if (event.key.code == sf::Keyboard::Left) {
+          rotate_xz(0.523599f);
+        } else if (event.key.code == sf::Keyboard::Right) {
+          rotate_xz(-0.523599f);
+        } else if (event.key.code == sf::Keyboard::W) {
+          position.z += 0.5f;
+        } else if (event.key.code == sf::Keyboard::S) {
+          position.z -= 0.5f;
+        } else if (event.key.code == sf::Keyboard::A) {
+          position.x += 0.5f;
+        } else if (event.key.code == sf::Keyboard::D) {
+          position.x -= 0.5f;
+        } else if (event.key.code == sf::Keyboard::Space) {
+          position.y += 0.5f;
+        } else if (event.key.code == sf::Keyboard::LShift) {
+          position.y -= 0.5f;
+        }
+      }
+      if (event.type == sf::Event::Closed) {
+        window.close();
+      }
+    }
+
+    Camera camera = make_camera(position, look_direction - position, 1.57f, aspect);
+    Image image   = render(camera, scene, width, height, 1);
+
+    sf::Image image_data;
+    image_data.create(width, height, (const sf::Uint8*) image.data);
+
+    sf::Texture image_tex;
+    image_tex.loadFromImage(image_data);
+
+    sf::Sprite image_sprite;
+    image_sprite.setTexture(image_tex, true);
+    std::cout << image_sprite.getPosition().x << '\n';
+    std::cout << image_sprite.getPosition().y << "\n\n";
+
+    window.clear();
+    window.draw(image_sprite);
+    window.display();
+  }
 
   return 0;
 }

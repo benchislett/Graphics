@@ -15,7 +15,7 @@ Image render(const Camera camera, const Scene scene, int x, int y, int spp) {
   Image image;
   image.x    = x;
   image.y    = y;
-  image.data = (float3*) malloc(x * y * sizeof(float3));
+  image.data = (uchar4*) malloc(x * y * sizeof(uchar4));
 
   for (int i = 0; i < x; i++) {
     for (int j = 0; j < y; j++) {
@@ -26,7 +26,16 @@ Image render(const Camera camera, const Scene scene, int x, int y, int spp) {
         Ray ray = get_ray(camera, u, v);
         val += trace(ray, scene);
       }
-      image.data[i * y + j] = val / (float) spp;
+      val /= (float) spp;
+      val = clamp(val, 0.f, 1.f);
+      val *= 255.9999f;
+      uchar4 data;
+      data.x = (unsigned char) val.x;
+      data.y = (unsigned char) val.x;
+      data.z = (unsigned char) val.x;
+      data.w = (unsigned char) 255;
+
+      image.data[i * y + j] = data;
     }
   }
 
