@@ -31,8 +31,8 @@ Image render(const Camera camera, const Scene scene, int x, int y, int spp) {
       val *= 255.9999f;
       uchar4 data;
       data.x = (unsigned char) val.x;
-      data.y = (unsigned char) val.x;
-      data.z = (unsigned char) val.x;
+      data.y = (unsigned char) val.y;
+      data.z = (unsigned char) val.z;
       data.w = (unsigned char) 255;
 
       image.data[i * y + j] = data;
