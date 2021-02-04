@@ -6,8 +6,8 @@ TEST(Camera_Sample, Init_And_Corners) {
   float fov    = M_PI / 2.f; // 90 degrees
   float aspect = 4.f;
 
-  float3 position = make_float3(100.f, 70.f, 33.f);
-  float3 target   = make_float3(200.f, 70.f, 33.f);
+  float3 position = make_float3(0.f, 0.f, 0.f);
+  float3 target   = make_float3(1.f, 0.f, 0.f);
 
   Camera camera = make_camera(position, target, fov, aspect);
 
@@ -43,4 +43,21 @@ TEST(Camera_Sample, Init_And_Corners) {
   EXPECT_NEAR(c3.origin.x, position.x, 0.00001f);
   EXPECT_NEAR(c3.origin.y, position.y, 0.00001f);
   EXPECT_NEAR(c3.origin.z, position.z, 0.00001f);
+
+  EXPECT_NEAR(c0.direction.x, +0.2357f, 0.01f);
+  EXPECT_NEAR(c0.direction.y, -0.2357f, 0.01f);
+  EXPECT_NEAR(c0.direction.z, -0.9428f, 0.01f);
+
+  EXPECT_NEAR(c1.direction.x, +0.2357f, 0.01f);
+  EXPECT_NEAR(c1.direction.y, +0.2357f, 0.01f);
+  EXPECT_NEAR(c1.direction.z, -0.9428f, 0.01f);
+
+  EXPECT_NEAR(c2.direction.x, +0.2357f, 0.01f);
+  EXPECT_NEAR(c2.direction.y, -0.2357f, 0.01f);
+  EXPECT_NEAR(c2.direction.z, +0.9428f, 0.01f);
+
+  EXPECT_NEAR(c3.direction.x, +0.2357f, 0.01f);
+  EXPECT_NEAR(c3.direction.y, +0.2357f, 0.01f);
+  EXPECT_NEAR(c3.direction.z, +0.9428f, 0.01f);
 }
+
