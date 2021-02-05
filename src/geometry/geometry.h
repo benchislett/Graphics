@@ -44,6 +44,6 @@ IHD TriangleHitRecord hit(const Ray ray, const Triangle tri) {
   return hit_mt(ray, tri);
 }
 
-HD TriangleHitRecord first_hit(const Ray ray, const Triangle* triangles, int n_triangles);
+HD TriangleHitRecord first_hit(const Ray ray, const Triangle* triangles, int n_triangles, int* which);
 
 HD HitRecord hit(const Ray ray, const AABB bbox);

@@ -12,6 +12,10 @@ Scene from_obj(const std::string& filename) {
   static std::vector<Triangle> triangles;
   static std::vector<TriangleNormal> triangle_normals;
   static std::vector<TriangleEmissivity> triangle_emissivities;
+  static std::vector<int> lights;
+
+  TriangleEmissivity current_emit;
+  current_emit.intensity = make_float3(0.f);
 
   std::ifstream file;
   file.open(filename, std::ios::in);
@@ -43,7 +47,19 @@ Scene from_obj(const std::string& filename) {
       }
       triangles.push_back((Triangle){vertices[v[0]], vertices[v[1]], vertices[v[2]]});
       triangle_normals.push_back((TriangleNormal){normals[n[0]], normals[n[1]], normals[n[2]]});
-      triangle_emissivities.push_back((TriangleEmissivity){make_float3(0.f)});
+      triangle_emissivities.push_back(current_emit);
+      if (length(current_emit.intensity) > 0.f) {
+        lights.push_back(triangles.size() - 1);
+      }
+    } else if (token == "usemtl") {
+      tokens >> token;
+      if (token == "Light") {
+        current_emit.intensity = make_float3(1.f);
+      } else {
+        current_emit.intensity = make_float3(0.f);
+      }
+    } else {
+      std::cout << "Skipping line with unrecognized identifier " << token << '\n';
     }
   }
 
@@ -52,6 +68,8 @@ Scene from_obj(const std::string& filename) {
   scene.triangles    = triangles.data();
   scene.normals      = triangle_normals.data();
   scene.emissivities = triangle_emissivities.data();
+  scene.n_lights     = lights.size();
+  scene.lights       = lights.data();
 
   return scene;
 }

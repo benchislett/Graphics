@@ -3,12 +3,20 @@
 #include <iostream>
 
 float3 trace(const Ray ray, const Scene scene) {
-  TriangleHitRecord record = first_hit(ray, scene.triangles, scene.n_triangles);
+  int which;
+  TriangleHitRecord record = first_hit(ray, scene.triangles, scene.n_triangles, &which);
   if (record.hit) {
-    return make_float3(record.u, record.v, 1.f - record.u - record.v);
-  } else {
-    return make_float3(0.f);
+    float3 hit_point = (record.u * scene.triangles[which].v1) + (record.v * scene.triangles[which].v2)
+                     + ((1.f - record.u - record.v) * scene.triangles[which].v0);
+    int which_vis;
+    float3 target                = scene.triangles[scene.lights[0]].v0;
+    Ray vis_ray                  = (Ray){hit_point, normalized(target - hit_point)};
+    TriangleHitRecord vis_record = first_hit(vis_ray, scene.triangles, scene.n_triangles, &which_vis);
+    if (vis_record.hit && which_vis == scene.lights[0]) {
+      return scene.emissivities[scene.lights[0]].intensity / vis_record.time;
+    }
   }
+  return make_float3(0.f);
 }
 
 Image render(const Camera camera, const Scene scene, int x, int y, int spp) {
