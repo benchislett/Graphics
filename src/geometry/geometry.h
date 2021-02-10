@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cu_math.h"
+#include "cu_math.cuh"
 
 struct Ray {
   float3 origin;

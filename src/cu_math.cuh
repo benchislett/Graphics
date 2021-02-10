@@ -169,8 +169,8 @@ IHD float3 clamp(float3 v, float3 a, float3 b) {
   return make_float3(clamp(v.x, a.x, b.x), clamp(v.y, a.y, b.y), clamp(v.z, a.z, b.z));
 }
 
-IHD float3 fabs(float3 v) {
-  return make_float3(fabs(v.x), fabs(v.y), fabs(v.z));
+IHD float3 fabsf(float3 v) {
+  return make_float3(fabsf(v.x), fabsf(v.y), fabsf(v.z));
 }
 
 IHD float3 reflect(float3 incident, float3 normal) {

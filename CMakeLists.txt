@@ -23,7 +23,7 @@ set(LIB_CAMERA_SOURCES src/camera/init.cpp src/camera/sample.cpp)
 set(LIB_SCENE_SOURCES src/scene/from_obj.cpp)
 set(LIB_IMAGE_SOURCES src/image/to_ppm.cpp)
 set(LIB_INTEGRATOR_SOURCES src/integrator/path_trace.cpp)
-set(LIB_SOURCES ${LIB_GEOMETRY_SOURCES} ${LIB_CAMERA_SOURCES} ${LIB_SCENE_SOURCES} ${LIB_INTEGRATOR_SOURCES})
+set(LIB_SOURCES ${LIB_GEOMETRY_SOURCES} ${LIB_CAMERA_SOURCES} ${LIB_SCENE_SOURCES} ${LIB_IMAGE_SOURCES} ${LIB_INTEGRATOR_SOURCES})
 
 add_library(benpt STATIC ${LIB_SOURCES})
 target_link_libraries(benpt PUBLIC CUDA::cudart)

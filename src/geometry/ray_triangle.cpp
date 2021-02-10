@@ -44,4 +44,3 @@ HD TriangleHitRecord hit_mt(const Ray ray, const Triangle tri) {
 
   return record;
 }
-

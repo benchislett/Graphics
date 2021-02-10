@@ -1,5 +1,5 @@
 #include "camera.h"
-#include "cu_math.h"
+#include "cu_math.cuh"
 #include "geometry.h"
 #include "integrate.h"
 #include "scene.h"
