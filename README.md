@@ -15,9 +15,3 @@ Some other planned changes:
 - Code style and syntax requirements. Going to use clang-format and more warnings going forward.
 - OpenGL interop for interactive rendering. Now that I plan to render at real-time rates, it only makes sense to implement a viewer atop the CUDA-OpenGL interop.
 - More pretty pictures! Lots more images in the gallery to come.
-
-### Progress
-
-- CMake set up and working with CUDA (compiling with clang++).
-- CUDA float3 math helpers are working on host and device.
-- Geometry folder contains ray-triangle and ray-aabb hit tests, both working.
