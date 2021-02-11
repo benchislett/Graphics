@@ -27,17 +27,17 @@ int main(int argc, char** argv) {
     while (window.pollEvent(event)) {
       if (event.type == sf::Event::KeyPressed) {
         if (event.key.code == sf::Keyboard::W) {
-          position.z += 0.5f;
-        } else if (event.key.code == sf::Keyboard::S) {
           position.z -= 0.5f;
+        } else if (event.key.code == sf::Keyboard::S) {
+          position.z += 0.5f;
         } else if (event.key.code == sf::Keyboard::A) {
-          position.y -= 0.5f;
-        } else if (event.key.code == sf::Keyboard::D) {
-          position.y += 0.5f;
-        } else if (event.key.code == sf::Keyboard::Space) {
-          position.x += 0.5f;
-        } else if (event.key.code == sf::Keyboard::LShift) {
           position.x -= 0.5f;
+        } else if (event.key.code == sf::Keyboard::D) {
+          position.x += 0.5f;
+        } else if (event.key.code == sf::Keyboard::Space) {
+          position.y += 0.5f;
+        } else if (event.key.code == sf::Keyboard::LShift) {
+          position.y -= 0.5f;
         }
       }
       if (event.type == sf::Event::Closed) {
@@ -64,4 +64,3 @@ int main(int argc, char** argv) {
 
   return 0;
 }
-
