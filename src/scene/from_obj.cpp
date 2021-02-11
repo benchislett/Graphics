@@ -42,8 +42,9 @@ Scene from_obj(const std::string& filename) {
       int v[3], n[3];
       for (int i = 0; i < 3; i++) {
         tokens >> token;
-        v[i] = std::stoi(token.substr(0, token.find('/'))) - 1;
-        n[i] = std::stoi(token.substr(token.find('/') + 2)) - 1;
+        sscanf(token.c_str(), "%d//%d", &v[i], &n[i]);
+        v[i]--;
+        n[i]--;
       }
       triangles.push_back((Triangle){vertices[v[0]], vertices[v[1]], vertices[v[2]]});
       triangle_normals.push_back((TriangleNormal){normals[n[0]], normals[n[1]], normals[n[2]]});
