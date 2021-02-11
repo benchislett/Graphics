@@ -6,14 +6,16 @@ float3 trace(const Ray ray, const Scene scene) {
   int which;
   TriangleHitRecord record = first_hit(ray, scene.triangles, scene.n_triangles, &which);
   if (record.hit) {
-    float3 hit_point = (record.u * scene.triangles[which].v1) + (record.v * scene.triangles[which].v2)
-                     + ((1.f - record.u - record.v) * scene.triangles[which].v0);
     int which_vis;
-    float3 target                = scene.triangles[scene.lights[0]].v0;
+    float3 hit_point  = interp(scene.triangles[which], record.u, record.v);
+    float3 hit_normal = interp(scene.normals[which], record.u, record.v);
+    float3 target =
+        scene.triangles[scene.lights[0]].v0 + scene.triangles[scene.lights[0]].v1 + scene.triangles[scene.lights[0]].v2;
+    target /= 3.f;
     Ray vis_ray                  = (Ray){hit_point, normalized(target - hit_point)};
     TriangleHitRecord vis_record = first_hit(vis_ray, scene.triangles, scene.n_triangles, &which_vis);
     if (vis_record.hit && which_vis == scene.lights[0]) {
-      return scene.emissivities[scene.lights[0]].intensity / vis_record.time;
+      return scene.emissivities[scene.lights[0]].intensity / vis_record.time * cosf(dot(vis_ray.direction, hit_normal));
     }
   }
   return make_float3(0.f);
@@ -28,8 +30,8 @@ Image render(const Camera camera, const Scene scene, int x, int y, int spp) {
   for (int i = 0; i < x; i++) {
     for (int j = 0; j < y; j++) {
       float3 val = make_float3(0.f);
-      float u    = (float) i / (float) x;
-      float v    = (float) j / (float) y;
+      float u    = (float) j / (float) y;
+      float v    = (float) i / (float) x;
       for (int s = 0; s < spp; s++) {
         Ray ray = get_ray(camera, u, v);
         val += trace(ray, scene);
