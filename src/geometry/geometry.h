@@ -13,11 +13,15 @@ struct Triangle {
   float3 v2;
 };
 
+HD float3 interp(const Triangle tri, float u, float v);
+
 struct TriangleNormal {
   float3 n0;
   float3 n1;
   float3 n2;
 };
+
+HD float3 interp(const TriangleNormal tri, float u, float v);
 
 struct TriangleEmissivity {
   float3 intensity;

@@ -13,12 +13,12 @@ include_directories("src/camera/")
 include_directories("src/geometry/")
 include_directories("src/integrator/")
 
-set(CMAKE_CXX_FLAGS "-Wall -std=c++20 -Ofast -flto")
+set(CMAKE_CXX_FLAGS "-Wall -std=c++20")
 
 set(DEMO_SOURCES demo/main.cpp)
 set(TEST_SOURCES test/geometry/ray_triangle.cpp test/camera/sample.cpp)
 
-set(LIB_GEOMETRY_SOURCES src/geometry/ray_triangle.cpp src/geometry/ray_aabb.cpp src/geometry/traverse.cpp)
+set(LIB_GEOMETRY_SOURCES src/geometry/ray_aabb.cpp src/geometry/ray_triangle.cpp src/geometry/traverse.cpp src/geometry/triangle.cpp)
 set(LIB_CAMERA_SOURCES src/camera/init.cpp src/camera/sample.cpp)
 set(LIB_SCENE_SOURCES src/scene/from_obj.cpp)
 set(LIB_IMAGE_SOURCES src/image/to_ppm.cpp)
