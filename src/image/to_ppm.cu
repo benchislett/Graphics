@@ -1,4 +1,4 @@
-#include "image.h"
+#include "image.cuh"
 
 #include <cstdio>
 

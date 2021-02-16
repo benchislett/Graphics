@@ -1,4 +1,4 @@
-#include "geometry.h"
+#include "geometry.cuh"
 
 #include "gtest/gtest.h"
 

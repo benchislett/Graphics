@@ -1,4 +1,4 @@
-#include "camera.h"
+#include "camera.cuh"
 
 const float3 view_up = make_float3(0.f, 1.f, 0.f);
 

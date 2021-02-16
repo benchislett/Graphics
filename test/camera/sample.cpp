@@ -1,4 +1,4 @@
-#include "camera.h"
+#include "camera.cuh"
 
 #include "gtest/gtest.h"
 
@@ -60,4 +60,3 @@ TEST(Camera_Sample, Init_And_Corners) {
   EXPECT_NEAR(c3.direction.y, +0.2357f, 0.01f);
   EXPECT_NEAR(c3.direction.z, +0.9428f, 0.01f);
 }
-

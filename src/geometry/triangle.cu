@@ -1,4 +1,4 @@
-#include "geometry.h"
+#include "geometry.cuh"
 
 HD float3 interp(const Triangle tri, float u, float v) {
   float w = 1.f - u - v;

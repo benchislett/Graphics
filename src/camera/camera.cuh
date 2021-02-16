@@ -1,7 +1,7 @@
 #pragma once
 
 #include "cu_math.cuh"
-#include "geometry.h"
+#include "geometry.cuh"
 
 struct Camera {
   float3 position;

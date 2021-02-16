@@ -1,4 +1,4 @@
-#include "geometry.h"
+#include "geometry.cuh"
 
 #include <climits>
 #include <cstdio>

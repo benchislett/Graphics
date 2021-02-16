@@ -1,4 +1,4 @@
-#include "camera.h"
+#include "camera.cuh"
 
 HD Ray get_ray(const Camera camera, float u, float v) {
   v                = 1.f - v;

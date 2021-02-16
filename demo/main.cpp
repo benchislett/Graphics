@@ -1,8 +1,8 @@
-#include "camera.h"
+#include "camera.cuh"
 #include "cu_math.cuh"
-#include "geometry.h"
-#include "integrate.h"
-#include "scene.h"
+#include "geometry.cuh"
+#include "integrate.cuh"
+#include "scene.cuh"
 
 #include <SFML/Graphics.hpp>
 #include <cassert>
@@ -22,6 +22,13 @@ int main(int argc, char** argv) {
   scene = from_obj("data/cornell.obj");
 
   sf::RenderWindow window(sf::VideoMode(width, height), "Demo Window", sf::Style::Close);
+
+  sf::Clock clock;
+  sf::Font font;
+  if (!font.loadFromFile("/usr/share/fonts/TTF/DejaVuSans.ttf")) {
+    fprintf(stderr, "Error loading font!\n");
+  }
+
 
   while (window.isOpen()) {
     sf::Event event;
@@ -63,9 +70,20 @@ int main(int argc, char** argv) {
     sf::Sprite image_sprite;
     image_sprite.setTexture(image_tex, true);
 
+    float fps = 1.f / clock.getElapsedTime().asSeconds();
+    clock.restart();
+    sf::Text fps_text;
+    fps_text.setFont(font);
+    fps_text.setString("FPS: " + std::to_string(fps));
+    fps_text.setCharacterSize(24);
+    fps_text.setFillColor(sf::Color::Red);
+
     window.clear();
     window.draw(image_sprite);
+    window.draw(fps_text);
     window.display();
+
+    free(image.data);
   }
 
   return 0;

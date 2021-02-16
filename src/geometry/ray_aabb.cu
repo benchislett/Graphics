@@ -1,4 +1,4 @@
-#include "geometry.h"
+#include "geometry.cuh"
 
 HD HitRecord hit(const Ray ray, const AABB bbox) {
   HitRecord record;

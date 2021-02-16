@@ -1,4 +1,4 @@
-#include "geometry.h"
+#include "geometry.cuh"
 
 constexpr float minHitTime = 0.01f;
 
