@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(benpt LANGUAGES CUDA CXX)
 
-find_package(CUDAToolkit)
+find_package(CUDAToolkit REQUIRED)
 
 set(CMAKE_CUDA_ARCHITECTURES "60")
 
