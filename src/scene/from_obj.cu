@@ -6,13 +6,13 @@
 #include <utility>
 #include <vector>
 
-Scene from_obj(const std::string& filename) {
-  static std::vector<float3> vertices;
-  static std::vector<float3> normals;
-  static std::vector<Triangle> triangles;
-  static std::vector<TriangleNormal> triangle_normals;
-  static std::vector<TriangleEmissivity> triangle_emissivities;
-  static std::vector<int> lights;
+HostScene from_obj(const std::string& filename) {
+  std::vector<float3> vertices;
+  std::vector<float3> normals;
+  std::vector<Triangle> triangles;
+  std::vector<TriangleNormal> triangle_normals;
+  std::vector<TriangleEmissivity> triangle_emissivities;
+  std::vector<int> lights;
 
   TriangleEmissivity current_emit;
   current_emit.intensity = make_float3(0.f);
@@ -64,13 +64,11 @@ Scene from_obj(const std::string& filename) {
     }
   }
 
-  Scene scene;
-  scene.n_triangles  = triangles.size();
-  scene.triangles    = triangles.data();
-  scene.normals      = triangle_normals.data();
-  scene.emissivities = triangle_emissivities.data();
-  scene.n_lights     = lights.size();
-  scene.lights       = lights.data();
+  HostScene scene(triangles.size(), lights.size());
+  std::copy(triangles.begin(), triangles.end(), scene.triangles.data);
+  std::copy(triangle_normals.begin(), triangle_normals.end(), scene.normals.data);
+  std::copy(triangle_emissivities.begin(), triangle_emissivities.end(), scene.emissivities.data);
+  std::copy(lights.begin(), lights.end(), scene.lights.data);
 
   return scene;
 }

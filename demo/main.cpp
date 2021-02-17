@@ -13,13 +13,16 @@ constexpr int width    = 1024;
 constexpr int height   = 1024;
 constexpr float aspect = (float) width / (float) height;
 
-Scene scene;
-float3 position       = make_float3(0.f);
-float3 look_direction = make_float3(0.f, 0.f, -1.f);
-
-Image image;
 int main(int argc, char** argv) {
-  scene = from_obj("data/cornell.obj");
+  HostScene scene = from_obj("data/cornell.obj");
+  DeviceScene device_scene(scene.n_triangles, scene.n_lights);
+  device_scene = scene;
+
+
+  float3 position       = make_float3(0.f);
+  float3 look_direction = make_float3(0.f, 0.f, -1.f);
+
+  Image image;
 
   sf::RenderWindow window(sf::VideoMode(width, height), "Demo Window", sf::Style::Close);
 
@@ -38,18 +41,27 @@ int main(int argc, char** argv) {
         if (event.key.control) {
           pan_factor /= 10.f;
         }
-        if (event.key.code == sf::Keyboard::W) {
+        switch (event.key.code) {
+        case sf::Keyboard::W:
           position.z -= pan_factor;
-        } else if (event.key.code == sf::Keyboard::S) {
+          break;
+        case sf::Keyboard::S:
           position.z += pan_factor;
-        } else if (event.key.code == sf::Keyboard::A) {
+          break;
+        case sf::Keyboard::A:
           position.x -= pan_factor;
-        } else if (event.key.code == sf::Keyboard::D) {
+          break;
+        case sf::Keyboard::D:
           position.x += pan_factor;
-        } else if (event.key.code == sf::Keyboard::Space) {
+          break;
+        case sf::Keyboard::Space:
           position.y += pan_factor;
-        } else if (event.key.code == sf::Keyboard::LShift) {
+          break;
+        case sf::Keyboard::LShift:
           position.y -= pan_factor;
+          break;
+        default:
+          break;
         }
       }
       if (event.type == sf::Event::Closed) {
@@ -59,7 +71,7 @@ int main(int argc, char** argv) {
     }
 
     Camera camera = make_camera(position, look_direction + position, 1.57f, aspect);
-    image         = render(camera, scene, width, height, 1);
+    image         = render(camera, device_scene, width, height, 1);
 
     sf::Image image_data;
     image_data.create(width, height, (const sf::Uint8*) image.data);

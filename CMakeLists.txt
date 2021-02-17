@@ -14,13 +14,14 @@ include_directories("src/geometry/")
 include_directories("src/integrator/")
 
 set(CMAKE_CXX_FLAGS "-Wall -std=c++20")
+set(CMAKE_CUDA_FLAGS "-Wall -ffast-math")
 
 set(DEMO_SOURCES demo/main.cpp)
 set(TEST_SOURCES test/geometry/ray_triangle.cpp test/camera/sample.cpp)
 
 set(LIB_GEOMETRY_SOURCES src/geometry/ray_aabb.cu src/geometry/ray_triangle.cu src/geometry/traverse.cu src/geometry/triangle.cu)
 set(LIB_CAMERA_SOURCES src/camera/init.cu src/camera/sample.cu)
-set(LIB_SCENE_SOURCES src/scene/from_obj.cu)
+set(LIB_SCENE_SOURCES src/scene/scene.cu src/scene/from_obj.cu)
 set(LIB_IMAGE_SOURCES src/image/to_ppm.cu)
 set(LIB_INTEGRATOR_SOURCES src/integrator/path_trace.cu)
 set(LIB_SOURCES ${LIB_GEOMETRY_SOURCES} ${LIB_CAMERA_SOURCES} ${LIB_SCENE_SOURCES} ${LIB_IMAGE_SOURCES} ${LIB_INTEGRATOR_SOURCES})
