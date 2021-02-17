@@ -1,21 +1,8 @@
 #pragma once
 
+#include "cu_misc.cuh"
+
 #include <cfloat>
-#include <cuda.h>
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-
-#define cudaCheckError()                                                               \
-  {                                                                                    \
-    cudaError_t e = cudaGetLastError();                                                \
-    if (e != cudaSuccess) {                                                            \
-      printf("Cuda failure %s:%d: '%s'\n", __FILE__, __LINE__, cudaGetErrorString(e)); \
-      exit(0);                                                                         \
-    }                                                                                  \
-  }
-
-#define HD  __host__ __device__
-#define IHD inline HD
 
 // Host-only code
 #ifndef __CUDACC__
