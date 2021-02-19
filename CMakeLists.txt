@@ -11,6 +11,7 @@ include_directories("src/scene/")
 include_directories("src/image/")
 include_directories("src/camera/")
 include_directories("src/geometry/")
+include_directories("src/cuda_misc/")
 include_directories("src/integrator/")
 
 set(CMAKE_CXX_FLAGS "-Wall -std=c++20")

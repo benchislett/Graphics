@@ -29,10 +29,9 @@ __global__ void render_kernel(const Camera camera, DeviceScene scene, uint3 para
   if (i >= param.x || j >= param.y)
     return;
 
-  float u = (float) j / (float) param.y;
-  float v = (float) i / (float) param.x;
-  // unsigned int spp = param.z;
-
+  float u          = (float) j / (float) param.y;
+  float v          = (float) i / (float) param.x;
+  unsigned int spp = param.z;
 
   Ray ray    = get_ray(camera, u, v);
   float3 val = trace(ray, scene);
