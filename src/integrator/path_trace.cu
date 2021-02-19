@@ -1,3 +1,4 @@
+#include "cu_rand.cuh"
 #include "integrate.cuh"
 
 #include <iostream>
@@ -7,6 +8,7 @@ __device__ float3 trace(const Ray ray, DeviceScene& scene) {
 
   TriangleHitRecord record = first_hit(ray, scene.triangles.data, scene.n_triangles, &which);
   if (record.hit) {
+    return make_float3(1.f);
     int which_vis;
     float3 hit_point  = interp(scene.triangles[which], record.u, record.v);
     float3 hit_normal = interp(scene.normals[which], record.u, record.v);
@@ -22,28 +24,44 @@ __device__ float3 trace(const Ray ray, DeviceScene& scene) {
   return make_float3(0.f);
 }
 
-__global__ void render_kernel(const Camera camera, DeviceScene scene, uint3 param, uchar4* pixels) {
-  unsigned int i = threadIdx.x + blockIdx.x * blockDim.x;
-  unsigned int j = threadIdx.y + blockIdx.y * blockDim.y;
+__global__ void render_kernel(const Camera camera, DeviceScene scene, DeviceRNG rng, uint3 param, uchar4* pixels) {
+  unsigned int i   = threadIdx.x + blockIdx.x * blockDim.x;
+  unsigned int j   = threadIdx.y + blockIdx.y * blockDim.y;
+  unsigned int tid = i * param.y + j;
 
   if (i >= param.x || j >= param.y)
     return;
 
-  float u          = (float) j / (float) param.y;
-  float v          = (float) i / (float) param.x;
   unsigned int spp = param.z;
 
-  Ray ray    = get_ray(camera, u, v);
-  float3 val = trace(ray, scene);
-  val        = clamp(val, 0.f, 1.f);
+  float3 val = make_float3(0.f);
+  for (int k = 0; k < spp; k++) {
+    float u = ((float) j + rng.uniform(tid)) / (float) param.y;
+    float v = ((float) i + rng.uniform(tid)) / (float) param.x;
+
+    Ray ray = get_ray(camera, u, v);
+    val += trace(ray, scene);
+  }
+  val /= (float) spp;
+  val = clamp(val, 0.f, 1.f);
   val *= 255.9999f;
 
   uchar4 pixel = make_uchar4((unsigned char) val.x, (unsigned char) val.y, (unsigned char) val.z, (unsigned char) 255);
 
-  pixels[i * param.y + j] = pixel;
+  pixels[tid] = pixel;
 }
 
 Image render(const Camera camera, DeviceScene& scene, int x, int y, int spp) {
+  // cache on same image size
+  static DeviceRNG rng;
+  static int last_x = 0;
+  static int last_y = 0;
+  if (x != last_x || y != last_y) {
+    rng    = init_rng(x * y);
+    last_x = x;
+    last_y = y;
+  }
+
   Image image;
   image.x    = x;
   image.y    = y;
@@ -56,7 +74,7 @@ Image render(const Camera camera, DeviceScene& scene, int x, int y, int spp) {
 
   dim3 threads(16, 16);
   dim3 blocks(x / threads.x + 1, y / threads.y + 1);
-  render_kernel<<<blocks, threads>>>(camera, scene, make_uint3(x, y, spp), gpu_data);
+  render_kernel<<<blocks, threads>>>(camera, scene, rng, make_uint3(x, y, spp), gpu_data);
   cudaDeviceSynchronize();
   cudaCheckError();
 

@@ -32,7 +32,6 @@ int main(int argc, char** argv) {
     fprintf(stderr, "Error loading font!\n");
   }
 
-
   while (window.isOpen()) {
     sf::Event event;
     while (window.pollEvent(event)) {
@@ -71,7 +70,7 @@ int main(int argc, char** argv) {
     }
 
     Camera camera = make_camera(position, look_direction + position, 1.57f, aspect);
-    image         = render(camera, device_scene, width, height, 1);
+    image         = render(camera, device_scene, width, height, 100);
 
     sf::Image image_data;
     image_data.create(width, height, (const sf::Uint8*) image.data);
