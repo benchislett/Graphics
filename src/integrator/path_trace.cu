@@ -8,7 +8,6 @@ __device__ float3 trace(const Ray ray, DeviceScene& scene) {
 
   TriangleHitRecord record = first_hit(ray, scene.triangles.data, scene.n_triangles, &which);
   if (record.hit) {
-    return make_float3(1.f);
     int which_vis;
     float3 hit_point  = interp(scene.triangles[which], record.u, record.v);
     float3 hit_normal = interp(scene.normals[which], record.u, record.v);
