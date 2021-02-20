@@ -15,9 +15,8 @@ constexpr float aspect = (float) width / (float) height;
 
 int main(int argc, char** argv) {
   HostScene scene = from_obj("data/cornell.obj");
-  DeviceScene device_scene(scene.n_triangles, scene.n_lights);
+  DeviceScene device_scene;
   device_scene = scene;
-
 
   float3 position       = make_float3(0.f);
   float3 look_direction = make_float3(0.f, 0.f, -1.f);
@@ -70,7 +69,7 @@ int main(int argc, char** argv) {
     }
 
     Camera camera = make_camera(position, look_direction + position, 1.57f, aspect);
-    image         = render(camera, device_scene, width, height, 100);
+    image         = render(camera, device_scene, width, height, 1);
 
     sf::Image image_data;
     image_data.create(width, height, (const sf::Uint8*) image.data);
@@ -96,6 +95,9 @@ int main(int argc, char** argv) {
 
     free(image.data);
   }
+
+  scene.destroy();
+  device_scene.destroy();
 
   return 0;
 }
