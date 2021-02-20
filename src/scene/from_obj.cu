@@ -7,12 +7,12 @@
 #include <vector>
 
 HostScene from_obj(const std::string& filename) {
+  HostScene scene;
   std::vector<float3> vertices;
   std::vector<float3> normals;
-  std::vector<Triangle> triangles;
-  std::vector<TriangleNormal> triangle_normals;
-  std::vector<TriangleEmissivity> triangle_emissivities;
-  std::vector<int> lights;
+
+  scene.diffuse_materials.resize(2);
+  scene.diffuse_materials[0] = (DiffuseBRDF){make_float3(1.f, 1.f, 1.f)};
 
   TriangleEmissivity current_emit;
   current_emit.intensity = make_float3(0.f);
@@ -46,11 +46,12 @@ HostScene from_obj(const std::string& filename) {
         v[i]--;
         n[i]--;
       }
-      triangles.push_back((Triangle){vertices[v[0]], vertices[v[1]], vertices[v[2]]});
-      triangle_normals.push_back((TriangleNormal){normals[n[0]], normals[n[1]], normals[n[2]]});
-      triangle_emissivities.push_back(current_emit);
+      scene.triangles.push_back((Triangle){vertices[v[0]], vertices[v[1]], vertices[v[2]]});
+      scene.normals.push_back((TriangleNormal){normals[n[0]], normals[n[1]], normals[n[2]]});
+      scene.emissivities.push_back(current_emit);
+      scene.material_ids.push_back(scene.diffuse_materials.size - 1);
       if (length(current_emit.intensity) > 0.f) {
-        lights.push_back(triangles.size() - 1);
+        scene.lights.push_back(scene.triangles.size - 1);
       }
     } else if (token == "usemtl") {
       tokens >> token;
@@ -64,11 +65,8 @@ HostScene from_obj(const std::string& filename) {
     }
   }
 
-  HostScene scene(triangles.size(), lights.size());
-  std::copy(triangles.begin(), triangles.end(), scene.triangles.data);
-  std::copy(triangle_normals.begin(), triangle_normals.end(), scene.normals.data);
-  std::copy(triangle_emissivities.begin(), triangle_emissivities.end(), scene.emissivities.data);
-  std::copy(lights.begin(), lights.end(), scene.lights.data);
+  scene.n_triangles = scene.triangles.size;
+  scene.n_lights    = scene.lights.size;
 
   return scene;
 }

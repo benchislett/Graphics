@@ -14,7 +14,7 @@ struct DeviceRNG {
   }
 };
 
-__global__ void rng_init_kernel(int xmax, curandState* state) {
+__global__ void rng_init_kernel(unsigned int xmax, curandState* state) {
   unsigned int i = threadIdx.x + blockIdx.x * blockDim.x;
   if (i >= xmax)
     return;

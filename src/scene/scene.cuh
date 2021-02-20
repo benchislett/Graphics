@@ -1,5 +1,6 @@
 #pragma once
 
+#include "bxdf.cuh"
 #include "cu_misc.cuh"
 #include "geometry.cuh"
 
@@ -13,11 +14,19 @@ struct Scene {
   Vector<Triangle> triangles;
   Vector<TriangleNormal> normals;
   Vector<TriangleEmissivity> emissivities;
+  Vector<int> material_ids;
 
   Vector<int> lights;
+  Vector<DiffuseBRDF> diffuse_materials;
 
-  Scene(int n_t, int n_l)
-      : n_triangles(n_t), n_lights(n_l), triangles{n_t}, normals{n_t}, emissivities{n_t}, lights{n_l} {}
+  __host__ void destroy() {
+    triangles.destroy();
+    normals.destroy();
+    emissivities.destroy();
+    material_ids.destroy();
+    lights.destroy();
+    diffuse_materials.destroy();
+  }
 };
 
 struct DeviceScene;
@@ -29,8 +38,6 @@ struct HostScene : Scene<HostVector> {
 };
 
 struct DeviceScene : Scene<DeviceVector> {
-  using Scene::Scene;
-
   DeviceScene& operator=(const HostScene& host_scene);
 };
 

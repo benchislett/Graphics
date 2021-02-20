@@ -17,7 +17,8 @@ __device__ float3 trace(const Ray ray, DeviceScene& scene) {
     Ray vis_ray                  = (Ray){hit_point, normalized(target - hit_point)};
     TriangleHitRecord vis_record = first_hit(vis_ray, scene.triangles.data, scene.n_triangles, &which_vis);
     if (vis_record.hit && which_vis == scene.lights[0]) {
-      return scene.emissivities[scene.lights[0]].intensity / vis_record.time * cosf(dot(vis_ray.direction, hit_normal));
+      return scene.diffuse_materials[0].albedo * scene.emissivities[scene.lights[0]].intensity / vis_record.time
+           * cosf(dot(vis_ray.direction, hit_normal));
     }
   }
   return make_float3(0.f);
