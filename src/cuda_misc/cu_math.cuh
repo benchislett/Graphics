@@ -4,6 +4,10 @@
 
 #include <cfloat>
 
+#define PI          3.14159265359f
+#define INV_PI      0.31830988618f
+#define SQRT_INV_PI 0.56418958354f
+
 // Host-only code
 #ifndef __CUDACC__
 #include <cmath>
@@ -169,10 +173,6 @@ IHD float3 clamp(float3 v, float3 a, float3 b) {
 
 IHD float3 fabsf(float3 v) {
   return make_float3(fabsf(v.x), fabsf(v.y), fabsf(v.z));
-}
-
-IHD float3 reflect(float3 incident, float3 normal) {
-  return incident - normal * (2.0f * dot(normal, incident));
 }
 
 IHD float3 cross(float3 a, float3 b) {
