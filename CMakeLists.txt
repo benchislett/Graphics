@@ -16,7 +16,7 @@ include_directories("src/cuda_misc/")
 include_directories("src/integrator/")
 
 set(CMAKE_CXX_FLAGS "-Wall -std=c++20")
-set(CMAKE_CUDA_FLAGS "-Wall -ffast-math")
+# set(CMAKE_CUDA_FLAGS "-Wall -ffast-math")
 
 set(DEMO_SOURCES demo/main.cpp)
 set(TEST_SOURCES test/geometry/ray_triangle.cpp test/camera/sample.cpp)
