@@ -12,7 +12,7 @@ set(CMAKE_CXX_FLAGS "-Wall -std=c++20")
 set(CMAKE_CUDA_FLAGS "--use_fast_math")
 
 file(GLOB_RECURSE LIB_SOURCES src/*.cu)
-file(GLOB_RECURSE TEST_SOURCES test/*.cu)
+file(GLOB_RECURSE TEST_SOURCES test/*.cpp)
 
 add_library(benpt STATIC ${LIB_SOURCES})
 target_link_libraries(benpt PUBLIC CUDA::cudart)
@@ -20,9 +20,10 @@ target_link_libraries(benpt PUBLIC CUDA::cudart)
 set_target_properties(benpt PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 
 find_package(GTest)
+find_package(embree 3.0)
 if (${GTEST_FOUND})
   add_executable(test ${TEST_SOURCES})
   target_link_libraries(test PRIVATE benpt)
   target_link_libraries(test PRIVATE GTest::GTest GTest::Main)
+  target_link_libraries(test PRIVATE embree)
 endif()
-
