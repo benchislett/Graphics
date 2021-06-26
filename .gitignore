@@ -9,7 +9,8 @@
 *.o
 data/
 *.ppm
-build/
+build/*
+!build/README.md
 output/
 main
 
