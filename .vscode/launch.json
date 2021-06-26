@@ -5,7 +5,7 @@
       "name": "Test",
       "type": "cuda-gdb",
       "request": "launch",
-      "program": "${workspaceFolder}/build/test",
+      "program": "${workspaceFolder}/build/benpt_test",
       "preLaunchTask": "build"
     }
   ]
