@@ -10,12 +10,9 @@ set(CMAKE_CUDA_ARCHITECTURES "60")
 
 include_directories("include/geometry")
 include_directories("include/math")
-include_directories("src/")
+include_directories("include/")
 
 set(CMAKE_CXX_STANDARD 20)
-
-set(CMAKE_CXX_FLAGS "-Wall")
-set(CMAKE_CUDA_FLAGS "")
 
 file(GLOB_RECURSE LIB_SOURCES src/*.cu)
 file(GLOB_RECURSE TEST_SOURCES test/*.cpp)
