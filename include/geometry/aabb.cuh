@@ -1,5 +1,5 @@
 #pragma once
-#include "float3.cuh"
+#include "../math/float3.cuh"
 #include "primitive.cuh"
 
 struct AABB : Primitive {
