@@ -1,6 +1,6 @@
 #include "aabb.cuh"
 
-bool AABB::intersects(Ray r) const {
+AABBIntersection AABB::intersects(Ray r) const {
   double tx1 = (lo.x - r.o.x) / r.d.x;
   double tx2 = (hi.x - r.o.x) / r.d.x;
 
@@ -13,5 +13,8 @@ bool AABB::intersects(Ray r) const {
   tmin = max(tmin, min(ty1, ty2));
   tmax = min(tmax, max(ty1, ty2));
 
-  return tmax >= tmin && tmax >= 0.f;
+  float time = tmin < 0.f ? tmax : tmin;
+  bool hit   = tmax >= tmin && tmax >= 0.f;
+
+  return {time, hit};
 }
