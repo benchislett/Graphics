@@ -7,4 +7,5 @@ struct Ray {
   float3 d;
 
   Ray(float3 o_, float3 d_) : o(o_), d(d_) {}
+  float3 at(float t) const;
 };
