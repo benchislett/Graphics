@@ -4,7 +4,7 @@ project(benpt LANGUAGES CUDA CXX)
 
 find_package(CUDAToolkit REQUIRED)
 find_package(Catch2)
-find_package(embree 3.0)
+find_package(lodepng CONFIG REQUIRED)
 
 set(CMAKE_CUDA_ARCHITECTURES "60")
 
@@ -19,12 +19,12 @@ file(GLOB_RECURSE TEST_SOURCES test/*.cpp)
 
 add_library(benpt STATIC ${LIB_SOURCES})
 target_link_libraries(benpt PUBLIC CUDA::cudart)
+target_link_libraries(benpt PRIVATE lodepng)
 
 set_target_properties(benpt PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 
 add_executable(benpt_test ${TEST_SOURCES})
 target_link_libraries(benpt_test PRIVATE benpt)
-target_link_libraries(benpt_test PRIVATE embree)
 target_link_libraries(benpt_test PRIVATE Catch2::Catch2)
 
 include(CTest)
