@@ -9,6 +9,7 @@ find_package(lodepng CONFIG REQUIRED)
 set(CMAKE_CUDA_ARCHITECTURES "60")
 
 include_directories("include/geometry")
+include_directories("include/image")
 include_directories("include/math")
 include_directories("include/")
 
@@ -19,7 +20,9 @@ file(GLOB_RECURSE TEST_SOURCES test/*.cpp)
 
 add_library(benpt STATIC ${LIB_SOURCES})
 target_link_libraries(benpt PUBLIC CUDA::cudart)
-target_link_libraries(benpt PRIVATE lodepng)
+target_link_libraries(benpt PUBLIC lodepng)
+
+target_compile_options(benpt BEFORE PRIVATE -Wall -Wextra)
 
 set_target_properties(benpt PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 
