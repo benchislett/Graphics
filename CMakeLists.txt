@@ -9,6 +9,7 @@ find_package(lodepng CONFIG REQUIRED)
 set(CMAKE_CUDA_ARCHITECTURES "60")
 
 include_directories("include/geometry")
+include_directories("include/camera")
 include_directories("include/image")
 include_directories("include/math")
 include_directories("include/")
