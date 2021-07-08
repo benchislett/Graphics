@@ -3,6 +3,8 @@
   "C_Cpp.errorSquiggles": "Disabled",
   "files.associations": {
     "__locale": "cpp",
-    "ostream": "cpp"
+    "ostream": "cpp",
+    "__node_handle": "cpp",
+    "regex": "cpp"
   }
 }
