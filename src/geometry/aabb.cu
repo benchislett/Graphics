@@ -13,8 +13,8 @@ AABBIntersection AABB::intersects(Ray r) const {
   tmin = max(tmin, min(ty1, ty2));
   tmax = min(tmax, max(ty1, ty2));
 
-  float time = tmin < 0.f ? tmax : tmin;
-  bool hit   = tmax >= tmin && tmax >= 0.f;
+  float time = tmin < 0.0 ? tmax : tmin;
+  bool hit   = tmax >= tmin && tmax >= 0.0;
 
   return {time, hit};
 }

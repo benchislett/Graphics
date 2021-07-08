@@ -17,26 +17,26 @@ TriangleIntersection Triangle::intersects(Ray r) const {
   if (fabsf(det) < FLT_MIN)
     return no_hit;
 
-  float detInv = 1.0f / det;
+  float detInv = 1.0 / det;
   float3 s     = r.o - v0;
   float u      = detInv * dot(s, h);
 
-  if (u < 0.0f || u > 1.0f)
+  if (u < 0.0 || u > 1.0)
     return no_hit;
 
   float3 q = cross(s, edge0);
   float v  = detInv * dot(r.d, q);
 
-  if (v < 0.0f || u + v > 1.0f)
+  if (v < 0.0 || u + v > 1.0)
     return no_hit;
 
   float time = detInv * dot(edge1, q);
 
-  if (time < 0.01f)
+  if (time < 0.01)
     return no_hit;
 
   float3 point = r.at(time);
-  float3 uvw{u, v, 1.f - u - v};
+  float3 uvw{u, v, 1.0f - u - v};
 
   return {point, uvw, time, true};
 }
