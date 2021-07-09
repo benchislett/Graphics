@@ -5,6 +5,7 @@
     "__locale": "cpp",
     "ostream": "cpp",
     "__node_handle": "cpp",
-    "regex": "cpp"
+    "regex": "cpp",
+    "numbers": "cpp"
   }
 }

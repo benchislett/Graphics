@@ -1,3 +1,5 @@
+#include "float.cuh"
+#include "float3.cuh"
 #include "triangle.cuh"
 
 #include <cassert>
@@ -39,4 +41,14 @@ TriangleIntersection Triangle::intersects(Ray r) const {
   float3 uvw{u, v, 1.0f - u - v};
 
   return {point, uvw, time, true};
+}
+
+float3 TriangleNormals::at(float3 uvw) const {
+  return normalized(uvw.z * n0 + uvw.x * n1 + uvw.y * n2);
+}
+
+float3 TriangleNormals::at(float3 uvw, Ray r) const {
+  float3 normal  = at(uvw);
+  int front_face = -sign(dot(r.d, normal));
+  return normal * front_face;
 }
