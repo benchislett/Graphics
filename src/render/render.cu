@@ -3,27 +3,30 @@
 #include "render.cuh"
 #include "triangle.cuh"
 
-#include <cmath>
+#include <iostream>
 
-Image render_triangle() {
-  Image out(512, 512);
-  Camera cam(M_PI / 3.0, 1.0, {-1, 0, 0}, {1, 0, 0});
-  Triangle t({2, -1, -1}, {2, 1, -1}, {2, 0, 1});
+Image render_normals(Triangle s, Camera cam, unsigned int w, unsigned int h) {
+  Image out(w, h);
+  TriangleNormals normals(s);
 
-  for (int y = 0; y < 512; y++) {
-    for (int x = 0; x < 512; x++) {
-      float u = (float) x / 512.0;
-      float v = (float) y / 512.0;
+  for (unsigned int y = 0; y < h; y++) {
+    for (unsigned int x = 0; x < w; x++) {
+      float u = (float) x / (float) w;
+      float v = (float) y / (float) h;
 
       Ray r = cam.get_ray(u, v);
 
       float3 rgb = {0, 0, 0};
 
-      auto i = t.intersects(r);
-      if (i.hit)
-        rgb = i.uvw;
+      auto i = s.intersects(r);
+      if (i.hit) {
+        auto normal = normalized(normals.at(i.uvw, r));
+        rgb.x       = (normal.x + 1.0) / 2.0;
+        rgb.y       = (normal.y + 1.0) / 2.0;
+        rgb.z       = (normal.z + 1.0) / 2.0;
+      }
 
-      out[y * 512 + x] = rgb;
+      out[y * w + x] = rgb;
     }
   }
 

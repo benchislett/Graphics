@@ -20,8 +20,9 @@ struct Triangle {
 struct TriangleNormals {
   float3 n0, n1, n2;
 
-  TriangleNormals(float3 a) : n0(a), n1(a), n2(a) {}
   TriangleNormals(float3 a, float3 b, float3 c) : n0(a), n1(b), n2(c) {}
+  TriangleNormals(float3 a) : TriangleNormals(a, a, a) {}
+  TriangleNormals(Triangle t) : TriangleNormals(cross(t.v2 - t.v0, t.v1 - t.v0)) {}
 
   float3 at(float3 uvw) const;
   float3 at(float3 uvw, Ray r) const; // Ensures normals are always facing towards the ray
