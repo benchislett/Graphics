@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../camera/camera.cuh"
 #include "../geometry/triangle.cuh"
 #include "../image/image.cuh"
 
