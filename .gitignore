@@ -5,6 +5,10 @@
 *.cubin
 *.fatbin
 
+__pycache__
+*.egg-info
+dist/
+
 *.a
 *.o
 data/
