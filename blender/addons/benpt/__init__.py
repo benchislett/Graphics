@@ -5,7 +5,12 @@ import benptpy
 
 bl_info = {
     "name": "benpt",
+    "author": "Benjamin Chislett",
+    "version": (2, 0, 0),
     "blender": (2, 93, 0),
+    "description": "Benpt blender integration",
+    "location": "Rendering > Render Engine",
+    "warning": "",
     "category": "Render",
 }
 
@@ -46,6 +51,7 @@ class CustomRenderEngine(bpy.types.RenderEngine):
             color = [0.2, 0.0, 0.8, 1.0]
 
         rect = benptpy.render(self.size_x, self.size_y)
+        print(tuple(map(int, benptpy.__version__.split("."))))
         # Here we write the pixel values to the RenderResult
         result = self.begin_result(0, 0, self.size_x, self.size_y)
         layer = result.layers[0].passes["Combined"]

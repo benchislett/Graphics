@@ -23,5 +23,5 @@ PYBIND11_MODULE(benptpy_core, m) {
       },
       "Render");
 
-  m.attr("__version__") = "2.0.0.0";
+  m.attr("__version__") = "2.0.1";
 }
