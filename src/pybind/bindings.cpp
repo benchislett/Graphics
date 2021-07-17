@@ -8,7 +8,9 @@ PYBIND11_MODULE(benptpy_core, m) {
 
   m.def(
       "render",
-      [](int width, int height) {
+      [](const py::int_ w, const py::int_ h) {
+        int width  = w;
+        int height = h;
         std::vector<std::array<float, 4>> out(width * height);
         Triangle t({2, -1, -1}, {2, 1, -1}, {2, 0, 1});
         Camera cam(M_PI / 4.0, 1.0, {-1, 0, 0}, {1, 0, 0});
@@ -20,4 +22,6 @@ PYBIND11_MODULE(benptpy_core, m) {
         return out;
       },
       "Render");
+
+  m.attr("__version__") = "2.0.0.0";
 }

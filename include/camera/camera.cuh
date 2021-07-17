@@ -11,5 +11,5 @@ struct Camera {
 
   Camera(float vfov, float aspect, float3 look_from, float3 look_at);
 
-  Ray get_ray(float u, float v) const;
+  __host__ __device__ Ray get_ray(float u, float v) const;
 };

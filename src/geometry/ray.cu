@@ -1,5 +1,5 @@
 #include "ray.cuh"
 
-float3 Ray::at(float t) const {
+__host__ __device__ float3 Ray::at(float t) const {
   return o + t * d;
 }

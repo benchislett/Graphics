@@ -20,6 +20,6 @@ Camera::Camera(float vfov, float aspect, float3 look_from, float3 look_at) {
   horizontal = u_ * width;
 }
 
-Ray Camera::get_ray(float u, float v) const {
+__host__ __device__ Ray Camera::get_ray(float u, float v) const {
   return Ray(position, lower_left + (u * horizontal) + (v * vertical) - position);
 }

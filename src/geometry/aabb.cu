@@ -1,6 +1,6 @@
 #include "aabb.cuh"
 
-AABBIntersection AABB::intersects(Ray r) const {
+__host__ __device__ AABBIntersection AABB::intersects(Ray r) const {
   double tx1 = (lo.x - r.o.x) / r.d.x;
   double tx2 = (hi.x - r.o.x) / r.d.x;
 

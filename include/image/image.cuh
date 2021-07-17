@@ -16,7 +16,7 @@ struct Image {
   Image(unsigned int w, unsigned int h, float* d) : data((float3*) d), width(w), height(h) {}
   Image(const std::string& filename);
 
-  float3& operator[](int i) {
+  __host__ __device__ float3& operator[](int i) {
     return data[i];
   }
 

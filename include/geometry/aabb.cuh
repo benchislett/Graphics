@@ -10,7 +10,7 @@ struct AABBIntersection {
 struct AABB {
   float3 lo;
   float3 hi;
-  AABB(float3 l, float3 h) : lo(l), hi(h) {}
+  __host__ __device__ AABB(float3 l, float3 h) : lo(l), hi(h) {}
 
-  AABBIntersection intersects(Ray r) const;
+  __host__ __device__ AABBIntersection intersects(Ray r) const;
 };

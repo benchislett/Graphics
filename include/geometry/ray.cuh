@@ -6,6 +6,6 @@ struct Ray {
   float3 o;
   float3 d;
 
-  Ray(float3 o_, float3 d_) : o(o_), d(normalized(d_)) {}
-  float3 at(float t) const;
+  __host__ __device__ Ray(float3 o_, float3 d_) : o(o_), d(normalized(d_)) {}
+  __host__ __device__ float3 at(float t) const;
 };

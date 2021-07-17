@@ -6,7 +6,7 @@
 
 #define FLT_MIN 1.175494351e-38F
 
-TriangleIntersection Triangle::intersects(Ray r) const {
+__host__ __device__ TriangleIntersection Triangle::intersects(Ray r) const {
   TriangleIntersection no_hit = {};
 
   float3 edge0 = v1 - v0;
@@ -43,11 +43,11 @@ TriangleIntersection Triangle::intersects(Ray r) const {
   return {point, uvw, time, true};
 }
 
-float3 TriangleNormals::at(float3 uvw) const {
+__host__ __device__ float3 TriangleNormals::at(float3 uvw) const {
   return normalized(uvw.z * n0 + uvw.x * n1 + uvw.y * n2);
 }
 
-float3 TriangleNormals::at(float3 uvw, Ray r) const {
+__host__ __device__ float3 TriangleNormals::at(float3 uvw, Ray r) const {
   float3 normal  = at(uvw);
   int front_face = -sign(dot(r.d, normal));
   return normal * front_face;
