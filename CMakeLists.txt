@@ -35,8 +35,8 @@ set_target_properties(benpt PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 
 ### SCRIPTS ###
 
-add_executable(render_triangle scripts/render_triangle.cpp)
-target_link_libraries(render_triangle PRIVATE benpt)
+add_executable(render_sphere scripts/render_sphere.cpp)
+target_link_libraries(render_sphere PRIVATE benpt)
 
 ### PYBIND
 

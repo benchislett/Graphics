@@ -6,6 +6,8 @@
     "ostream": "cpp",
     "__node_handle": "cpp",
     "regex": "cpp",
-    "numbers": "cpp"
+    "numbers": "cpp",
+    "__config": "cpp",
+    "random": "cpp"
   }
 }

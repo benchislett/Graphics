@@ -1,7 +1,7 @@
 #include "camera.cuh"
 #include "image.cuh"
 #include "render.cuh"
-#include "triangle.cuh"
+#include "sphere.cuh"
 
 #include <cuda.h>
 #include <iostream>
@@ -15,17 +15,15 @@
     }                                                                                  \
   }
 
-__global__ void render_kernel_normals(Triangle s, Camera cam, float3* out, unsigned int w, unsigned int h) {
+__global__ void render_kernel_normals(Sphere s, Camera cam, float3* out, unsigned int w, unsigned int h) {
   int x = (blockIdx.x * blockDim.x) + threadIdx.x;
   int y = (blockIdx.y * blockDim.y) + threadIdx.y;
 
   if (x >= w || y >= h)
     return;
 
-  TriangleNormals normals(s);
-
-  int spp_x  = 64;
-  int spp_y  = 64;
+  int spp_x  = 4;
+  int spp_y  = 4;
   int spp    = spp_x * spp_y;
   float3 rgb = {0, 0, 0};
 
@@ -36,13 +34,11 @@ __global__ void render_kernel_normals(Triangle s, Camera cam, float3* out, unsig
 
       Ray r = cam.get_ray(u, v);
 
-
       auto i = s.intersects(r);
       if (i.hit) {
-        auto normal = normalized(normals.at(i.uvw, r));
-        rgb.x += (normal.x + 1.0) / 2.0;
-        rgb.y += (normal.y + 1.0) / 2.0;
-        rgb.z += (normal.z + 1.0) / 2.0;
+        rgb.x += (i.normal.x + 1.0) / 2.0;
+        rgb.y += (i.normal.y + 1.0) / 2.0;
+        rgb.z += (i.normal.z + 1.0) / 2.0;
       }
     }
   }
@@ -50,7 +46,7 @@ __global__ void render_kernel_normals(Triangle s, Camera cam, float3* out, unsig
   out[y * w + x] = rgb / (float) spp;
 }
 
-Image render_normals(Triangle s, Camera cam, unsigned int w, unsigned int h) {
+Image render_normals(Sphere s, Camera cam, unsigned int w, unsigned int h) {
   Image out(w, h);
 
   float3* device_out;

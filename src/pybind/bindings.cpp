@@ -12,9 +12,9 @@ PYBIND11_MODULE(benptpy_core, m) {
         int width  = w;
         int height = h;
         std::vector<std::array<float, 4>> out(width * height);
-        Triangle t({2, -1, -1}, {2, 1, -1}, {2, 0, 1});
+        Sphere s({2, 0, 0}, 0.5);
         Camera cam(M_PI / 4.0, 1.0, {-1, 0, 0}, {1, 0, 0});
-        Image img = render_normals(t, cam, width, height);
+        Image img = render_normals(s, cam, width, height);
         for (int i = 0; i < width * height; i++) {
           out[i] = {img[i].x, img[i].y, img[i].z, 1.0};
         }
