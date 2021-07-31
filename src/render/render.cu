@@ -2,6 +2,7 @@
 #include "image.cuh"
 #include "render.cuh"
 #include "sphere.cuh"
+#include "trimesh.cuh"
 
 #include <cuda.h>
 #include <iostream>
@@ -15,7 +16,7 @@
     }                                                                                  \
   }
 
-__global__ void render_kernel_normals(Sphere s, Camera cam, float3* out, unsigned int w, unsigned int h) {
+__global__ void render_kernel_normals(TriMesh m, Camera cam, float3* out, unsigned int w, unsigned int h) {
   int x = (blockIdx.x * blockDim.x) + threadIdx.x;
   int y = (blockIdx.y * blockDim.y) + threadIdx.y;
 
@@ -34,11 +35,15 @@ __global__ void render_kernel_normals(Sphere s, Camera cam, float3* out, unsigne
 
       Ray r = cam.get_ray(u, v);
 
-      auto i = s.intersects(r);
+      auto i   = m.intersects(r);
+      auto tri = i.tri;
+
+      auto normals  = TriangleNormals(tri);
+      float3 normal = normals.at(i.uvw, r);
       if (i.hit) {
-        rgb.x += (i.normal.x + 1.0) / 2.0;
-        rgb.y += (i.normal.y + 1.0) / 2.0;
-        rgb.z += (i.normal.z + 1.0) / 2.0;
+        rgb.x += (normal.x + 1.0) / 2.0;
+        rgb.y += (normal.y + 1.0) / 2.0;
+        rgb.z += (normal.z + 1.0) / 2.0;
       }
     }
   }
@@ -46,22 +51,29 @@ __global__ void render_kernel_normals(Sphere s, Camera cam, float3* out, unsigne
   out[y * w + x] = rgb / (float) spp;
 }
 
-Image render_normals(Sphere s, Camera cam, unsigned int w, unsigned int h) {
+Image render_normals(TriMesh host_mesh, Camera cam, unsigned int w, unsigned int h) {
   Image out(w, h);
 
   float3* device_out;
   cudaMalloc(&device_out, w * h * sizeof(float3));
   cudaCheckError();
 
-  dim3 block(32, 32);
-  dim3 grid((w + 31) / 32, (h + 31) / 32);
-  render_kernel_normals<<<grid, block>>>(s, cam, device_out, w, h);
+  Triangle* device_tris;
+  cudaMalloc(&device_tris, host_mesh.n * sizeof(Triangle));
+  cudaMemcpy(device_tris, host_mesh.tris, host_mesh.n * sizeof(Triangle), cudaMemcpyHostToDevice);
+  cudaCheckError();
+  TriMesh device_mesh(device_tris, host_mesh.n);
+
+  dim3 block(16, 16);
+  dim3 grid((w + 15) / 16, (h + 15) / 16);
+  render_kernel_normals<<<grid, block>>>(device_mesh, cam, device_out, w, h);
   cudaCheckError();
 
   cudaDeviceSynchronize();
   cudaMemcpy(out.data, device_out, w * h * sizeof(float3), cudaMemcpyDeviceToHost);
   cudaCheckError();
   cudaFree(device_out);
+  cudaFree(device_tris);
 
   return out;
 }

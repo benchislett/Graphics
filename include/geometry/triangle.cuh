@@ -12,6 +12,7 @@ struct TriangleIntersection {
 struct Triangle {
   float3 v0, v1, v2;
 
+  __host__ __device__ Triangle() {}
   __host__ __device__ Triangle(float3 a, float3 b, float3 c) : v0(a), v1(b), v2(c) {}
 
   __host__ __device__ TriangleIntersection intersects(Ray r) const;

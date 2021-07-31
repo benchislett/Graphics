@@ -50,7 +50,8 @@ class CustomRenderEngine(bpy.types.RenderEngine):
         else:
             color = [0.2, 0.0, 0.8, 1.0]
 
-        rect = benptpy.render(self.size_x, self.size_y)
+        tris = [[[2, -1, -1], [2, 1, -1], [2, 0, 1]]]
+        rect = benptpy.render(tris, self.size_x, self.size_y)
         print(tuple(map(int, benptpy.__version__.split("."))))
         # Here we write the pixel values to the RenderResult
         result = self.begin_result(0, 0, self.size_x, self.size_y)

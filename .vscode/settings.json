@@ -8,6 +8,12 @@
     "regex": "cpp",
     "numbers": "cpp",
     "__config": "cpp",
-    "random": "cpp"
+    "random": "cpp",
+    "array": "cpp",
+    "string": "cpp",
+    "string_view": "cpp",
+    "vector": "cpp",
+    "ranges": "cpp",
+    "tuple": "cpp"
   }
 }
