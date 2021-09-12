@@ -52,7 +52,6 @@ __host__ __device__ float3 operator/(float3 a, float b);
 
 __host__ __device__ float3 operator/(float b, float3 a);
 
-
 __host__ __device__ float3 fminf(float3 a, float3 b);
 
 __host__ __device__ float3 fmaxf(float3 a, float3 b);

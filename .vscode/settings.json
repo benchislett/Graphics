@@ -15,6 +15,9 @@
     "vector": "cpp",
     "ranges": "cpp",
     "tuple": "cpp",
-    "filesystem": "cpp"
+    "filesystem": "cpp",
+    "deque": "cpp",
+    "map": "cpp",
+    "unordered_map": "cpp"
   }
 }

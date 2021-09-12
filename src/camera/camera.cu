@@ -1,10 +1,10 @@
 #include "camera.cuh"
 
-constexpr float3 view_up = {0.0, 1.0, 0.0};
+constexpr Vec3 view_up(0.0, 1.0, 0.0);
 
-Camera::Camera(float vfov, float aspect, float3 look_from, float3 look_at) {
+Camera::Camera(float vfov, float aspect, Point3 look_from, Point3 look_at) {
   position = look_from;
-  float3 u_, v_, w_;
+  Vec3 u_, v_, w_;
 
   // vfov should be in radians
   float height = 2.0 * tanf(vfov / 2.f);

@@ -38,8 +38,8 @@ __global__ void render_kernel_normals(TriMesh m, Camera cam, float3* out, unsign
       auto i   = m.intersects(r);
       auto tri = i.tri;
 
-      auto normals  = TriangleNormals(tri);
-      float3 normal = normals.at(i.uvw, r);
+      auto normals = TriangleNormals(tri);
+      Vec3 normal  = normals.at(i.uvw, r);
       if (i.hit) {
         rgb.x += (normal.x + 1.0) / 2.0;
         rgb.y += (normal.y + 1.0) / 2.0;

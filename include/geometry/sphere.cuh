@@ -1,21 +1,21 @@
 #pragma once
 
-#include "float3.cuh"
+#include "point.cuh"
 #include "ray.cuh"
-
+#include "vector.cuh"
 
 struct SphereIntersection {
-  float3 normal;
-  float3 point;
+  Vec3 normal;
+  Point3 point;
   float time;
   bool hit;
 };
 
 struct Sphere {
-  float3 center;
+  Point3 center;
   float radius;
 
-  __host__ __device__ Sphere(float3 c, float r) : center(c), radius(r) {}
+  __host__ __device__ Sphere(Point3 c, float r) : center(c), radius(r) {}
 
   __host__ __device__ SphereIntersection intersects(Ray r) const;
 };

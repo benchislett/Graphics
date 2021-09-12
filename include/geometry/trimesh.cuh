@@ -4,7 +4,7 @@
 
 struct TriMeshIntersection {
   Triangle tri;
-  float3 point;
+  Point3 point;
   float3 uvw;
   float time;
   bool hit;

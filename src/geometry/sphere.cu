@@ -6,7 +6,7 @@ __host__ __device__ SphereIntersection Sphere::intersects(Ray r) const {
   SphereIntersection no_hit = {};
 
   float radius2 = radius * radius;
-  float3 L      = center - r.o;
+  Point3 L      = center - r.o;
   float tca     = dot(L, r.d);
   float d2      = dot(L, L) - tca * tca;
   if (d2 > radius2)
@@ -22,8 +22,8 @@ __host__ __device__ SphereIntersection Sphere::intersects(Ray r) const {
   else if (tmin < 0)
     t = tmax;
 
-  float3 point  = r.at(t);
-  float3 normal = normalized(point - center);
+  Point3 isect_point = r.at(t);
+  Vec3 normal        = normalized(isect_point - center);
 
-  return {normal, point, t, true};
+  return {normal, isect_point, t, true};
 }
