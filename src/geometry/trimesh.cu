@@ -18,7 +18,6 @@ __host__ __device__ TriMeshIntersection TriMesh::intersects(Ray r) const {
       isect.time  = ii.time;
       isect.hit   = true;
       isect.tri   = tri;
-      printf("Hit!\n");
     }
   }
 

@@ -2,25 +2,19 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python: Remote Attach",
-      "type": "python",
-      "request": "attach",
-      "connect": {
-        "host": "localhost",
-        "port": 5678
-      },
-      "pathMappings": [
-        {
-          "localRoot": "${workspaceFolder}",
-          "remoteRoot": "."
-        }
-      ]
-    },
-    {
-      "name": "Test",
+      "name": "Run Tests",
       "type": "cuda-gdb",
       "request": "launch",
-      "program": "${workspaceFolder}/build/benpt_test"
+      "program": "${workspaceFolder}/build/benpt_test",
+    },
+    {
+      "name": "Run Frontend",
+      "type": "cuda-gdb",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/render_frontend",
+      "initCommands": [
+        "cd ${workspaceFolder}/build"
+      ]
     }
   ]
 }

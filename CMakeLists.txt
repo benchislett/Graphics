@@ -34,8 +34,8 @@ set_target_properties(benpt PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 
 ### SCRIPTS ###
 
-add_executable(render_sphere scripts/render_sphere.cpp)
-target_link_libraries(render_sphere PRIVATE benpt)
+add_executable(render_frontend scripts/render_frontend.cpp)
+target_link_libraries(render_frontend PRIVATE benpt)
 
 ### TESTS ###
 
