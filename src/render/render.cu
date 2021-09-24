@@ -70,7 +70,7 @@ Image render_normals(TriMesh host_mesh, Camera cam, unsigned int w, unsigned int
   cudaCheckError();
 
   cudaDeviceSynchronize();
-  cudaMemcpy(out.data, device_out, w * h * sizeof(float3), cudaMemcpyDeviceToHost);
+  cudaMemcpy(out.values.data(), device_out, w * h * sizeof(float3), cudaMemcpyDeviceToHost);
   cudaCheckError();
   cudaFree(device_out);
   cudaFree(device_tris);
