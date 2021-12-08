@@ -1,7 +1,10 @@
 #pragma once
 
+#include "integer.cuh"
+
 #include <algorithm>
 #include <cuda_runtime.h>
+#include <limits>
 #include <stdexcept>
 #include <vector>
 
@@ -43,27 +46,52 @@ bool operator!=(const UnifiedMemoryAllocator<T>&, const UnifiedMemoryAllocator<U
   return false;
 }
 
-template <typename T>
-using Vector = std::vector<T, UnifiedMemoryAllocator<T>>;
+// template <typename T>
+// using Vector = std::vector<T, UnifiedMemoryAllocator<T>>;
 
 template <typename T>
-struct DeviceArray {
+struct Vector {
   T* data;
   size_t size;
+  size_t capacity;
 
-  DeviceArray(Vector<T>& src) : data(src.data()), size(src.size()) {}
-
-  __host__ __device__ T& operator[](size_t i) const {
-    if (i >= size)
-      throw std::out_of_range();
-    return data[i];
+  Vector() : data(nullptr), size(0), capacity(0) {}
+  Vector(size_t n) : size(n), capacity(n) {
+    UnifiedMemoryAllocator<T> allocator;
+    data = allocator.allocate(n);
+  }
+  Vector(size_t n, T value) : Vector(n) {
+    std::fill(begin(), end(), value);
   }
 
-  __host__ __device__ T* begin() const {
+  __host__ __device__ T* begin() const noexcept {
     return data;
   }
 
-  __host__ __device__ T* end() const {
+  __host__ __device__ T* end() const noexcept {
     return data + size;
+  }
+
+  __host__ __device__ T& operator[](size_t idx) const {
+    return data[idx];
+  }
+
+  __host__ void reserve(size_t n) {
+    if (n <= capacity) {
+      return;
+    }
+
+    UnifiedMemoryAllocator<T> allocator;
+    T* new_data = allocator.allocate(n);
+    std::copy(begin(), end(), new_data);
+    allocator.deallocate(data);
+    data = new_data;
+
+    capacity = n;
+  }
+
+  __host__ void push_back(const T& value) {
+    reserve(next_power_2(size + 1));
+    data[size++] = value;
   }
 };

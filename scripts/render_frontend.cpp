@@ -9,11 +9,9 @@
 #include <vector>
 
 int main() {
-  std::vector<Triangle> tris;
-  tris.emplace_back((float3){2, -1, -1}, (float3){2, 1, -1}, (float3){2, 0, 1});
-  TriMesh mesh(tris.data(), tris.size());
+  Triangle t((float3){2, -1, -1}, (float3){2, 1, -1}, (float3){2, 0, 1});
   Camera cam(M_PI / 4.0, 1.0, {-1, 0, 0}, {1, 0, 0});
-  Image out = render_normals(mesh, cam, 128, 128);
+  Image out = render_normals(t, cam, 4096, 4096);
   out.to_png("../scripts/output/output.png");
   return 0;
 }

@@ -4,4 +4,4 @@
 #include "../geometry/trimesh.cuh"
 #include "../image/image.cuh"
 
-Image render_normals(TriMesh host_mesh, Camera cam, unsigned int w, unsigned int h);
+Image render_normals(Triangle tri, Camera cam, unsigned int w, unsigned int h);

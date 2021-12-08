@@ -9,7 +9,7 @@
 __host__ __device__ TriMeshIntersection TriMesh::intersects(Ray r) const {
   TriMeshIntersection isect = {};
 
-  for (int i = 0; i < n; i++) {
+  for (size_t i = 0; i < tris.size; i++) {
     auto tri = tris[i];
     auto ii  = tri.intersects(r);
     if (ii.hit && ((!isect.hit) || (ii.time < isect.time))) {

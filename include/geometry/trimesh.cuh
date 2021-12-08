@@ -1,5 +1,6 @@
 #pragma once
 
+#include "alloc.cuh"
 #include "triangle.cuh"
 
 struct TriMeshIntersection {
@@ -10,12 +11,8 @@ struct TriMeshIntersection {
   bool hit;
 };
 
-
 struct TriMesh {
-  Triangle* tris;
-  int n;
-
-  __host__ __device__ TriMesh(Triangle* ts, int n) : tris(ts), n(n) {}
+  Vector<Triangle> tris;
 
   __host__ __device__ TriMeshIntersection intersects(Ray r) const;
 };

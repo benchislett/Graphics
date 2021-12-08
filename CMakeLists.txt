@@ -29,8 +29,6 @@ add_library(benpt STATIC ${LIB_SOURCES})
 target_link_libraries(benpt PUBLIC CUDA::cudart)
 target_link_libraries(benpt PUBLIC lodepng)
 
-target_compile_options(benpt BEFORE PRIVATE -Wall -Wextra)
-
 set_target_properties(benpt PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 
 ### SCRIPTS ###
