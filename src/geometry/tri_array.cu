@@ -1,16 +1,16 @@
 #include "float.cuh"
 #include "float3.cuh"
-#include "trimesh.cuh"
+#include "tri_array.cuh"
 
 #include <cassert>
 #include <cstdio>
 
 
-__host__ __device__ TriMeshIntersection TriMesh::intersects(Ray r) const {
-  TriMeshIntersection isect = {};
+__host__ __device__ TriangleArrayIntersection TriangleArray::intersects(Ray r) const {
+  TriangleArrayIntersection isect = {};
 
-  for (size_t i = 0; i < tris.size; i++) {
-    auto tri = tris[i];
+  for (size_t i = 0; i < size; i++) {
+    auto tri = data[i];
     auto ii  = tri.intersects(r);
     if (ii.hit && ((!isect.hit) || (ii.time < isect.time))) {
       isect.point = ii.point;
@@ -18,6 +18,7 @@ __host__ __device__ TriMeshIntersection TriMesh::intersects(Ray r) const {
       isect.time  = ii.time;
       isect.hit   = true;
       isect.tri   = tri;
+      isect.idx   = i;
     }
   }
 
