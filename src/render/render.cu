@@ -54,19 +54,10 @@ __global__ void render_kernel_normals(Triangle t, Camera cam, float3* out, unsig
 Image render_normals(Triangle tri, Camera cam, unsigned int w, unsigned int h) {
   Image out(w, h);
 
-  float3* device_out;
-  cudaMalloc(&device_out, w * h * sizeof(float3));
-  cudaCheckError();
-
   dim3 block(16, 16);
   dim3 grid((w + 15) / 16, (h + 15) / 16);
-  render_kernel_normals<<<grid, block>>>(tri, cam, device_out, w, h);
-  cudaCheckError();
-
-  cudaMemcpy(out.values.data, device_out, w * h * sizeof(float3), cudaMemcpyDeviceToHost);
-  cudaCheckError();
-
-  cudaFree(device_out);
+  render_kernel_normals<<<grid, block>>>(tri, cam, out.values.data, w, h);
+  cudaDeviceSynchronize();
   cudaCheckError();
 
   return out;

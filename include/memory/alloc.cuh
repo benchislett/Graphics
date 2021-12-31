@@ -46,9 +46,6 @@ bool operator!=(const UnifiedMemoryAllocator<T>&, const UnifiedMemoryAllocator<U
   return false;
 }
 
-// template <typename T>
-// using Vector = std::vector<T, UnifiedMemoryAllocator<T>>;
-
 template <typename T>
 struct Vector {
   T* data;
@@ -84,7 +81,7 @@ struct Vector {
     UnifiedMemoryAllocator<T> allocator;
     T* new_data = allocator.allocate(n);
     std::copy(begin(), end(), new_data);
-    allocator.deallocate(data);
+    allocator.deallocate(data, capacity);
     data = new_data;
 
     capacity = n;
@@ -93,5 +90,10 @@ struct Vector {
   __host__ void push_back(const T& value) {
     reserve(next_power_2(size + 1));
     data[size++] = value;
+  }
+
+  __host__ void release() {
+    UnifiedMemoryAllocator<T> allocator;
+    allocator.deallocate(data, capacity);
   }
 };
