@@ -1,6 +1,6 @@
 #include "camera.cuh"
 
-constexpr Vec3 view_up(0.0, 1.0, 0.0);
+constexpr Vec3 view_up(0.0, -1.0, 0.0);
 
 Camera::Camera(float vfov, float aspect, Point3 look_from, Point3 look_at) {
   position = look_from;

@@ -81,7 +81,6 @@ Image render_normals(TriangleArray tris, Vector<TriangleNormals> normals_arr, Ca
                      unsigned int h) {
   Image out(w, h);
 
-
   unsigned int spp = 1;
 
   unsigned int total_paths = w * h * spp;

@@ -15,6 +15,7 @@ include_directories("include/render")
 include_directories("include/timing")
 include_directories("include/image")
 include_directories("include/math")
+include_directories("include/io")
 include_directories("include/")
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
