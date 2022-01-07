@@ -9,16 +9,19 @@
 __host__ __device__ TriangleArrayIntersection TriangleArray::intersects(Ray r) const {
   TriangleArrayIntersection isect = {};
 
-  for (size_t i = 0; i < size; i++) {
-    auto tri = data[i];
+  for (size_t i = 0; i < tris.size; i++) {
+    auto tri = tris[i];
     auto ii  = tri.intersects(r);
     if (ii.hit && ((!isect.hit) || (ii.time < isect.time))) {
-      isect.point = ii.point;
-      isect.uvw   = ii.uvw;
-      isect.time  = ii.time;
-      isect.hit   = true;
-      isect.tri   = tri;
-      isect.idx   = i;
+      auto normals = tri_normals[i];
+
+      isect.normal = normals.at(ii.uvw, r);
+      isect.point  = ii.point;
+      isect.uvw    = ii.uvw;
+      isect.time   = ii.time;
+      isect.hit    = true;
+      isect.tri    = tri;
+      isect.idx    = i;
     }
   }
 

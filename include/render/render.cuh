@@ -1,9 +1,8 @@
 #pragma once
 
-#include "../camera/camera.cuh"
-#include "../geometry/tri_array.cuh"
-#include "../geometry/triangle.cuh"
-#include "../image/image.cuh"
+#include "camera.cuh"
+#include "image.cuh"
+#include "tri_array.cuh"
+#include "triangle.cuh"
 
-Image render_normals(TriangleArray tris, Vector<TriangleNormals> normals_arr, Camera cam, unsigned int w,
-                     unsigned int h);
+Image render_normals(TriangleArray primitives, Camera cam, unsigned int w, unsigned int h);

@@ -11,8 +11,7 @@ struct OBJScene {
   Vector<Point3> vertices;
   Vector<Point3> normals;
 
-  TriangleArray tris;
-  Vector<TriangleNormals> tri_normals;
+  TriangleArray primitives;
 };
 
 OBJScene load_obj(const std::string& filename);

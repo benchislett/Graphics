@@ -54,7 +54,7 @@ __global__ void init_paths(Vector<Path> pq, Camera cam, unsigned int w, unsigned
   pq[idx] = {r, {0, 0, 0}, x, y, true};
 }
 
-__global__ void advance_paths(TriangleArray tris, Vector<TriangleNormals> normals_arr, Vector<Path> pq, Image out) {
+__global__ void advance_paths(TriangleArray tris, Vector<Path> pq, Image out, float spp) {
   unsigned int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
 
   if (idx >= pq.size)
@@ -66,20 +66,23 @@ __global__ void advance_paths(TriangleArray tris, Vector<TriangleNormals> normal
   auto i = tris.intersects(r);
 
   if (i.hit) {
-    auto normals = normals_arr[i.idx];
-
-    Vec3 normal = normals.at(i.uvw, r);
+    Vec3 normal = i.normal;
     p.L.x += (normal.x + 1.0) / 2.0;
     p.L.y += (normal.y + 1.0) / 2.0;
     p.L.z += (normal.z + 1.0) / 2.0;
   }
 
-  out[p.py * out.width + p.px] = p.L;
+  out[p.py * out.width + p.px] += p.L / spp;
 }
 
-Image render_normals(TriangleArray tris, Vector<TriangleNormals> normals_arr, Camera cam, unsigned int w,
-                     unsigned int h) {
+Image render_normals(TriangleArray tris, Camera cam, unsigned int w, unsigned int h) {
+  ScopedMicroTimer x_([&](int us) { printf("Rendered in %.2f ms\n", (double) us / 1000.0); });
+
   Image out(w, h);
+
+  for (int i = 0; i < w * h; i++) {
+    out[i] = {0, 0, 0};
+  }
 
   unsigned int spp = 1;
 
@@ -88,8 +91,6 @@ Image render_normals(TriangleArray tris, Vector<TriangleNormals> normals_arr, Ca
   unsigned int path_queue_size = min(total_paths, 1024 * 1024);
   Vector<Path> path_queue(path_queue_size);
 
-  ScopedMicroTimer x_([&](int us) { printf("Rendered in %.2f ms\n", (double) us / 1000.0); });
-
   unsigned int paths_processed = 0, rounds = 0;
   while (paths_processed < total_paths) {
     dim3 block(128);
@@ -97,7 +98,7 @@ Image render_normals(TriangleArray tris, Vector<TriangleNormals> normals_arr, Ca
     init_paths<<<grid, block>>>(path_queue, cam, w, h, spp, paths_processed);
     cudaDeviceSynchronize();
     cudaCheckError();
-    advance_paths<<<grid, block>>>(tris, normals_arr, path_queue, out);
+    advance_paths<<<grid, block>>>(tris, path_queue, out, (float) spp);
     cudaDeviceSynchronize();
     cudaCheckError();
 

@@ -13,7 +13,7 @@ int main() {
   auto scene = load_obj("../scripts/scenes/CornellBox-Sphere.obj");
 
   Camera cam(M_PI / 4.0, 1.0, {1.8, 2, 3}, {0, 0, 0});
-  Image out = render_normals(scene.tris, scene.tri_normals, cam, 512, 512);
+  Image out = render_normals(scene.primitives, cam, 512, 512);
   out.to_png("../scripts/output/output.png");
   return 0;
 }

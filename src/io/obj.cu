@@ -44,10 +44,10 @@ OBJScene load_obj(const std::string& filename) {
         }
 
         if (ret >= 6) {
-          scene.tris.push_back(Triangle(scene.vertices[vertices[0] - 1], scene.vertices[vertices[1] - 1],
-                                        scene.vertices[vertices[2] - 1]));
-          scene.tri_normals.push_back(TriangleNormals(scene.normals[normals[0] - 1], scene.normals[normals[1] - 1],
-                                                      scene.normals[normals[2] - 1]));
+          scene.primitives.tris.push_back(Triangle(scene.vertices[vertices[0] - 1], scene.vertices[vertices[1] - 1],
+                                                   scene.vertices[vertices[2] - 1]));
+          scene.primitives.tri_normals.push_back(TriangleNormals(
+              scene.normals[normals[0] - 1], scene.normals[normals[1] - 1], scene.normals[normals[2] - 1]));
         }
       }
     }
