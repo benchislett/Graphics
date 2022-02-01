@@ -18,3 +18,10 @@ __host__ __device__ AABBIntersection AABB::intersects(Ray r) const {
 
   return {time, hit};
 }
+
+__host__ __device__ AABB AABB::plus(AABB other) const {
+  Point3 small = fminf(lo, other.lo);
+  Point3 big   = fmaxf(hi, other.hi);
+
+  return AABB(small, big);
+}

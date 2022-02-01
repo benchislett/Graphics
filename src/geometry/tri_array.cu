@@ -27,3 +27,23 @@ __host__ __device__ TriangleArrayIntersection TriangleArray::intersects(Ray r) c
 
   return isect;
 }
+
+__host__ __device__ TriangleArrayIntersection TriangleArray::intersects(Ray r, int idx) const {
+  TriangleArrayIntersection isect = {};
+
+  auto tri = tris[idx];
+  auto ii  = tri.intersects(r);
+  if (ii.hit) {
+    auto normals = tri_normals[idx];
+
+    isect.normal = normals.at(ii.uvw, r);
+    isect.point  = ii.point;
+    isect.uvw    = ii.uvw;
+    isect.time   = ii.time;
+    isect.hit    = true;
+    isect.tri    = tri;
+    isect.idx    = idx;
+  }
+
+  return isect;
+}

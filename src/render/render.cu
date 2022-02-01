@@ -1,3 +1,4 @@
+#include "bvh.cuh"
 #include "camera.cuh"
 #include "image.cuh"
 #include "render.cuh"
@@ -54,7 +55,7 @@ __global__ void init_paths(Vector<Path> pq, Camera cam, unsigned int w, unsigned
   pq[idx] = {r, {0, 0, 0}, x, y, true};
 }
 
-__global__ void advance_paths(TriangleArray tris, Vector<Path> pq, Image out, float spp) {
+__global__ void advance_paths(BVH bvh, Vector<Path> pq, Image out, float spp) {
   unsigned int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
 
   if (idx >= pq.size)
@@ -63,10 +64,12 @@ __global__ void advance_paths(TriangleArray tris, Vector<Path> pq, Image out, fl
   Path p = pq[idx];
   Ray r  = p.cur;
 
-  auto i = tris.intersects(r);
+  auto i = bvh.intersects(r);
 
   if (i.hit) {
+    pq[idx].cur = Ray(i.point, i.normal);
     Vec3 normal = i.normal;
+    // // p.L += normal;
     p.L.x += (normal.x + 1.0) / 2.0;
     p.L.y += (normal.y + 1.0) / 2.0;
     p.L.z += (normal.z + 1.0) / 2.0;
@@ -84,6 +87,8 @@ Image render_normals(TriangleArray tris, Camera cam, unsigned int w, unsigned in
     out[i] = {0, 0, 0};
   }
 
+  BVH bvh(tris);
+
   unsigned int spp = 1;
 
   unsigned int total_paths = w * h * spp;
@@ -98,8 +103,12 @@ Image render_normals(TriangleArray tris, Camera cam, unsigned int w, unsigned in
     init_paths<<<grid, block>>>(path_queue, cam, w, h, spp, paths_processed);
     cudaDeviceSynchronize();
     cudaCheckError();
-    advance_paths<<<grid, block>>>(tris, path_queue, out, (float) spp);
+    advance_paths<<<grid, block>>>(bvh, path_queue, out, (float) spp);
     cudaDeviceSynchronize();
+    // advance_paths<<<grid, block>>>(bvh, path_queue, out, (float) spp);
+    // cudaDeviceSynchronize();
+    // advance_paths<<<grid, block>>>(bvh, path_queue, out, (float) spp);
+    // cudaDeviceSynchronize();
     cudaCheckError();
 
     rounds++;

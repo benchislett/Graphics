@@ -10,9 +10,9 @@
 #include <vector>
 
 int main() {
-  auto scene = load_obj("../scripts/scenes/CornellBox-Sphere.obj");
+  auto scene = load_obj("../scripts/scenes/CornellBox-Original.obj");
 
-  Camera cam(M_PI / 4.0, 1.0, {1.8, 2, 3}, {0, 0, 0});
+  Camera cam(M_PI / 4.0, 1.0, {0, 5, 10}, {0, 2, 0});
   Image out = render_normals(scene.primitives, cam, 512, 512);
   out.to_png("../scripts/output/output.png");
   return 0;

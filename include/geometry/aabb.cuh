@@ -1,6 +1,8 @@
 #pragma once
+
 #include "point.cuh"
 #include "ray.cuh"
+#include "triangle.cuh"
 
 struct AABBIntersection {
   float time;
@@ -10,7 +12,12 @@ struct AABBIntersection {
 struct AABB {
   Point3 lo;
   Point3 hi;
+
+  __host__ __device__ AABB() : lo{0, 0, 0}, hi{0, 0, 0} {}
   __host__ __device__ AABB(Point3 l, Point3 h) : lo(l), hi(h) {}
+  __host__ __device__ AABB(Triangle tri)
+      : lo(fminf(fminf(tri.v0, tri.v1), tri.v2)), hi(fmaxf(fmaxf(tri.v0, tri.v1), tri.v2)) {}
 
   __host__ __device__ AABBIntersection intersects(Ray r) const;
+  __host__ __device__ AABB plus(AABB other) const;
 };

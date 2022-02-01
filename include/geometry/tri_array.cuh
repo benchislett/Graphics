@@ -18,4 +18,5 @@ struct TriangleArray {
   Vector<TriangleNormals> tri_normals;
 
   __host__ __device__ TriangleArrayIntersection intersects(Ray r) const;
+  __host__ __device__ TriangleArrayIntersection intersects(Ray r, int idx) const;
 };

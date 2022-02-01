@@ -24,7 +24,8 @@ struct Triangle {
 struct TriangleNormals {
   Vec3 n0, n1, n2;
 
-  __host__ __device__ TriangleNormals(Vec3 a, Vec3 b, Vec3 c) : n0(a), n1(b), n2(c) {}
+  __host__ __device__ TriangleNormals(Vec3 a, Vec3 b, Vec3 c)
+      : n0(normalized(a)), n1(normalized(b)), n2(normalized(c)) {}
   __host__ __device__ TriangleNormals(Vec3 a) : TriangleNormals(a, a, a) {}
   __host__ __device__ TriangleNormals(Triangle t) : TriangleNormals(cross(t.v2 - t.v0, t.v1 - t.v0)) {}
 
