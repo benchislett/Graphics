@@ -1,14 +1,18 @@
 #include "bvh.cuh"
 #include "host_rand.cuh"
+#include "scoped_timer.cuh"
 #include "triangle.cuh"
 
 #include <algorithm>
+#include <iostream>
 #include <queue>
 #include <stack>
 #include <tuple>
 #include <vector>
 
 __host__ BVH::BVH(TriangleArray tris) : primitives(tris) {
+  ScopedMicroTimer x_([&](int us) { printf("BVH constructed in %.2f ms\n", (double) us / 1000.0); });
+
   auto sort_range = [&](int low, int high, int axis) {
     if (high - low < 2) {
       return;
@@ -45,7 +49,7 @@ __host__ BVH::BVH(TriangleArray tris) : primitives(tris) {
   tq.push(std::make_pair(0, primitives.tris.size));
 
   // std::random_shuffle(primitives.tris.begin(), primitives.tris.end());
-  sort_range(0, primitives.tris.size, 2);
+  sort_range(0, primitives.tris.size, rand_in_range(0, 2));
 
   while (!tq.empty()) {
     auto [low, high] = tq.front();
@@ -54,7 +58,7 @@ __host__ BVH::BVH(TriangleArray tris) : primitives(tris) {
     if (high - low == 1) {
       tree.push_back(BVHNode{AABB(primitives.tris[low]), -low - 1, -low - 1});
     } else {
-      sort_range(low, high, 0);
+      sort_range(low, high, rand_in_range(0, 2));
 
       int cur_idx  = tree.size;
       int next_idx = cur_idx + tq.size() + 1;
@@ -81,8 +85,6 @@ __host__ __device__ TriangleArrayIntersection BVH::intersects(Ray r) const {
   int stack[64];
   int n_stack = 0;
 
-  return primitives.intersects(r);
-
   if (!tree[0].box.intersects(r).hit)
     return isect;
 
@@ -92,14 +94,11 @@ __host__ __device__ TriangleArrayIntersection BVH::intersects(Ray r) const {
     BVHNode node = tree[stack[--n_stack]];
 
     if (node.left < 0 || node.right < 0) {
-      auto i_left  = primitives.intersects(r, -(node.left + 1));
-      auto i_right = primitives.intersects(r, -(node.right + 1));
+      auto i = primitives.intersects(r, -(node.left + 1));
 
-      if (i_left.hit && (!isect.hit || i_left.time < isect.time))
-        isect = i_left;
+      if (i.hit && (!isect.hit || i.time < isect.time))
+        isect = i;
 
-      if (i_right.hit && (!isect.hit || i_right.time < isect.time))
-        isect = i_right;
     } else {
       auto left  = tree[node.left];
       auto right = tree[node.right];

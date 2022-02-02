@@ -79,7 +79,6 @@ __global__ void advance_paths(BVH bvh, Vector<Path> pq, Image out, float spp) {
 }
 
 Image render_normals(TriangleArray tris, Camera cam, unsigned int w, unsigned int h) {
-  ScopedMicroTimer x_([&](int us) { printf("Rendered in %.2f ms\n", (double) us / 1000.0); });
 
   Image out(w, h);
 
@@ -89,7 +88,9 @@ Image render_normals(TriangleArray tris, Camera cam, unsigned int w, unsigned in
 
   BVH bvh(tris);
 
-  unsigned int spp = 1;
+  ScopedMicroTimer x_([&](int us) { printf("Rendered in %.2f ms\n", (double) us / 1000.0); });
+
+  unsigned int spp = 4;
 
   unsigned int total_paths = w * h * spp;
 
