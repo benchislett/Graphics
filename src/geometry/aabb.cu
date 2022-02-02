@@ -25,3 +25,7 @@ __host__ __device__ AABB AABB::plus(AABB other) const {
 
   return AABB(small, big);
 }
+
+__host__ __device__ Point3 AABB::centroid() const {
+  return (lo + hi) / 2.f;
+}

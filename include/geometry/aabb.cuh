@@ -20,4 +20,5 @@ struct AABB {
 
   __host__ __device__ AABBIntersection intersects(Ray r) const;
   __host__ __device__ AABB plus(AABB other) const;
+  __host__ __device__ Point3 centroid() const;
 };
