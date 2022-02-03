@@ -29,3 +29,12 @@ __host__ __device__ AABB AABB::plus(AABB other) const {
 __host__ __device__ Point3 AABB::centroid() const {
   return (lo + hi) / 2.f;
 }
+
+__host__ __device__ Vec3 AABB::length() const {
+  return hi - lo;
+}
+
+__host__ __device__ float AABB::surface_area() const {
+  Vec3 l = length();
+  return 2 * (l.x * l.y + l.x * l.z + l.y * l.z);
+}

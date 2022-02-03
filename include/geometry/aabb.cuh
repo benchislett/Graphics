@@ -20,5 +20,9 @@ struct AABB {
 
   __host__ __device__ AABBIntersection intersects(Ray r) const;
   __host__ __device__ AABB plus(AABB other) const;
+
   __host__ __device__ Point3 centroid() const;
+  __host__ __device__ Vec3 length() const;
+
+  __host__ __device__ float surface_area() const;
 };

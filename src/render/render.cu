@@ -90,7 +90,7 @@ Image render_normals(TriangleArray tris, Camera cam, unsigned int w, unsigned in
 
   ScopedMicroTimer x_([&](int us) { printf("Rendered in %.2f ms\n", (double) us / 1000.0); });
 
-  unsigned int spp = 4;
+  unsigned int spp = 1;
 
   unsigned int total_paths = w * h * spp;
 
@@ -104,6 +104,22 @@ Image render_normals(TriangleArray tris, Camera cam, unsigned int w, unsigned in
     init_paths<<<grid, block>>>(path_queue, cam, w, h, spp, paths_processed);
     cudaDeviceSynchronize();
     cudaCheckError();
+    // for (int idx = 0; idx < path_queue_size; idx++) {
+    //   Path p = path_queue[idx];
+    //   Ray r  = p.cur;
+
+    //   auto i = bvh.intersects(r);
+
+    //   if (i.hit) {
+    //     path_queue[idx].cur = Ray(i.point, i.normal);
+    //     Vec3 normal         = i.normal;
+    //     // // p.L += normal;
+    //     p.L.x += (normal.x + 1.0) / 2.0;
+    //     p.L.y += (normal.y + 1.0) / 2.0;
+    //     p.L.z += (normal.z + 1.0) / 2.0;
+    //   }
+    //   out[p.py * out.width + p.px] += p.L / spp;
+    // }
     advance_paths<<<grid, block>>>(bvh, path_queue, out, (float) spp);
     cudaDeviceSynchronize();
     // advance_paths<<<grid, block>>>(bvh, path_queue, out, (float) spp);
