@@ -176,11 +176,9 @@ void Build(Vector<BVHNode>& tree, int root_idx, int num_primitives, int primitiv
 
   assert(n_left + n_right == num_primitives);
 
-  tree[root_idx].left  = tree.size;
-  tree[root_idx].right = tree.size + 1;
-  tree.size += 2;
-
+  tree[root_idx].left = tree.size++;
   Build(tree, tree[root_idx].left, n_left, primitives_offset, primitives);
+  tree[root_idx].right = tree.size++;
   Build(tree, tree[root_idx].right, n_right, primitives_offset + n_left, primitives);
 }
 
@@ -213,17 +211,12 @@ __host__ __device__ TriangleArrayIntersection BVH::intersects(Ray r) const {
 
   stack[n_stack++] = 0;
 
-  int primitive_tests = 0;
-  int biggest_node    = 0;
-
   while (n_stack > 0) {
     BVHNode node = tree[stack[--n_stack]];
 
     if (node.left < 0 || node.right < 0) {
       int begin          = -(node.left + 1);
       int num_primitives = -(node.right);
-      primitive_tests += num_primitives;
-      biggest_node = max(biggest_node, num_primitives);
       for (int i = begin; i < begin + num_primitives; i++) {
         auto ii = primitives.intersects(r, i);
 
@@ -237,9 +230,9 @@ __host__ __device__ TriangleArrayIntersection BVH::intersects(Ray r) const {
       auto i_left  = left.box.intersects(r);
       auto i_right = right.box.intersects(r);
 
-      if (i_left.hit)
+      if (i_left.hit && (!isect.hit || i_left.time < isect.time))
         stack[n_stack++] = node.left;
-      if (i_right.hit)
+      if (i_right.hit && (!isect.hit || i_right.time < isect.time))
         stack[n_stack++] = node.right;
     }
     assert(n_stack < 64);

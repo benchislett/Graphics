@@ -1,17 +1,17 @@
 #include "aabb.cuh"
 
 __host__ __device__ AABBIntersection AABB::intersects(Ray r) const {
-  double tx1 = (lo.x - r.o.x) / r.d.x;
-  double tx2 = (hi.x - r.o.x) / r.d.x;
+  float tx1 = (lo.x - r.o.x) / r.d.x;
+  float tx2 = (hi.x - r.o.x) / r.d.x;
 
-  double tmin = min(tx1, tx2);
-  double tmax = max(tx1, tx2);
+  float tmin = fminf(tx1, tx2);
+  float tmax = fmaxf(tx1, tx2);
 
-  double ty1 = (lo.y - r.o.y) / r.d.y;
-  double ty2 = (hi.y - r.o.y) / r.d.y;
+  float ty1 = (lo.y - r.o.y) / r.d.y;
+  float ty2 = (hi.y - r.o.y) / r.d.y;
 
-  tmin = max(tmin, min(ty1, ty2));
-  tmax = min(tmax, max(ty1, ty2));
+  tmin = fmaxf(tmin, fminf(ty1, ty2));
+  tmax = fminf(tmax, fmaxf(ty1, ty2));
 
   float time = tmin < 0.0 ? tmax : tmin;
   bool hit   = tmax >= tmin && tmax >= 0.0;
