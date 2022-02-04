@@ -65,111 +65,107 @@ void Build(Vector<BVHNode>& tree, int root_idx, int num_primitives, int primitiv
     }
   };
 
-  if (which_bin_coeff_x == INFINITY || which_bin_coeff_y == INFINITY || which_bin_coeff_z == INFINITY) {
-    n_left               = num_primitives / 2;
-    n_right              = num_primitives - n_left;
-    tree[root_idx].left  = tree.size;
-    tree[root_idx].right = tree.size + 1;
-    tree.size += 2;
+  if (which_bin_coeff_x != INFINITY && which_bin_coeff_y != INFINITY && which_bin_coeff_z != INFINITY) {
 
-    Build(tree, tree[root_idx].left, n_left, primitives_offset, primitives);
-    Build(tree, tree[root_idx].right, n_right, primitives_offset + n_left, primitives);
-    return;
-  }
 
-  // // Determine the cost for splitting along each bin border
-  float current_cost = num_primitives * bin_region.surface_area();
+    // // Determine the cost for splitting along each bin border
+    float current_cost = num_primitives * bin_region.surface_area();
 
-  int num_splits = num_bins - 1;
+    int num_splits = num_bins - 1;
 
-  int min_splits[3];
-  float sah_bin_split_costs[num_splits][3] = {};
+    int min_splits[3];
+    float sah_bin_split_costs[num_splits][3] = {};
 
-  for (int axis = 0; axis < 3; axis++) {
+    for (int axis = 0; axis < 3; axis++) {
 
-    // Calculate bounding box and number of tris per bin
-    int num_tris_per_bin[num_bins]       = {};
-    AABB centroid_bbox_per_bin[num_bins] = {};
+      // Calculate bounding box and number of tris per bin
+      int num_tris_per_bin[num_bins]       = {};
+      AABB centroid_bbox_per_bin[num_bins] = {};
+      for (int i = primitives_offset; i < num_primitives + primitives_offset; i++) {
+        int which = bin_for_tri(i, axis);
+
+        AABB tri_bbox      = AABB(primitives.tris[i]);
+        AABB centroid_bbox = AABB(tri_bbox.centroid(), tri_bbox.centroid());
+
+        num_tris_per_bin[which]++;
+        centroid_bbox_per_bin[which] = centroid_bbox_per_bin[which].plus(centroid_bbox);
+      }
+
+      // First pass: analyze cost for splits from the left
+      for (int i = 1; i < num_bins; i++) {
+        int num_tris_on_left = 0;
+        AABB bbox_from_left;
+        for (int j = 0; j < i; j++) {
+          num_tris_on_left += num_tris_per_bin[j];
+          bbox_from_left = bbox_from_left.plus(centroid_bbox_per_bin[j]);
+        }
+        sah_bin_split_costs[i - 1][axis] += num_tris_on_left * bbox_from_left.surface_area();
+      }
+
+      // Second pass: analyze cost for splits from the right
+      for (int i = num_splits; i > 0; i--) {
+        int num_tris_on_right = 0;
+        AABB bbox_from_right;
+        for (int j = num_splits; j >= i; j--) {
+          num_tris_on_right += num_tris_per_bin[j];
+          bbox_from_right = bbox_from_right.plus(centroid_bbox_per_bin[j]);
+        }
+        sah_bin_split_costs[i - 1][axis] += num_tris_on_right * bbox_from_right.surface_area();
+      }
+
+      // Determine split with the least cost
+      int min_idx = 0;
+
+      for (int i = 1; i < num_splits; i++) {
+        if (sah_bin_split_costs[i][axis] < sah_bin_split_costs[min_idx][axis]) {
+          min_idx = i;
+        }
+      }
+
+      int min_split    = min_idx + 1;
+      min_splits[axis] = min_split;
+    }
+
+    // Determine which axis is cheapest to split on
+    int min_axis = 0;
+    if (sah_bin_split_costs[min_splits[1] - 1][1] < sah_bin_split_costs[min_splits[min_axis] - 1][min_axis])
+      min_axis = 1;
+    if (sah_bin_split_costs[min_splits[2] - 1][2] < sah_bin_split_costs[min_splits[min_axis] - 1][min_axis])
+      min_axis = 2;
+
+    // Partition primitives
+    int begin = primitives_offset;
+    int end   = begin + num_primitives;
+    while (begin < end - 1) {
+      int which = bin_for_tri(begin, min_axis);
+      if (which >= min_splits[min_axis]) {
+        // left triangle belongs on the right
+        while (bin_for_tri(end - 1, min_axis) >= min_splits[min_axis]) {
+          end--;
+        }
+        // right triangle now belongs on the left. swap!
+        std::swap(primitives.tris[begin], primitives.tris[end - 1]);
+        std::swap(primitives.tri_normals[begin], primitives.tri_normals[end - 1]);
+      }
+      begin++;
+    }
+
     for (int i = primitives_offset; i < num_primitives + primitives_offset; i++) {
-      int which = bin_for_tri(i, axis);
-
-      AABB tri_bbox      = AABB(primitives.tris[i]);
-      AABB centroid_bbox = AABB(tri_bbox.centroid(), tri_bbox.centroid());
-
-      num_tris_per_bin[which]++;
-      centroid_bbox_per_bin[which] = centroid_bbox_per_bin[which].plus(centroid_bbox);
-    }
-
-    // First pass: analyze cost for splits from the left
-    for (int i = 1; i < num_bins; i++) {
-      int num_tris_on_left = 0;
-      AABB bbox_from_left;
-      for (int j = 0; j < i; j++) {
-        num_tris_on_left += num_tris_per_bin[j];
-        bbox_from_left = bbox_from_left.plus(centroid_bbox_per_bin[j]);
-      }
-      sah_bin_split_costs[i - 1][axis] += num_tris_on_left * bbox_from_left.surface_area();
-    }
-
-    // Second pass: analyze cost for splits from the right
-    for (int i = num_splits; i > 0; i--) {
-      int num_tris_on_right = 0;
-      AABB bbox_from_right;
-      for (int j = num_splits; j >= i; j--) {
-        num_tris_on_right += num_tris_per_bin[j];
-        bbox_from_right = bbox_from_right.plus(centroid_bbox_per_bin[j]);
-      }
-      sah_bin_split_costs[i - 1][axis] += num_tris_on_right * bbox_from_right.surface_area();
-    }
-
-    // Determine split with the least cost
-    int min_idx = 0;
-
-    for (int i = 1; i < num_splits; i++) {
-      if (sah_bin_split_costs[i][axis] < sah_bin_split_costs[min_idx][axis]) {
-        min_idx = i;
+      if (bin_for_tri(i, min_axis) < min_splits[min_axis]) {
+        n_left++;
+      } else {
+        n_right++;
       }
     }
 
-    int min_split    = min_idx + 1;
-    min_splits[axis] = min_split;
-  }
-
-  // Determine which axis is cheapest to split on
-  int min_axis = 0;
-  if (sah_bin_split_costs[min_splits[1] - 1][1] < sah_bin_split_costs[min_splits[min_axis] - 1][min_axis])
-    min_axis = 1;
-  if (sah_bin_split_costs[min_splits[2] - 1][2] < sah_bin_split_costs[min_splits[min_axis] - 1][min_axis])
-    min_axis = 2;
-
-  // Partition primitives
-  int begin = primitives_offset;
-  int end   = begin + num_primitives;
-  while (begin < end - 1) {
-    int which = bin_for_tri(begin, min_axis);
-    if (which >= min_splits[min_axis]) {
-      // left triangle belongs on the right
-      while (bin_for_tri(end - 1, min_axis) >= min_splits[min_axis]) {
-        end--;
-      }
-      // right triangle now belongs on the left. swap!
-      std::swap(primitives.tris[begin], primitives.tris[end - 1]);
-      std::swap(primitives.tri_normals[begin], primitives.tri_normals[end - 1]);
+    // Base case, if tree is small enough make a leaf node
+    if ((n_left <= primitives_per_leaf || n_right <= primitives_per_leaf)
+        || sah_bin_split_costs[min_splits[min_axis] - 1][min_axis] == current_cost) {
+      n_left  = num_primitives / 2;
+      n_right = num_primitives - n_left;
     }
-    begin++;
-  }
 
-  for (int i = primitives_offset; i < num_primitives + primitives_offset; i++) {
-    if (bin_for_tri(i, min_axis) < min_splits[min_axis]) {
-      n_left++;
-    } else {
-      n_right++;
-    }
-  }
-
-  // Base case, if tree is small enough make a leaf node
-  if ((n_left <= primitives_per_leaf || n_right <= primitives_per_leaf)
-      || sah_bin_split_costs[min_splits[min_axis] - 1][min_axis] == current_cost) {
+  } else {
     n_left  = num_primitives / 2;
     n_right = num_primitives - n_left;
   }
@@ -180,6 +176,7 @@ void Build(Vector<BVHNode>& tree, int root_idx, int num_primitives, int primitiv
   Build(tree, tree[root_idx].left, n_left, primitives_offset, primitives);
   tree[root_idx].right = tree.size++;
   Build(tree, tree[root_idx].right, n_right, primitives_offset + n_left, primitives);
+  tree[root_idx].box = tree[tree[root_idx].left].box.plus(tree[tree[root_idx].right].box);
 }
 
 __host__ BVH::BVH(TriangleArray tris) : primitives(tris) {
@@ -188,15 +185,6 @@ __host__ BVH::BVH(TriangleArray tris) : primitives(tris) {
   tree.reserve(8 * primitives.tris.size + 1);
 
   Build(tree, 0, primitives.tris.size, 0, primitives);
-
-  for (auto it = std::prev(tree.end()); it >= tree.begin(); it--) {
-    BVHNode node = *it;
-    if (node.left >= 0 && node.right >= 0) {
-      BVHNode left  = tree[node.left];
-      BVHNode right = tree[node.right];
-      it->box       = left.box.plus(right.box);
-    }
-  }
 }
 
 __host__ __device__ TriangleArrayIntersection BVH::intersects(Ray r) const {
