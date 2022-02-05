@@ -13,7 +13,17 @@ struct BVH {
   TriangleArray primitives;
   Vector<BVHNode> tree;
 
+  cudaChannelFormatDesc channelDesc;
+  cudaArray_t cuArray;
+  struct cudaResourceDesc resDesc;
+  struct cudaTextureDesc texDesc;
+  cudaTextureObject_t texObj;
+
+  texture<float4, 1> t_;
+
   __host__ BVH(TriangleArray tris);
 
-  __host__ __device__ TriangleArrayIntersection intersects(Ray r) const;
+  __device__ BVHNode fetch_node(int idx) const;
+
+  __device__ TriangleArrayIntersection intersects(Ray r) const;
 };

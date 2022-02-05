@@ -185,9 +185,53 @@ __host__ BVH::BVH(TriangleArray tris) : primitives(tris) {
   tree.reserve(8 * primitives.tris.size + 1);
 
   Build(tree, 0, primitives.tris.size, 0, primitives);
+
+  float* data;
+  cudaMalloc(&data, tree.size * sizeof(BVHNode));
+  cudaMemcpy(data, tree.begin(), tree.size * sizeof(BVHNode), cudaMemcpyDefault);
+
+  channelDesc = cudaCreateChannelDesc<float4>();
+
+  // Specify texture
+  memset(&resDesc, 0, sizeof(resDesc));
+  resDesc.resType                = cudaResourceTypeLinear;
+  resDesc.res.linear.devPtr      = data;
+  resDesc.res.linear.sizeInBytes = tree.size * sizeof(BVHNode);
+  resDesc.res.linear.desc        = channelDesc;
+
+  // Specify texture object parameters
+  memset(&texDesc, 0, sizeof(texDesc));
+  texDesc.addressMode[0]   = cudaAddressModeBorder;
+  texDesc.addressMode[1]   = cudaAddressModeBorder;
+  texDesc.filterMode       = cudaFilterModePoint;
+  texDesc.readMode         = cudaReadModeElementType;
+  texDesc.normalizedCoords = 0;
+
+  // Create texture object
+  texObj = 0;
+  cudaCreateTextureObject(&texObj, &resDesc, &texDesc, NULL);
+  cudaCheckError();
 }
 
-__host__ __device__ TriangleArrayIntersection BVH::intersects(Ray r) const {
+__device__ BVHNode BVH::fetch_node(int idx) const {
+  return tree[idx];
+
+  float4 data0 = tex1Dfetch<float4>(texObj, 2 * idx + 0);
+  float4 data1 = tex1Dfetch<float4>(texObj, 2 * idx + 1);
+  BVHNode node;
+  node.box.lo.x = data0.x;
+  node.box.lo.y = data0.y;
+  node.box.lo.z = data0.z;
+  node.box.hi.x = data0.w;
+  node.box.hi.y = data1.x;
+  node.box.hi.z = data1.y;
+  node.right    = *(int*) (&data1.z);
+  node.left     = *(int*) (&data1.w);
+
+  return node;
+}
+
+__device__ TriangleArrayIntersection BVH::intersects(Ray r) const {
   TriangleArrayIntersection isect = {};
   int stack[64];
   int n_stack = 0;
@@ -200,7 +244,8 @@ __host__ __device__ TriangleArrayIntersection BVH::intersects(Ray r) const {
   stack[n_stack++] = 0;
 
   while (n_stack > 0) {
-    BVHNode node = tree[stack[--n_stack]];
+    int fetch_idx = stack[--n_stack];
+    BVHNode node  = fetch_node(fetch_idx);
 
     if (node.left < 0 || node.right < 0) {
       int begin          = -(node.left + 1);
@@ -212,16 +257,28 @@ __host__ __device__ TriangleArrayIntersection BVH::intersects(Ray r) const {
           isect = ii;
       }
     } else {
-      auto left  = tree[node.left];
-      auto right = tree[node.right];
+      auto left  = fetch_node(node.left);
+      auto right = fetch_node(node.right);
 
       auto i_left  = left.box.intersects(r);
       auto i_right = right.box.intersects(r);
 
-      if (i_left.hit && (!isect.hit || i_left.time < isect.time))
+      i_left.hit  = i_left.hit && (!isect.hit || i_left.time < isect.time);
+      i_right.hit = i_right.hit && (!isect.hit || i_right.time < isect.time);
+
+      if (i_left.hit && i_right.hit) {
+        if (i_left.time > i_right.time) {
+          stack[n_stack++] = node.left;
+          stack[n_stack++] = node.right;
+        } else {
+          stack[n_stack++] = node.right;
+          stack[n_stack++] = node.left;
+        }
+      } else if (i_left.hit) {
         stack[n_stack++] = node.left;
-      if (i_right.hit && (!isect.hit || i_right.time < isect.time))
+      } else if (i_right.hit) {
         stack[n_stack++] = node.right;
+      }
     }
     assert(n_stack < 64);
   }

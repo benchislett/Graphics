@@ -3,13 +3,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
-#include <fstream>
 #include <iostream>
-#include <sstream>
-
-static inline void rtrim(std::string& s) {
-  s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), s.end());
-}
 
 OBJScene load_obj(const std::string& filename) {
   OBJScene scene{};
