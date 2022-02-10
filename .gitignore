@@ -35,3 +35,4 @@ _deps
 # Scene files
 *.mtl
 *.obj
+scripts/scenes/
