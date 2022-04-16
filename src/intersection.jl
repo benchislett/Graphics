@@ -3,6 +3,7 @@ module Intersections
 using LinearAlgebra
 
 using ..GeometryTypes
+using ..OBJ
 
 const hitepsilon = 0.001
 
@@ -53,7 +54,21 @@ function intersection(tri::Triangle, ray::Ray)::TriangleIntersection
 
   uvw = [u, v, 1.0 - u - v]
 
-  return TriangleIntersection(uvw, time, true)
+  TriangleIntersection(uvw, time, true)
+end
+
+function intersection(scene::OBJMeshScene, ray::Ray)::TriangleIntersection
+  closest = TriangleIntersection(false)
+  for tri in scene.triangles
+    isect = intersection(tri, ray)
+    if !hit_test(isect)
+      continue
+    elseif !hit_test(closest) || hit_time(isect) < hit_time(closest)
+      closest = isect
+    end
+  end
+
+  closest
 end
 
 hit_test(isect::TriangleIntersection) = isect.hit
@@ -90,7 +105,7 @@ function intersection(sphere::Sphere, ray::Ray)::SphereIntersection
     time = root1
   end
 
-  return SphereIntersection(time, true)
+  SphereIntersection(time, true)
 end
 
 hit_test(isect::SphereIntersection) = isect.hit

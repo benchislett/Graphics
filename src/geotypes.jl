@@ -4,6 +4,7 @@ using StaticArrays
 
 export Vector3, Vector3f, Vector3i, Point3, Point3f, Point3i, Scalar
 export Ray, Triangle, Sphere
+export Scene
 
 const Scalar = Float32
 
@@ -30,5 +31,7 @@ struct Sphere
   center::Point3f
   radius::Scalar
 end
+
+abstract type Scene end
 
 end
