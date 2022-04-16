@@ -1,6 +1,5 @@
 using Test
 
-include("../src/lib.jl")
 using .GraphicsCore.Cameras
 using .GraphicsCore.GeometryTypes
 

@@ -1,6 +1,5 @@
 using Test
 
-include("../src/lib.jl")
 using .GraphicsCore.Intersections
 using .GraphicsCore.GeometryTypes
 
@@ -14,7 +13,6 @@ using .GraphicsCore.GeometryTypes
     @test intersect_test(tri, ray)
     @test intersection(tri, ray).time ≈ 2
     @test intersection(tri, ray).uvw ≈ [0.25, 0.5, 0.25]
-    @test intersection(tri, ray).point ≈ [2, 0, 0]
 
     ray = Ray([0, 0, 0], [1, 0, 0])
     tri = Triangle([-2, -1, -1], [-2, 1, -1], [-2, 0, 1])
@@ -27,12 +25,23 @@ using .GraphicsCore.GeometryTypes
     @test intersect_test(tri, ray)
     @test intersection(tri, ray).time ≈ 2
     @test intersection(tri, ray).uvw ≈ [0.25, 0.5, 0.25]
-    @test intersection(tri, ray).point ≈ [-2, 0, 0]
 
     ray = Ray([0, 0, 0], [-1, 0, 0])
     tri = Triangle([2, -1, -1], [2, 1, -1], [2, 0, 1])
 
     @test !intersect_test(tri, ray)
+  end
+
+  @testset "Sphere Intersections" begin
+    sphere = Sphere([2, 3, 4], 4.9)
+    ray = Ray([8, 0, 0], [-1, 0, 0])
+
+    @test !intersect_test(sphere, ray)
+
+    sphere = Sphere([2, 3, 4], 6)
+
+    @test intersect_test(sphere, ray)
+    @test intersection(sphere, ray).time ≈ 2.68337
   end
 
 end
