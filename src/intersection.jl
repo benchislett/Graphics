@@ -6,7 +6,7 @@ using ..GeometryTypes
 
 const hitepsilon = 0.001
 
-export Intersection, TriangleIntersection, intersection, intersect_test
+export Intersection, TriangleIntersection, intersection, hit_test, hit_time
 
 abstract type Intersection end
 
@@ -56,9 +56,8 @@ function intersection(tri::Triangle, ray::Ray)::TriangleIntersection
   return TriangleIntersection(uvw, time, true)
 end
 
-function intersect_test(tri::Triangle, ray::Ray)::Bool
-  return intersection(tri, ray).hit
-end
+hit_test(isect::TriangleIntersection) = isect.hit
+hit_time(isect::TriangleIntersection) = isect.time
 
 struct SphereIntersection <: Intersection
   time::Scalar
@@ -94,8 +93,7 @@ function intersection(sphere::Sphere, ray::Ray)::SphereIntersection
   return SphereIntersection(time, true)
 end
 
-function intersect_test(sphere::Sphere, ray::Ray)::Bool
-  return intersection(sphere, ray).hit
-end
+hit_test(isect::SphereIntersection) = isect.hit
+hit_time(isect::SphereIntersection) = isect.time
 
 end
