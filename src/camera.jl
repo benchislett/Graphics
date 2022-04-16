@@ -2,8 +2,7 @@ module Cameras
 
 using LinearAlgebra
 
-include("./geotypes.jl")
-using .GeometryTypes
+using ..GeometryTypes
 
 const viewup = Vector3f(0, 1, 0)
 

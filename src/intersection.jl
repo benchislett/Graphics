@@ -1,10 +1,8 @@
 module Intersections
 
-
 using LinearAlgebra
 
-include("./geotypes.jl")
-using .GeometryTypes
+using ..GeometryTypes
 
 const hitepsilon = 0.001
 

@@ -1,9 +1,8 @@
 using Test
 
-include("../src/camera.jl")
-include("../src/geotypes.jl")
-using .Cameras
-using .GeometryTypes
+include("../src/lib.jl")
+using .GraphicsCore.Cameras
+using .GraphicsCore.GeometryTypes
 
 @testset verbose = true "Camera Tests" begin
   @testset "Perspective Camera" begin

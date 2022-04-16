@@ -1,9 +1,8 @@
 using Test
 
-include("../src/intersection.jl")
-include("../src/geotypes.jl")
-using .Intersections
-using .GeometryTypes
+include("../src/lib.jl")
+using .GraphicsCore.Intersections
+using .GraphicsCore.GeometryTypes
 
 @testset verbose = true "Intersection Tests" begin
   @testset "Triangle Intersections" begin
