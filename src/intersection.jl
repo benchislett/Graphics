@@ -6,7 +6,7 @@ using ..GeometryTypes
 
 const hitepsilon = 0.001
 
-export Intersection, TriangleIntersection, intersect, intersect_test
+export Intersection, TriangleIntersection, intersection, intersect_test
 
 abstract type Intersection end
 
@@ -20,7 +20,7 @@ end
 TriangleIntersection(hit::Bool) =
   TriangleIntersection(zero(Point3f), zero(Vector3f), 0.0, hit)
 
-function intersect(tri::Triangle, ray::Ray)::TriangleIntersection
+function intersection(tri::Triangle, ray::Ray)::TriangleIntersection
   edge1 = tri.vertices[2] - tri.vertices[1]
   edge2 = tri.vertices[3] - tri.vertices[1]
 
@@ -59,7 +59,7 @@ function intersect(tri::Triangle, ray::Ray)::TriangleIntersection
 end
 
 function intersect_test(tri::Triangle, ray::Ray)::Bool
-  return intersect(tri, ray).hit
+  return intersection(tri, ray).hit
 end
 
 end
