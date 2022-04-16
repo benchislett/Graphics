@@ -2,7 +2,7 @@ module GeometryTypes
 
 using StaticArrays
 
-export Vector3, Vector3f, Vector3i, Point3, Point3f, Point3i, Ray
+export Vector3, Vector3f, Vector3i, Point3, Point3f, Point3i, Ray, Triangle
 
 const Vector3{T} = SVector{3,T} where {T<:Number}
 const Vector3f = Vector3{Float32}
@@ -16,5 +16,11 @@ struct Ray
   origin::Point3f
   direction::Vector3f
 end
+
+struct Triangle
+  vertices::SVector{3,Point3f}
+end
+
+Triangle(v1, v2, v3) = Triangle([v1, v2, v3])
 
 end
