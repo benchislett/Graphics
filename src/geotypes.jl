@@ -1,9 +1,10 @@
 module GeometryTypes
 
-using StaticArrays
+using StaticArrays, LinearAlgebra
 
 export Vector3, Vector3f, Vector3i, Point3, Point3f, Point3i, Scalar
 export Ray, Triangle, Sphere
+export TriangleNormals, interpolate
 export Scene
 
 const Scalar = Float32
@@ -26,6 +27,20 @@ struct Triangle
 end
 
 Triangle(v1, v2, v3) = Triangle([v1, v2, v3])
+
+struct TriangleNormals
+  normals::SVector{3,Vector3f}
+end
+
+TriangleNormals(n1, n2, n3) = TriangleNormals([n1, n2, n3])
+TriangleNormals(normal::Vector3f) = TriangleNormals([normal, normal, normal])
+TriangleNormals(tri::Triangle) =
+  TriangleNormals(normalize(cross(
+    tri.vertices[2] - tri.vertices[1],
+    tri.vertices[3] - tri.vertices[1]
+  )))
+
+interpolate(n::TriangleNormals, uvw::Vector3f) = sum(n.normals .* uvw)
 
 struct Sphere
   center::Point3f

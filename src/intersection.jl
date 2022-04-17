@@ -7,18 +7,22 @@ using ..OBJ
 
 const hitepsilon = 0.001
 
-export Intersection, TriangleIntersection, intersection, hit_test, hit_time
+export Intersection, TriangleIntersection
+export intersection
+export hit_test, hit_time, hit_point, hit_normal
 
 abstract type Intersection end
 
 struct TriangleIntersection <: Intersection
   uvw::Vector3f
+  point::Point3f
+  normal::Vector3f
   time::Scalar
   hit::Bool
 end
 
 TriangleIntersection(hit::Bool) =
-  TriangleIntersection(zero(Vector3f), 0.0, hit)
+  TriangleIntersection(zero(Vector3f), zero(Vector3f), zero(Vector3f), 0.0, hit)
 
 function intersection(tri::Triangle, ray::Ray)::TriangleIntersection
   edge1 = tri.vertices[2] - tri.vertices[1]
@@ -52,19 +56,23 @@ function intersection(tri::Triangle, ray::Ray)::TriangleIntersection
     return TriangleIntersection(false)
   end
 
+  point = ray.origin + time * ray.direction
+  normal = TriangleNormals(tri).normals[1]
   uvw = [u, v, 1.0 - u - v]
 
-  TriangleIntersection(uvw, time, true)
+  TriangleIntersection(uvw, point, normal, time, true)
 end
 
 function intersection(scene::OBJMeshScene, ray::Ray)::TriangleIntersection
   closest = TriangleIntersection(false)
-  for tri in scene.triangles
+  for i in eachindex(scene.triangles)
+    tri = scene.triangles[i]
     isect = intersection(tri, ray)
     if !hit_test(isect)
       continue
     elseif !hit_test(closest) || hit_time(isect) < hit_time(closest)
-      closest = isect
+      normal = interpolate(scene.normals[i], isect.uvw)
+      closest = TriangleIntersection(isect.uvw, isect.point, normal, isect.time, isect.hit)
     end
   end
 
@@ -73,6 +81,8 @@ end
 
 hit_test(isect::TriangleIntersection) = isect.hit
 hit_time(isect::TriangleIntersection) = isect.time
+hit_point(isect::TriangleIntersection) = isect.point
+hit_normal(isect::TriangleIntersection) = isect.normal
 
 struct SphereIntersection <: Intersection
   time::Scalar
