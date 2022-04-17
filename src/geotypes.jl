@@ -5,7 +5,7 @@ using StaticArrays, LinearAlgebra
 export Vector3, Vector3f, Vector3i, Point3, Point3f, Point3i, Scalar
 export Ray, Triangle, Sphere
 export TriangleNormals, interpolate
-export Scene
+export Hittable
 
 const Scalar = Float32
 
@@ -17,12 +17,14 @@ const Point3{T} = SVector{3,T} where {T<:Number}
 const Point3f = Point3{Scalar}
 const Point3i = Point3{Int64}
 
+abstract type Hittable end
+
 struct Ray
   origin::Point3f
   direction::Vector3f
 end
 
-struct Triangle
+struct Triangle <: Hittable
   vertices::SVector{3,Point3f}
 end
 
@@ -42,11 +44,9 @@ TriangleNormals(tri::Triangle) =
 
 interpolate(n::TriangleNormals, uvw::Vector3f) = sum(n.normals .* uvw)
 
-struct Sphere
+struct Sphere <: Hittable
   center::Point3f
   radius::Scalar
 end
-
-abstract type Scene end
 
 end

@@ -3,9 +3,10 @@ module Intersections
 using LinearAlgebra
 
 using ..GeometryTypes
+using ..SDFs
 using ..OBJ
 
-const hitepsilon = 0.001
+const hitepsilon = 0.001f0
 
 export Intersection, TriangleIntersection
 export intersection
@@ -85,11 +86,13 @@ hit_point(isect::TriangleIntersection) = isect.point
 hit_normal(isect::TriangleIntersection) = isect.normal
 
 struct SphereIntersection <: Intersection
+  point::Point3f
+  normal::Vector3f
   time::Scalar
   hit::Bool
 end
 
-SphereIntersection(hit::Bool) = SphereIntersection(0.0, hit)
+SphereIntersection(hit::Bool) = SphereIntersection(zero(Point3f), zero(Vector3f), 0.0, hit)
 
 function intersection(sphere::Sphere, ray::Ray)::SphereIntersection
   oc = ray.origin - sphere.center
@@ -115,10 +118,58 @@ function intersection(sphere::Sphere, ray::Ray)::SphereIntersection
     time = root1
   end
 
-  SphereIntersection(time, true)
+  point = ray.origin + time * ray.direction
+  normal = normalize(point - sphere.center)
+  SphereIntersection(point, normal, time, true)
 end
 
 hit_test(isect::SphereIntersection) = isect.hit
 hit_time(isect::SphereIntersection) = isect.time
+hit_point(isect::SphereIntersection) = isect.point
+hit_normal(isect::SphereIntersection) = isect.normal
+
+struct SDFIntersection
+  point::Point3f
+  normal::Vector3f
+  time::Scalar
+  hit::Bool
+end
+
+SDFIntersection(hit::Bool) = SDFIntersection(zero(Point3f), zero(Vector3f), 0.0, hit)
+
+# Sphere Tracing
+function intersection(f::SDF, ray::Ray)
+  e = 0.00001
+  dist = Inf32
+  point = ray.origin
+  time = 0
+  steps = 0
+  while abs(dist) > e
+    dist = sample(f, point)
+    time += dist
+    point += dist * ray.direction
+    steps += 1
+
+    if steps > 10000 || abs(dist) > 1000
+      return SDFIntersection(false)
+    end
+  end
+
+  e = 0.001
+  dx = Point3f(e, 0, 0)
+  dy = Point3f(0, e, 0)
+  dz = Point3f(0, 0, e)
+  xdev = sample(f, point + dx) - sample(f, point - dx)
+  ydev = sample(f, point + dy) - sample(f, point - dy)
+  zdev = sample(f, point + dz) - sample(f, point - dz)
+  normal = normalize([xdev, ydev, zdev])
+
+  SDFIntersection(point, normal, time, true)
+end
+
+hit_test(isect::SDFIntersection) = isect.hit
+hit_time(isect::SDFIntersection) = isect.time
+hit_point(isect::SDFIntersection) = isect.point
+hit_normal(isect::SDFIntersection) = isect.normal
 
 end

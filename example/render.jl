@@ -6,15 +6,14 @@ using .GraphicsCore.Renderer
 using .GraphicsCore.OBJ
 using .GraphicsCore.Cameras
 using .GraphicsCore.GeometryTypes
+using .GraphicsCore.SDFs
 
-width = 2048
-height = 2048
+width = 128
+height = 128
 
-scene = OBJMeshScene("bunny.obj")
-# scene = OBJMeshScene([Triangle([-0.5, 0, 0], [1, 0, 0], [0, 2, 0])])
-cam = PerspectiveCamera(width / height, π / 6.3, [-0.3, 1.8, 4], [-0.3, 0.8, 0])
+scene = CubeSDF([0, 0, 0], 1)
+cam = PerspectiveCamera(width / height, π / 4, [3, 3, 3], [0, 0, 0])
 
 @time img = render(scene, cam, width, height)
 img = map(x -> isnan(x) ? RGB(1, 1, 1) : x, img)
 plot(img)
-png("bunny.png")

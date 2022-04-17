@@ -1,6 +1,7 @@
 module Renderer
 
 using ColorTypes
+using LinearAlgebra
 
 using ..GeometryTypes
 using ..Cameras
@@ -9,7 +10,7 @@ using ..Intersections
 
 export render
 
-function render(scene::Scene, camera::Camera, width::Integer, height::Integer)
+function render(scene::Hittable, camera::Camera, width::Integer, height::Integer)
   img = RGB.(zeros(width, height))
 
   for x in 1:width
@@ -22,6 +23,7 @@ function render(scene::Scene, camera::Camera, width::Integer, height::Integer)
 
       if hit_test(isect)
         normal = hit_normal(isect)
+        normal = (1 .+ normal) ./ 2
         img[y, x] = RGB(normal...)
       end
 

@@ -6,7 +6,7 @@ using ..GeometryTypes
 
 export OBJMeshScene
 
-struct OBJMeshScene <: Scene
+struct OBJMeshScene <: Hittable
   triangles::Vector{Triangle}
   normals::Vector{TriangleNormals}
 end
