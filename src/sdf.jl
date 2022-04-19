@@ -3,7 +3,7 @@ module SDFs
 using ..GeometryTypes
 using LinearAlgebra
 
-export SDF, SphereSDF, CubeSDF
+export SDF, SphereSDF, CubeSDF, DifferenceSDF
 export sample
 
 abstract type SDF <: Hittable end
@@ -21,5 +21,12 @@ struct CubeSDF <: SDF
 end
 
 sample(f::CubeSDF, point::Point3f) = max(abs.(point - f.origin)...) - f.length
+
+struct DifferenceSDF <: SDF
+  a::SDF
+  b::SDF
+end
+
+sample(f::DifferenceSDF, point::Point3f) = max(sample(f.a, point), -sample(f.b, point))
 
 end
