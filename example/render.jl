@@ -8,10 +8,11 @@ using .GraphicsCore.Cameras
 using .GraphicsCore.GeometryTypes
 using .GraphicsCore.SDFs
 
-width = 128
-height = 128
+width = 32
+height = 32
 
-scene = CubeSDF([0, 0, 0], 1)
+# scene = DifferenceSDF(CubeSDF([0, 0, 0], 1), SphereSDF([0, 0, 0], 1.2))
+scene = loadobjmesh("bunny.obj")
 cam = PerspectiveCamera(width / height, π / 4, [3, 3, 3], [0, 0, 0])
 
 @time img = render(scene, cam, width, height)

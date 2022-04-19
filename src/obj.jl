@@ -4,19 +4,9 @@ using GeometryBasics: Mesh, coordinates, faces, normals
 using FileIO
 using ..GeometryTypes
 
-export OBJMeshScene
+export loadobjmesh
 
-struct OBJMeshScene <: Hittable
-  triangles::Vector{Triangle}
-  normals::Vector{TriangleNormals}
-end
-
-function OBJMeshScene(tris::Vector{Triangle})
-  trinormals = map(TriangleNormals, tris)
-  OBJMeshScene(tris, trinormals)
-end
-
-function OBJMeshScene(filename::String)
+function loadobjmesh(filename::String)
   mesh::Mesh = load(filename)
 
   function facetotri(f)
@@ -32,12 +22,11 @@ function OBJMeshScene(filename::String)
   tris = map(facetotri, faces(mesh))
 
   if isnothing(normals(mesh))
-    trinormals = map(TriangleNormals, tris)
+    return TriangleArray(tris)
   else
     trinormals = map(facetonormals, faces(mesh))
+    return TriangleArray(tris, trinormals)
   end
-
-  OBJMeshScene(tris, trinormals)
 end
 
 end

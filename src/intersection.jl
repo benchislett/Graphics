@@ -8,8 +8,8 @@ using ..OBJ
 
 const hitepsilon = 0.001f0
 
-export Intersection, TriangleIntersection
 export intersection
+export Intersection, TriangleIntersection, TriangleArrayIntersection, SphereIntersection, SDFIntersection
 export hit_test, hit_time, hit_point, hit_normal
 
 abstract type Intersection end
@@ -64,26 +64,44 @@ function intersection(tri::Triangle, ray::Ray)::TriangleIntersection
   TriangleIntersection(uvw, point, normal, time, true)
 end
 
-function intersection(scene::OBJMeshScene, ray::Ray)::TriangleIntersection
-  closest = TriangleIntersection(false)
-  for i in eachindex(scene.triangles)
-    tri = scene.triangles[i]
+
+hit_test(isect::TriangleIntersection) = isect.hit
+hit_time(isect::TriangleIntersection) = isect.time
+hit_point(isect::TriangleIntersection) = isect.point
+hit_normal(isect::TriangleIntersection) = isect.normal
+
+struct TriangleArrayIntersection <: Intersection
+  uvw::Vector3f
+  point::Point3f
+  normal::Vector3f
+  time::Scalar
+  hit::Bool
+  which::Int32
+end
+
+TriangleArrayIntersection(hit::Bool) =
+  TriangleArrayIntersection(zero(Vector3f), zero(Point3f), zero(Vector3f), 0.0, hit, 0)
+
+function intersection(array::TriangleArray, ray::Ray)::TriangleArrayIntersection
+  closest = TriangleArrayIntersection(false)
+  for i in eachindex(array.triangles)
+    tri = array.triangles[i]
     isect = intersection(tri, ray)
     if !hit_test(isect)
       continue
     elseif !hit_test(closest) || hit_time(isect) < hit_time(closest)
-      normal = interpolate(scene.normals[i], isect.uvw)
-      closest = TriangleIntersection(isect.uvw, isect.point, normal, isect.time, isect.hit)
+      normal = interpolate(array.normals[i], isect.uvw)
+      closest = TriangleArrayIntersection(isect.uvw, isect.point, normal, isect.time, isect.hit, i)
     end
   end
 
   closest
 end
 
-hit_test(isect::TriangleIntersection) = isect.hit
-hit_time(isect::TriangleIntersection) = isect.time
-hit_point(isect::TriangleIntersection) = isect.point
-hit_normal(isect::TriangleIntersection) = isect.normal
+hit_test(isect::TriangleArrayIntersection) = isect.hit
+hit_time(isect::TriangleArrayIntersection) = isect.time
+hit_point(isect::TriangleArrayIntersection) = isect.point
+hit_normal(isect::TriangleArrayIntersection) = isect.normal
 
 struct SphereIntersection <: Intersection
   point::Point3f

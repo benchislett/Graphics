@@ -23,7 +23,7 @@ function render(scene::Hittable, camera::Camera, width::Integer, height::Integer
 
       if hit_test(isect)
         normal = hit_normal(isect)
-        normal = (1 .+ normal) ./ 2
+        # normal = (1 .+ normal) ./ 2
         img[y, x] = RGB(normal...)
       end
 
