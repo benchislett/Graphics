@@ -1,0 +1,6 @@
+name = "GraphicsCore"
+uuid = "9ec3c116-8957-4438-ba3c-953d3de2f140"
+version = "3.0.0"
+
+[compat]
+julia = "1"
