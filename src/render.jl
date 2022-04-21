@@ -18,6 +18,7 @@ function render(scene::Hittable, camera::Camera, width::Integer, height::Integer
       u = x / width
       v = 1 - y / height
 
+
       ray = get_ray(camera, u, v)
       isect = intersection(scene, ray)
 
