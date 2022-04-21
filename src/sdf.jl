@@ -1,7 +1,7 @@
 module SDFs
 
-using ..GeometryTypes
 using LinearAlgebra
+using ..GeometryTypes
 
 export SDF, SphereSDF, CubeSDF, DifferenceSDF
 export sample
