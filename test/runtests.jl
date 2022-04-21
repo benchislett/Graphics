@@ -2,7 +2,7 @@ module Tests
 
 using Test
 
-include("../src/lib.jl")
+include("../src/GraphicsCore.jl")
 
 @testset verbose = true "Main" begin
   include("test_camera.jl")
