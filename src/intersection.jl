@@ -22,8 +22,8 @@ struct TriangleIntersection <: Intersection
   hit::Bool
 end
 
-TriangleIntersection(hit::Bool) =
-  TriangleIntersection(zero(Vector3f), zero(Vector3f), zero(Vector3f), 0.0, hit)
+TriangleIntersection() =
+  TriangleIntersection(zero(Vector3f), zero(Vector3f), zero(Vector3f), 0.0, false)
 
 function intersection(tri::Triangle, ray::Ray)::TriangleIntersection
   edge1 = tri.vertices[2] - tri.vertices[1]
@@ -33,42 +33,37 @@ function intersection(tri::Triangle, ray::Ray)::TriangleIntersection
   determinant = dot(edge1, h)
 
   if abs(determinant) < eps(typeof(determinant))
-    return TriangleIntersection(false)
+    return TriangleIntersection()
   end
 
-  invdeterminant = 1.0 / determinant
+  invdeterminant = 1.0f0 / determinant
   s = ray.origin - tri.vertices[1]
   u = invdeterminant * dot(s, h)
 
-  if u < 0.0 || u > 1.0
-    return TriangleIntersection(false)
+
+  if u < 0.0f0 || u > 1.0f0
+    return TriangleIntersection()
   end
 
   q = cross(s, edge1)
   v = invdeterminant * dot(ray.direction, q)
 
-  if v < 0.0 || u + v > 1.0
-    return TriangleIntersection(false)
+  if v < 0.0f0 || u + v > 1.0f0
+    return TriangleIntersection()
   end
 
   time = invdeterminant * dot(edge2, q)
 
   if time < hitepsilon
-    return TriangleIntersection(false)
+    return TriangleIntersection()
   end
 
   point = ray.origin + time * ray.direction
-  normal = TriangleNormals(tri).normals[1]
-  uvw = [u, v, 1.0 - u - v]
+  normal = normalize(cross(edge1, edge2))
+  uvw = Vector3f(u, v, 1.0f0 - u - v)
 
   TriangleIntersection(uvw, point, normal, time, true)
 end
-
-
-hit_test(isect::TriangleIntersection) = isect.hit
-hit_time(isect::TriangleIntersection) = isect.time
-hit_point(isect::TriangleIntersection) = isect.point
-hit_normal(isect::TriangleIntersection) = isect.normal
 
 struct TriangleArrayIntersection <: Intersection
   uvw::Vector3f
@@ -79,11 +74,11 @@ struct TriangleArrayIntersection <: Intersection
   which::Int32
 end
 
-TriangleArrayIntersection(hit::Bool) =
-  TriangleArrayIntersection(zero(Vector3f), zero(Point3f), zero(Vector3f), 0.0, hit, 0)
+TriangleArrayIntersection() =
+  TriangleArrayIntersection(zero(Vector3f), zero(Point3f), zero(Vector3f), 0.0, false, 0)
 
 function intersection(array::TriangleArray, ray::Ray)::TriangleArrayIntersection
-  closest = TriangleArrayIntersection(false)
+  closest = TriangleArrayIntersection()
   for i in eachindex(array.triangles)
     tri = array.triangles[i]
     isect = intersection(tri, ray)
@@ -98,11 +93,6 @@ function intersection(array::TriangleArray, ray::Ray)::TriangleArrayIntersection
   closest
 end
 
-hit_test(isect::TriangleArrayIntersection) = isect.hit
-hit_time(isect::TriangleArrayIntersection) = isect.time
-hit_point(isect::TriangleArrayIntersection) = isect.point
-hit_normal(isect::TriangleArrayIntersection) = isect.normal
-
 struct SphereIntersection <: Intersection
   point::Point3f
   normal::Vector3f
@@ -110,7 +100,7 @@ struct SphereIntersection <: Intersection
   hit::Bool
 end
 
-SphereIntersection(hit::Bool) = SphereIntersection(zero(Point3f), zero(Vector3f), 0.0, hit)
+SphereIntersection() = SphereIntersection(zero(Point3f), zero(Vector3f), 0.0, false)
 
 function intersection(sphere::Sphere, ray::Ray)::SphereIntersection
   oc = ray.origin - sphere.center
@@ -121,14 +111,14 @@ function intersection(sphere::Sphere, ray::Ray)::SphereIntersection
   discriminant = b^2 - 4a * c
 
   if discriminant < 0
-    return SphereIntersection(false)
+    return SphereIntersection()
   end
 
   root1 = (-b - sqrt(discriminant)) / 2a
   root2 = (-b + sqrt(discriminant)) / 2a
 
   if root2 < 0
-    return SphereIntersection(false)
+    return SphereIntersection()
   end
 
   time = root2
@@ -141,11 +131,6 @@ function intersection(sphere::Sphere, ray::Ray)::SphereIntersection
   SphereIntersection(point, normal, time, true)
 end
 
-hit_test(isect::SphereIntersection) = isect.hit
-hit_time(isect::SphereIntersection) = isect.time
-hit_point(isect::SphereIntersection) = isect.point
-hit_normal(isect::SphereIntersection) = isect.normal
-
 struct SDFIntersection
   point::Point3f
   normal::Vector3f
@@ -153,7 +138,7 @@ struct SDFIntersection
   hit::Bool
 end
 
-SDFIntersection(hit::Bool) = SDFIntersection(zero(Point3f), zero(Vector3f), 0.0, hit)
+SDFIntersection() = SDFIntersection(zero(Point3f), zero(Vector3f), 0.0, false)
 
 # Sphere Tracing
 function intersection(f::SDF, ray::Ray)
@@ -169,7 +154,7 @@ function intersection(f::SDF, ray::Ray)
     steps += 1
 
     if steps > 10000 || abs(dist) > 1000
-      return SDFIntersection(false)
+      return SDFIntersection()
     end
   end
 
@@ -185,9 +170,9 @@ function intersection(f::SDF, ray::Ray)
   SDFIntersection(point, normal, time, true)
 end
 
-hit_test(isect::SDFIntersection) = isect.hit
-hit_time(isect::SDFIntersection) = isect.time
-hit_point(isect::SDFIntersection) = isect.point
-hit_normal(isect::SDFIntersection) = isect.normal
+hit_test(isect::Intersection) = isect.hit
+hit_time(isect::Intersection) = isect.time
+hit_point(isect::Intersection) = isect.point
+hit_normal(isect::Intersection) = isect.normal
 
 end
