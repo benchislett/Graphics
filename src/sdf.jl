@@ -3,7 +3,8 @@ module SDFs
 using LinearAlgebra
 using ..GeometryTypes
 
-export SDF, SphereSDF, CubeSDF, DifferenceSDF, IntersectSDF, UnionSDF
+export SDF
+export SphereSDF, CubeSDF, DifferenceSDF, IntersectSDF, UnionSDF, ModuloSDF
 export sample
 
 abstract type SDF <: Hittable end
@@ -42,5 +43,15 @@ struct UnionSDF <: SDF
 end
 
 sample(f::UnionSDF, point::Point3f) = min(sample(f.a, point), sample(f.b, point))
+
+struct ModuloSDF <: SDF
+  a::SDF
+  period::Vector3f
+end
+
+function sample(f::ModuloSDF, point::Point3f)
+  q = mod.(point .+ 0.5f0 .* f.period, f.period) .- 0.5f0 .* f.period
+  sample(f.a, q)
+end
 
 end
