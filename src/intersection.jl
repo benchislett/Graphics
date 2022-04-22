@@ -40,7 +40,6 @@ function intersection(tri::Triangle, ray::Ray)::TriangleIntersection
   s = ray.origin - tri.vertices[1]
   u = invdeterminant * dot(s, h)
 
-
   if u < 0.0f0 || u > 1.0f0
     return TriangleIntersection()
   end
@@ -126,12 +125,16 @@ function intersection(sphere::Sphere, ray::Ray)::SphereIntersection
     time = root1
   end
 
+  if time < hitepsilon
+    return SphereIntersection()
+  end
+
   point = ray.origin + time * ray.direction
   normal = normalize(point - sphere.center)
   SphereIntersection(point, normal, time, true)
 end
 
-struct SDFIntersection
+struct SDFIntersection <: Intersection
   point::Point3f
   normal::Vector3f
   time::Scalar
@@ -144,8 +147,8 @@ SDFIntersection() = SDFIntersection(zero(Point3f), zero(Vector3f), 0.0, false)
 function intersection(f::SDF, ray::Ray)
   e = 0.00001
   dist = Inf32
-  point = ray.origin
-  time = 0
+  time = 10 * hitepsilon
+  point = ray.origin + time * ray.direction
   steps = 0
   while abs(dist) > e
     dist = sample(f, point)
@@ -153,7 +156,7 @@ function intersection(f::SDF, ray::Ray)
     point += dist * ray.direction
     steps += 1
 
-    if steps > 10000 || abs(dist) > 1000
+    if steps > 10000
       return SDFIntersection()
     end
   end
@@ -165,7 +168,7 @@ function intersection(f::SDF, ray::Ray)
   xdev = sample(f, point + dx) - sample(f, point - dx)
   ydev = sample(f, point + dy) - sample(f, point - dy)
   zdev = sample(f, point + dz) - sample(f, point - dz)
-  normal = normalize([xdev, ydev, zdev])
+  normal = normalize(Vector3f(xdev, ydev, zdev))
 
   SDFIntersection(point, normal, time, true)
 end
