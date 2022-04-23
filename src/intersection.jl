@@ -14,6 +14,25 @@ export hit_test, hit_time, hit_point, hit_normal
 
 abstract type Intersection end
 
+hit_test(isect::Intersection) = isect.hit
+hit_time(isect::Intersection) = isect.time
+hit_point(isect::Intersection) = isect.point
+hit_normal(isect::Intersection) = isect.normal
+
+function min(t1::Intersection, t2::Intersection)
+  if !hit_test(t1) && !hit_test(t2)
+    t1
+  elseif !hit_test(t2)
+    t1
+  elseif !hit_test(t1)
+    t2
+  elseif hit_time(t1) < hit_time(t2)
+    t1
+  else
+    t2
+  end
+end
+
 struct TriangleIntersection <: Intersection
   uvw::Vector3f
   point::Point3f
@@ -76,17 +95,20 @@ end
 TriangleArrayIntersection() =
   TriangleArrayIntersection(zero(Vector3f), zero(Point3f), zero(Vector3f), 0.0, false, 0)
 
+TriangleArrayIntersection(t::TriangleIntersection, i::Integer) =
+  TriangleArrayIntersection(t.uvw, t.point, t.normal, t.time, t.hit, i)
+
 function intersection(array::TriangleArray, ray::Ray)::TriangleArrayIntersection
   closest = TriangleArrayIntersection()
   for i in eachindex(array.triangles)
     tri = array.triangles[i]
     isect = intersection(tri, ray)
-    if !hit_test(isect)
-      continue
-    elseif !hit_test(closest) || hit_time(isect) < hit_time(closest)
-      normal = interpolate(array.normals[i], isect.uvw)
-      closest = TriangleArrayIntersection(isect.uvw, isect.point, normal, isect.time, isect.hit, i)
-    end
+    closest = min(closest, TriangleArrayIntersection(isect, i))
+  end
+
+  if hit_test(closest)
+    normal = interpolate(array.normals[closest.which], closest.uvw)
+    closest = TriangleArrayIntersection(closest.uvw, closest.point, normal, closest.time, closest.hit, closest.which)
   end
 
   closest
@@ -156,7 +178,7 @@ function intersection(f::SDF, ray::Ray)
     point += dist * ray.direction
     steps += 1
 
-    if steps > 10000
+    if steps > 1000 || abs(dist) > 100
       return SDFIntersection()
     end
   end
@@ -172,10 +194,5 @@ function intersection(f::SDF, ray::Ray)
 
   SDFIntersection(point, normal, time, true)
 end
-
-hit_test(isect::Intersection) = isect.hit
-hit_time(isect::Intersection) = isect.time
-hit_point(isect::Intersection) = isect.point
-hit_normal(isect::Intersection) = isect.normal
 
 end
