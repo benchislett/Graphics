@@ -4,7 +4,7 @@ using LinearAlgebra
 using ..GeometryTypes
 
 export SDF
-export SphereSDF, CubeSDF, DifferenceSDF, IntersectSDF, UnionSDF, ModuloSDF
+export SphereSDF, CubeSDF, DifferenceSDF, IntersectionSDF, UnionSDF, ModuloSDF
 export sample
 
 abstract type SDF <: Hittable end
@@ -23,29 +23,29 @@ end
 
 sample(f::CubeSDF, point::Point3f) = max(abs.(point - f.origin)...) - f.length
 
-struct DifferenceSDF <: SDF
-  a::SDF
-  b::SDF
+struct DifferenceSDF{T1,T2} <: SDF where {T1<:SDF,T2<:SDF}
+  a::T1
+  b::T2
 end
 
 sample(f::DifferenceSDF, point::Point3f) = max(sample(f.a, point), -sample(f.b, point))
 
-struct IntersectSDF <: SDF
-  a::SDF
-  b::SDF
+struct IntersectionSDF{T1,T2} <: SDF where {T1<:SDF,T2<:SDF}
+  a::T1
+  b::T2
 end
 
-sample(f::IntersectSDF, point::Point3f) = max(sample(f.a, point), sample(f.b, point))
+sample(f::IntersectionSDF, point::Point3f) = max(sample(f.a, point), sample(f.b, point))
 
-struct UnionSDF <: SDF
-  a::SDF
-  b::SDF
+struct UnionSDF{T1,T2} <: SDF where {T1<:SDF,T2<:SDF}
+  a::T1
+  b::T2
 end
 
 sample(f::UnionSDF, point::Point3f) = min(sample(f.a, point), sample(f.b, point))
 
-struct ModuloSDF <: SDF
-  a::SDF
+struct ModuloSDF{T} <: SDF where {T<:SDF}
+  a::T
   period::Vector3f
 end
 
