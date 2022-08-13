@@ -9,6 +9,7 @@ using ..GeometryTypes
 using ..Cameras
 using ..OBJ
 using ..Intersections
+using ..Sampling
 
 export Scene, Integrator, NormalsIntegrator, AOIntegrator, render!
 
@@ -27,24 +28,6 @@ end
 
 blankimg(width, height) = RGB.(zeros(Scalar, width, height))
 Scene(geometry::Hittable, camera::Camera, width, height) = Scene(geometry, camera, blankimg(width, height))
-
-function sample_sphere()::Vector3f
-  u, v = rand(Scalar), rand(Scalar)
-
-  z = 1 - 2u
-  r = sqrt(max(0, 1 - z^2))
-  Φ = 2π * v
-  normalize(Vector3f(r * cos(Φ), r * sin(Φ), z))
-end
-
-function sample_pointed_hemisphere(n)::Vector3f
-  w = zero(Vector3f)
-  while dot(w, n) <= 0.001
-    w = sample_sphere()
-  end
-
-  w
-end
 
 function trace_and_shade(scene::Scene, ::NormalsIntegrator, u::Scalar, v::Scalar)::RGB{Scalar}
   ray = get_ray(scene.camera, u, v)
@@ -80,7 +63,7 @@ function trace_and_shade(scene::Scene, integrator::AOIntegrator, u::Scalar, v::S
     occlusion = 0.0f0
     point = hit_point(isect)
     for i in 1:nsamples
-      w = sample_pointed_hemisphere(normal)
+      w = sample_oriented_hemisphere(normal, rand(Scalar), rand(Scalar))
       isect = intersection(scene.geometry, Ray(point, w))
       if !hit_test(isect)
         occlusion += dot(w, normal)
