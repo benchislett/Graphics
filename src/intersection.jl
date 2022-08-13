@@ -107,7 +107,11 @@ function intersection(array::TriangleArray, ray::Ray)::TriangleArrayIntersection
   end
 
   if hit_test(closest)
-    normal = interpolate(array.normals[closest.which], closest.uvw)
+    normals = array.normals[closest.which]
+    normal = interpolate(normals, closest.uvw)
+    if dot(normal, ray.direction) > 0
+      normal *= -1
+    end
     closest = TriangleArrayIntersection(closest.uvw, closest.point, normal, closest.time, closest.hit, closest.which)
   end
 
