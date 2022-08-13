@@ -23,28 +23,28 @@ end
 
 sample(f::CubeSDF, point::Point3f) = max(abs.(point - f.origin)...) - f.length
 
-struct DifferenceSDF{T1,T2} <: SDF where {T1<:SDF,T2<:SDF}
+struct DifferenceSDF{T1<:SDF,T2<:SDF} <: SDF
   a::T1
   b::T2
 end
 
 sample(f::DifferenceSDF, point::Point3f) = max(sample(f.a, point), -sample(f.b, point))
 
-struct IntersectionSDF{T1,T2} <: SDF where {T1<:SDF,T2<:SDF}
+struct IntersectionSDF{T1<:SDF,T2<:SDF} <: SDF
   a::T1
   b::T2
 end
 
 sample(f::IntersectionSDF, point::Point3f) = max(sample(f.a, point), sample(f.b, point))
 
-struct UnionSDF{T1,T2} <: SDF where {T1<:SDF,T2<:SDF}
+struct UnionSDF{T1<:SDF,T2<:SDF} <: SDF
   a::T1
   b::T2
 end
 
 sample(f::UnionSDF, point::Point3f) = min(sample(f.a, point), sample(f.b, point))
 
-struct ModuloSDF{T} <: SDF where {T<:SDF}
+struct ModuloSDF{T<:SDF} <: SDF
   a::T
   period::Vector3f
 end
