@@ -1,4 +1,4 @@
-using Plots, Images, ImageView
+using Plots, Images, ImageView, ImageFiltering
 
 using GraphicsCore.Renderer
 using GraphicsCore.OBJ
@@ -23,14 +23,14 @@ function getscene(sz=32, t=0)
   # scene = loadobjmesh("bunny.obj")
   # cam = PerspectiveCamera(width / height, π / 4, [2, 3, 2], [0, 1, 0])
 
-  (scene, cam, width, height)
+  Scene(scene, cam, width, height)
 end
 
 # t = 0
 function makeanim(sz=1024, int=0:0.01:2π)
   @animate for t = int
     scene = getscene(sz, t)
-    img = render(scene...)
+    img = render!(scene)
     # save("output.png", img)
     plot(img; dpi=600, framestyle=:none, background=RGB(0, 0, 0))
   end
@@ -38,8 +38,10 @@ end
 
 function makeimage(sz=1024)
   scene = getscene(sz)
-  render(scene...)
+  @time render!(scene, AOIntegrator(128))
 end
 
-# img = makeimage(512)
-gif(makeanim(512, 0:0.01:2π), fps=30)
+# mp4(makeanim(512, 0:0.005:2π), "./sdf_ao_anim.mp4", fps=60)
+# scene = getscene(1024)
+# @profview render!(scene)
+img = makeimage(512)

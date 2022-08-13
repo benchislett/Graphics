@@ -10,9 +10,23 @@ using ..Cameras
 using ..OBJ
 using ..Intersections
 
-export render!, render
+export Scene, Integrator, NormalsIntegrator, AOIntegrator, render!
+
+struct Scene{T<:Hittable}
+  geometry::T
+  camera::Camera
+  film::Matrix{RGB{Scalar}}
+end
+
+abstract type Integrator end
+
+struct NormalsIntegrator <: Integrator end
+struct AOIntegrator <: Integrator
+  nsamples::Int32
+end
 
 blankimg(width, height) = RGB.(zeros(Scalar, width, height))
+Scene(geometry::Hittable, camera::Camera, width, height) = Scene(geometry, camera, blankimg(width, height))
 
 function sample_sphere()::Vector3f
   u, v = rand(Scalar), rand(Scalar)
@@ -32,9 +46,9 @@ function sample_pointed_hemisphere(n)::Vector3f
   w
 end
 
-function trace_and_shade(scene::Hittable, camera::Camera, u::Float32, v::Float32)
-  ray = get_ray(camera, u, v)
-  isect = intersection(scene, ray)
+function trace_and_shade(scene::Scene, ::NormalsIntegrator, u::Scalar, v::Scalar)::RGB{Scalar}
+  ray = get_ray(scene.camera, u, v)
+  isect = intersection(scene.geometry, ray)
 
   illum::Vector3f = zero(Vector3f)
 
@@ -42,21 +56,38 @@ function trace_and_shade(scene::Hittable, camera::Camera, u::Float32, v::Float32
     normal = hit_normal(isect)
 
     # Simple normal-based illumination
-    # illum = (1 .+ normal) ./ 2
+    illum = (1 .+ normal) ./ 2
+
+    if any(isnan.(illum))
+      illum = Vector3f(1, 1, 1)
+    end
+  end
+
+  RGB(illum...)
+end
+
+function trace_and_shade(scene::Scene, integrator::AOIntegrator, u::Scalar, v::Scalar)::RGB{Scalar}
+  ray = get_ray(scene.camera, u, v)
+  isect = intersection(scene.geometry, ray)
+
+  illum::Vector3f = zero(Vector3f)
+
+  if hit_test(isect)
+    normal = hit_normal(isect)
 
     # Ambient Occlusion
-    nsamples = 8
+    nsamples = integrator.nsamples
     occlusion = 0.0f0
     point = hit_point(isect)
     for i in 1:nsamples
       w = sample_pointed_hemisphere(normal)
-      isect = intersection(scene, Ray(point, w))
+      isect = intersection(scene.geometry, Ray(point, w))
       if !hit_test(isect)
         occlusion += dot(w, normal)
       end
     end
 
-    pdf = 1.0f0 / (2π)
+    pdf = 1.0f0 / 2π
     occlusion /= π
     occlusion /= pdf * nsamples
     illum = Vector3f(occlusion, occlusion, occlusion)
@@ -69,40 +100,22 @@ function trace_and_shade(scene::Hittable, camera::Camera, u::Float32, v::Float32
   RGB(illum...)
 end
 
-function rendercpu!(scene::Hittable, camera::Camera, img)
-  width, height = size(img)
+
+
+function rendercpu!(scene::Scene, integrator::Integrator)
+  width, height = size(scene.film)
   for x in 1:width
     for y in 1:height
       u::Float32 = x / width
       v::Float32 = 1 - y / height
 
-      img[y, x] = trace_and_shade(scene, camera, u, v)
+      scene.film[y, x] = trace_and_shade(scene, integrator, u, v)
     end
   end
 
-  img
+  scene.film
 end
 
-function rendergpukernel!(scene, camera, gpuimg)
-  width::Int32, height::Int32 = size(gpuimg)
-  x::Int32 = threadIdx().x
-  y::Int32 = blockIdx().x
-  u::Float32 = x / width
-  v::Float32 = 1 - y / height
-
-  # @cuprintf("%d %d %d %d\n", x, y, u, v)
-  gpuimg[y, x] = trace_and_shade(scene, camera, u, v)
-
-  nothing
-end
-
-function rendergpu!(scene::Hittable, camera::Camera, img)
-  x, y = size(img)
-  gpuimg = cu(img)
-  @cuda threads = x blocks = y rendergpukernel!(scene, camera, gpuimg)
-  copyto!(img, gpuimg)
-end
-
-render(scene, camera, width, height) = rendergpu!(scene, camera, blankimg(width, height))
+render!(scene, integrator) = rendercpu!(scene, integrator)
 
 end
