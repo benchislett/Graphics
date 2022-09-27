@@ -1,7 +1,7 @@
 using Test
 
 using .GraphicsCore.Cameras
-using .GraphicsCore.GeometryTypes
+using .GraphicsCore.GeometryPrimitives
 
 @testset verbose = true "Camera Tests" begin
   @testset "Perspective Camera" begin
