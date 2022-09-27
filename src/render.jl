@@ -12,7 +12,9 @@ using ..GeometryIntersection
 using ..Sampling
 using ..Materials
 
-export Scene, Integrator, NormalsIntegrator, AOIntegrator, ShadowIntegrator, render!
+export Scene, Integrator
+export NormalsIntegrator, DepthIntegrator
+export render!
 
 struct Scene
   geometry::TriangleMesh
@@ -28,23 +30,27 @@ Scene(geometry, materials, light, camera, width, height) = Scene(geometry, mater
 abstract type Integrator end
 
 struct NormalsIntegrator <: Integrator end
-struct AOIntegrator <: Integrator
-  nsamples::Int32
+struct DepthIntegrator <: Integrator end
+
+function shade_intersection(scene, ::NormalsIntegrator, isect)
+  normal = isect.normal
+  (1 .+ normal) ./ 2
 end
 
-struct ShadowIntegrator <: Integrator end
+function shade_intersection(scene, ::DepthIntegrator, isect)
+  depth = isect.time
+  i = 1 / depth
+  Vector3f(i, i, i)
+end
 
-function trace_and_shade(scene::Scene, ::NormalsIntegrator, u::Scalar, v::Scalar)::RGB{Scalar}
+function trace_and_shade(scene, integrator, u, v)
   ray = get_ray(scene.camera, u, v)
   isect = intersection(scene.geometry, ray)
 
-  illum::Vector3f = zero(Vector3f)
+  illum = zero(Vector3f)
 
   if !ismissing(isect)
-    normal = isect.normal
-
-    # Simple normal-based illumination
-    illum = (1 .+ normal) ./ 2
+    illum = shade_intersection(scene, integrator, isect)
 
     if any(isnan.(illum))
       illum = Vector3f(1, 1, 1)
@@ -58,8 +64,8 @@ function rendercpu!(scene::Scene, integrator::Integrator)
   width, height = size(scene.film)
   for x in 1:width
     for y in 1:height
-      u::Float32 = x / width
-      v::Float32 = 1 - y / height
+      u::Scalar = x / width
+      v::Scalar = 1 - y / height
       scene.film[y, x] = trace_and_shade(scene, integrator, u, v)
     end
   end
