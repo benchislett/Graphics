@@ -1,11 +1,13 @@
 module GraphicsCore
 
-include("geotypes.jl")
-include("sampling.jl")
+include("geometry/core.jl")
+include("geometry/primitives.jl")
+include("geometry/mesh.jl")
+include("geometry/intersection.jl")
 include("camera.jl")
+include("material.jl")
+include("sampling.jl")
 include("obj.jl")
-include("sdf.jl")
-include("intersection.jl")
 include("render.jl")
 
 end

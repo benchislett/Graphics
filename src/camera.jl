@@ -2,9 +2,12 @@ module Cameras
 
 using LinearAlgebra
 
-using ..GeometryTypes
+using ..GeometryCore
+using ..GeometryPrimitives
 
-const viewup = Vector3f(0, 1, 0)
+begin
+  const viewup = Vector3f(0, 1, 0)
+end
 
 export Camera, PerspectiveCamera, OrthographicCamera, get_ray
 

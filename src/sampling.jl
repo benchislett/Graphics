@@ -3,7 +3,7 @@ module Sampling
 using LinearAlgebra
 using Statistics
 
-using ..GeometryTypes
+using ..GeometryCore
 
 export sample_sphere, sample_oriented_hemisphere
 
