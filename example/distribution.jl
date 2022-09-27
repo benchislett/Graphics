@@ -1,6 +1,6 @@
 using Plots, Images, ImageView, ImageFiltering, LinearAlgebra
 
-using GraphicsCore.GeometryTypes
+using GraphicsCore.GeometryCore
 using GraphicsCore.Sampling
 
 N = 100
